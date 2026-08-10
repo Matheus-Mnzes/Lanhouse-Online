@@ -1,3 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap');
+
+:root {
+    --bg: #0b0b0b;
+    --surface: #151515;
+    --surface-2: #1e1e1e;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.18);
+
+    --green: #107c10;
+    --green-bright: #6cc24a;
+    --green-glow: #9bf00b;
+
+    --text: #f5f5f5;
+    --text-muted: #a0a0a0;
+    --text-faint: #5c5c5c;
+
+    --font-display: 'Barlow Condensed', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
 * {
     margin: 0;
@@ -6,16 +28,39 @@
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-body);
 
-    background: #f1f3f8;
-    color: #1e1e2f;
+    background: var(--bg);
+
+    color: var(--text);
 
     display: flex;
 
     min-height: 100vh;
+}
 
-    transition: 0.3s;
+::selection {
+    background: var(--green);
+    color: #fff;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-2);
+    border-radius: 10px;
+    border: 2px solid var(--bg);
+}
+
+:focus-visible {
+    outline: 2px solid var(--green-glow);
+    outline-offset: 2px;
 }
 
 
@@ -27,8 +72,10 @@ body {
     width: 250px;
     height: 100vh;
 
-    background: #151522;
-    color: white;
+    background: #0e0e0e;
+    border-right: 1px solid var(--border);
+
+    color: var(--text);
 
     position: fixed;
     left: 0;
@@ -46,12 +93,28 @@ body {
 /* LOGO */
 
 .logo {
-    font-size: 22px;
-    font-weight: bold;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
 
     padding: 10px;
 
     margin-bottom: 35px;
+
+    color: var(--text);
+}
+
+
+.logo::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+    background: var(--green-glow);
+    border-radius: 2px;
 }
 
 
@@ -61,26 +124,29 @@ body {
     display: flex;
     flex-direction: column;
 
-    gap: 8px;
+    gap: 4px;
 }
 
 
 .menu-item {
     width: 100%;
 
-    border: none;
+    border: 1px solid transparent;
+    border-left: 3px solid transparent;
 
     background: transparent;
 
-    color: #aaa;
+    color: var(--text-muted);
 
-    padding: 14px;
+    padding: 13px 14px;
 
-    border-radius: 10px;
+    border-radius: 4px;
 
     cursor: pointer;
 
-    font-size: 15px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
 
     display: flex;
     align-items: center;
@@ -89,19 +155,20 @@ body {
 
     text-align: left;
 
-    transition: 0.2s;
+    transition: background 0.18s var(--ease), color 0.18s var(--ease), border-color 0.18s var(--ease);
 }
 
 
 .menu-item:hover {
-    background: #242436;
-    color: white;
+    background: var(--surface);
+    color: var(--text);
 }
 
 
 .menu-item.ativo {
-    background: #635bff;
-    color: white;
+    background: var(--surface);
+    border-left: 3px solid var(--green-glow);
+    color: #fff;
 }
 
 
@@ -110,9 +177,11 @@ body {
 .sidebar-bottom {
     margin-top: auto;
 
-    color: #666;
+    color: var(--text-faint);
 
-    font-size: 12px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 
     text-align: center;
 }
@@ -138,7 +207,7 @@ body {
 .aba {
     display: none;
 
-    animation: aparecer 0.3s ease;
+    animation: aparecer 0.3s var(--ease);
 }
 
 
@@ -151,7 +220,7 @@ body {
 
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(8px);
     }
 
     to {
@@ -172,14 +241,19 @@ body {
 
 
 .topo h1 {
-    font-size: 32px;
+    font-family: var(--font-display);
+    font-size: 34px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
 
     margin-bottom: 8px;
 }
 
 
 .topo p {
-    color: #777;
+    color: var(--text-muted);
+    font-size: 14px;
 }
 
 
@@ -188,15 +262,16 @@ body {
 ========================= */
 
 .banner {
-    background: linear-gradient(
-        135deg,
-        #635bff,
-        #8f87ff
-    );
+    position: relative;
+    overflow: hidden;
 
-    color: white;
+    background: linear-gradient(100deg, #0f2a0f 0%, #0b0b0b 65%);
 
-    border-radius: 20px;
+    border: 1px solid var(--border);
+
+    color: #fff;
+
+    border-radius: 8px;
 
     padding: 40px;
 
@@ -209,8 +284,24 @@ body {
 }
 
 
+.banner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 45%;
+    background: var(--green);
+    opacity: 0.15;
+    clip-path: polygon(35% 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+
 .banner h2 {
-    font-size: 30px;
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
 
     margin-bottom: 10px;
 }
@@ -219,31 +310,36 @@ body {
 .banner p {
     margin-bottom: 20px;
 
-    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 
 .banner button {
     border: none;
 
-    background: white;
+    background: var(--green-glow);
 
-    color: #635bff;
+    color: #0b0b0b;
 
-    padding: 12px 22px;
+    padding: 12px 26px;
 
-    border-radius: 8px;
+    border-radius: 999px;
 
-    font-weight: bold;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 
     cursor: pointer;
 
-    transition: 0.2s;
+    transition: transform 0.18s var(--ease), background 0.18s var(--ease);
 }
 
 
 .banner button:hover {
     transform: translateY(-2px);
+    background: #b3ff33;
 }
 
 
@@ -252,6 +348,12 @@ body {
 ========================= */
 
 .titulo-secao {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+
     margin-bottom: 20px;
 }
 
@@ -266,31 +368,30 @@ body {
     grid-template-columns:
         repeat(auto-fill, minmax(230px, 1fr));
 
-    gap: 20px;
+    gap: 18px;
 }
 
 
 /* CARD */
 
 .jogo-card {
-    background: white;
+    background: var(--surface);
+    border: 1px solid var(--border);
 
-    border-radius: 15px;
+    border-radius: 6px;
 
     overflow: hidden;
 
-    box-shadow:
-        0 5px 20px rgba(0,0,0,0.06);
-
-    transition: 0.2s;
+    transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 
 
 .jogo-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
 
-    box-shadow:
-        0 10px 25px rgba(0,0,0,0.1);
+    border-color: var(--green-glow);
+
+    box-shadow: 0 0 0 1px var(--green-glow), 0 12px 24px rgba(0, 0, 0, 0.5);
 }
 
 
@@ -299,33 +400,38 @@ body {
 .jogo-imagem {
     height: 150px;
 
-    background: #242436;
+    background: var(--surface-2);
 
     display: flex;
 
     align-items: center;
     justify-content: center;
 
-    font-size: 60px;
+    font-size: 56px;
 }
 
 
 /* INFO */
 
 .jogo-info {
-    padding: 18px;
+    padding: 16px;
 }
 
 
 .jogo-info h3 {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+
     margin-bottom: 6px;
 }
 
 
 .jogo-info p {
-    color: #777;
+    color: var(--text-muted);
 
-    font-size: 14px;
+    font-size: 13px;
 
     margin-bottom: 15px;
 }
@@ -338,24 +444,28 @@ body {
 
     border: none;
 
-    background: #635bff;
+    background: var(--green);
 
-    color: white;
+    color: #fff;
 
     padding: 11px;
 
-    border-radius: 8px;
+    border-radius: 999px;
+
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
 
     cursor: pointer;
 
-    font-weight: bold;
-
-    transition: 0.2s;
+    transition: background 0.18s var(--ease);
 }
 
 
 .jogo-info button:hover {
-    background: #5149df;
+    background: var(--green-bright);
 }
 
 
@@ -364,28 +474,35 @@ body {
 ========================= */
 
 .mensagem-vazia {
-    background: white;
+    background: var(--surface);
+    border: 1px dashed var(--border-strong);
 
     padding: 60px 30px;
 
-    border-radius: 15px;
+    border-radius: 6px;
 
     text-align: center;
 }
 
 
 .mensagem-vazia span {
-    font-size: 50px;
+    font-size: 46px;
+    opacity: 0.8;
 }
 
 
 .mensagem-vazia h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+
     margin: 15px 0 10px;
 }
 
 
 .mensagem-vazia p {
-    color: #777;
+    color: var(--text-muted);
+    font-size: 14px;
 }
 
 
@@ -394,11 +511,12 @@ body {
 ========================= */
 
 .config-card {
-    background: white;
+    background: var(--surface);
+    border: 1px solid var(--border);
 
-    padding: 25px;
+    padding: 22px 25px;
 
-    border-radius: 15px;
+    border-radius: 6px;
 
     display: flex;
 
@@ -409,56 +527,60 @@ body {
 
 
 .config-card p {
-    color: #777;
+    color: var(--text-muted);
+    font-size: 13px;
 
     margin-top: 5px;
 }
 
 
 .config-card button {
-    border: none;
+    border: 1px solid var(--border-strong);
 
-    background: #635bff;
+    background: var(--surface-2);
 
-    color: white;
+    color: var(--text);
 
-    padding: 12px 20px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
 
-    border-radius: 8px;
+    padding: 11px 20px;
+
+    border-radius: 999px;
 
     cursor: pointer;
+
+    transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+
+
+.config-card button:hover {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
 }
 
 
 /* =========================
-   TEMA ESCURO
+   VARIANTE "DEEP"
 ========================= */
 
 body.dark {
-    background: #0d0d14;
-
-    color: white;
-}
-
-
-body.dark .topo p {
-    color: #999;
+    background: #000;
 }
 
 
 body.dark .jogo-card,
 body.dark .mensagem-vazia,
 body.dark .config-card {
-    background: #181824;
-
-    color: white;
+    background: #0d0d0d;
 }
 
 
-body.dark .jogo-info p,
-body.dark .mensagem-vazia p,
-body.dark .config-card p {
-    color: #999;
+body.dark .sidebar {
+    background: #000;
 }
 
 
@@ -474,8 +596,12 @@ body.dark .config-card p {
         padding: 20px 10px;
     }
 
-    .logo span {
-        display: none;
+    .logo {
+        font-size: 0;
+    }
+
+    .logo::before {
+        margin-right: 0;
     }
 
     .menu-item {
@@ -498,4 +624,12 @@ body.dark .config-card p {
         padding: 25px;
     }
 
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
 }
