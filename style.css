@@ -1,0 +1,501 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #f1f3f8;
+    color: #1e1e2f;
+
+    display: flex;
+
+    min-height: 100vh;
+
+    transition: 0.3s;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+
+    background: #151522;
+    color: white;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 25px 15px;
+
+    z-index: 10;
+}
+
+
+/* LOGO */
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+
+    padding: 10px;
+
+    margin-bottom: 35px;
+}
+
+
+/* MENU */
+
+.menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.menu-item {
+    width: 100%;
+
+    border: none;
+
+    background: transparent;
+
+    color: #aaa;
+
+    padding: 14px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    text-align: left;
+
+    transition: 0.2s;
+}
+
+
+.menu-item:hover {
+    background: #242436;
+    color: white;
+}
+
+
+.menu-item.ativo {
+    background: #635bff;
+    color: white;
+}
+
+
+/* PARTE INFERIOR */
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    color: #666;
+
+    font-size: 12px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.conteudo {
+    margin-left: 250px;
+
+    width: calc(100% - 250px);
+
+    padding: 40px;
+}
+
+
+/* =========================
+   ABAS
+========================= */
+
+.aba {
+    display: none;
+
+    animation: aparecer 0.3s ease;
+}
+
+
+.aba.ativa {
+    display: block;
+}
+
+
+@keyframes aparecer {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================
+   TOPO
+========================= */
+
+.topo {
+    margin-bottom: 30px;
+}
+
+
+.topo h1 {
+    font-size: 32px;
+
+    margin-bottom: 8px;
+}
+
+
+.topo p {
+    color: #777;
+}
+
+
+/* =========================
+   BANNER
+========================= */
+
+.banner {
+    background: linear-gradient(
+        135deg,
+        #635bff,
+        #8f87ff
+    );
+
+    color: white;
+
+    border-radius: 20px;
+
+    padding: 40px;
+
+    margin-bottom: 35px;
+
+    min-height: 200px;
+
+    display: flex;
+    align-items: center;
+}
+
+
+.banner h2 {
+    font-size: 30px;
+
+    margin-bottom: 10px;
+}
+
+
+.banner p {
+    margin-bottom: 20px;
+
+    opacity: 0.9;
+}
+
+
+.banner button {
+    border: none;
+
+    background: white;
+
+    color: #635bff;
+
+    padding: 12px 22px;
+
+    border-radius: 8px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+.banner button:hover {
+    transform: translateY(-2px);
+}
+
+
+/* =========================
+   TÍTULOS
+========================= */
+
+.titulo-secao {
+    margin-bottom: 20px;
+}
+
+
+/* =========================
+   GRID DE JOGOS
+========================= */
+
+.jogos-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(230px, 1fr));
+
+    gap: 20px;
+}
+
+
+/* CARD */
+
+.jogo-card {
+    background: white;
+
+    border-radius: 15px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.06);
+
+    transition: 0.2s;
+}
+
+
+.jogo-card:hover {
+    transform: translateY(-5px);
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.1);
+}
+
+
+/* IMAGEM */
+
+.jogo-imagem {
+    height: 150px;
+
+    background: #242436;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 60px;
+}
+
+
+/* INFO */
+
+.jogo-info {
+    padding: 18px;
+}
+
+
+.jogo-info h3 {
+    margin-bottom: 6px;
+}
+
+
+.jogo-info p {
+    color: #777;
+
+    font-size: 14px;
+
+    margin-bottom: 15px;
+}
+
+
+/* BOTÃO */
+
+.jogo-info button {
+    width: 100%;
+
+    border: none;
+
+    background: #635bff;
+
+    color: white;
+
+    padding: 11px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: 0.2s;
+}
+
+
+.jogo-info button:hover {
+    background: #5149df;
+}
+
+
+/* =========================
+   FAVORITOS
+========================= */
+
+.mensagem-vazia {
+    background: white;
+
+    padding: 60px 30px;
+
+    border-radius: 15px;
+
+    text-align: center;
+}
+
+
+.mensagem-vazia span {
+    font-size: 50px;
+}
+
+
+.mensagem-vazia h2 {
+    margin: 15px 0 10px;
+}
+
+
+.mensagem-vazia p {
+    color: #777;
+}
+
+
+/* =========================
+   CONFIGURAÇÕES
+========================= */
+
+.config-card {
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 15px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+}
+
+
+.config-card p {
+    color: #777;
+
+    margin-top: 5px;
+}
+
+
+.config-card button {
+    border: none;
+
+    background: #635bff;
+
+    color: white;
+
+    padding: 12px 20px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   TEMA ESCURO
+========================= */
+
+body.dark {
+    background: #0d0d14;
+
+    color: white;
+}
+
+
+body.dark .topo p {
+    color: #999;
+}
+
+
+body.dark .jogo-card,
+body.dark .mensagem-vazia,
+body.dark .config-card {
+    background: #181824;
+
+    color: white;
+}
+
+
+body.dark .jogo-info p,
+body.dark .mensagem-vazia p,
+body.dark .config-card p {
+    color: #999;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 700px) {
+
+    .sidebar {
+        width: 70px;
+
+        padding: 20px 10px;
+    }
+
+    .logo span {
+        display: none;
+    }
+
+    .menu-item {
+        justify-content: center;
+    }
+
+    .menu-item span:last-child {
+        display: none;
+    }
+
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .conteudo {
+        margin-left: 70px;
+
+        width: calc(100% - 70px);
+
+        padding: 25px;
+    }
+
+}
