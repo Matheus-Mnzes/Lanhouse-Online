@@ -1,10 +1,10 @@
 export default async function handler(request, response) {
     try {
-        // Credenciais armazenadas nas Environment Variables da Vercel
+        // Credenciais armazenadas nas variáveis de ambiente da Vercel
         const clientId = process.env.TWITCH_CLIENT_ID;
         const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
-        // 1. Pegar o Access Token da Twitch
+        // 1. Pegar o Access Token da API
         const tokenResponse = await fetch(
             "https://id.twitch.tv/oauth2/token",
             {
@@ -31,7 +31,7 @@ export default async function handler(request, response) {
 
         const accessToken = tokenData.access_token;
 
-        // 2. Consultar a IGDB
+        // 2. Consultar a API
         const igdbResponse = await fetch(
             "https://api.igdb.com/v4/games",
             {
@@ -60,7 +60,7 @@ export default async function handler(request, response) {
 
         if (!igdbResponse.ok) {
             return response.status(igdbResponse.status).json({
-                erro: "Erro ao consultar a IGDB",
+                erro: "Erro ao consultar a API",
                 detalhes: jogos
             });
         }
