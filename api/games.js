@@ -103,7 +103,7 @@ export default async function handler(request, response) {
 
                     ${pesquisa ? `search "${pesquisa}";` : ""}
                     where cover != null & rating != null${genero ? ` & genres = (${genero})` : ""};
-                    sort rating desc;
+                    ${pesquisa ? "" : "sort rating desc;"}
 
                     limit ${limite};
                     offset ${offset};
@@ -115,7 +115,7 @@ export default async function handler(request, response) {
 
         if (!igdbResponse.ok) {
             return response.status(igdbResponse.status).json({
-                erro: "Erro ao consultar a API",
+                erro: jogos.message || "Erro ao consultar a API",
                 detalhes: jogos
             });
         }
