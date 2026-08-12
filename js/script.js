@@ -56,7 +56,7 @@ function mostrarPainel(id) {
     });
 
     if (idAlvo === "jogos" && !catalogoCarregado) {
-        carregarCatalogo(1, false);
+        carregarCatalogo(1);
     }
 
     if (idAlvo === "biblioteca") {
@@ -191,16 +191,17 @@ function alternarBiblioteca(jogo) {
 
 
 // ── Carregar e renderizar catálogo ──────────────────────────────
-async function carregarCatalogo(pagina, adicionar) {
-    const botaoMais = document.getElementById("carregarMais");
+async function carregarCatalogo(pagina) {
+    const botaoAnterior = document.getElementById("paginaAnterior");
+    const botaoProxima = document.getElementById("paginaProxima");
+    const indicador = document.getElementById("paginaIndicador");
     const catalogo  = document.getElementById("catalogo");
 
-    if (botaoMais) {
-        botaoMais.disabled    = true;
-        botaoMais.textContent = "Carregando…";
-    }
+    if (botaoAnterior) botaoAnterior.disabled = true;
+    if (botaoProxima) botaoProxima.disabled = true;
+    if (indicador) indicador.textContent = "Carregando...";
 
-    if (!adicionar && catalogo) {
+    if (catalogo) {
         catalogo.replaceChildren(...Array.from({ length: 6 }, () => {
             const sk = document.createElement("div");
             sk.className = "skel";
@@ -213,31 +214,27 @@ async function carregarCatalogo(pagina, adicionar) {
         if (!dados) return;
 
         const jogos = dados.jogos || [];
-        jogosCatalogo   = adicionar ? jogosCatalogo.concat(jogos) : jogos;
+        jogosCatalogo   = jogos;
         paginaAtual     = pagina;
         catalogoCarregado = true;
         renderizarCatalogo();
 
-        if (!adicionar && !generoSelecionado && !pesquisaSelecionada) {
+        if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
                 jogos.slice(0, 4)
             );
         }
 
-        if (botaoMais) {
-            const temMais = jogos.length >= (dados.limite ?? jogos.length);
-            botaoMais.hidden      = !temMais;
-            botaoMais.disabled    = false;
-            botaoMais.textContent = "Carregar mais";
-        }
+        if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
+        if (botaoProxima) botaoProxima.disabled = jogos.length < (dados.limite ?? 15);
+        if (indicador) indicador.textContent = `Página ${pagina}`;
 
     } catch (erro) {
         mostrarErro(catalogo, erro.message || "Não foi possível carregar os jogos.");
-        if (botaoMais) {
-            botaoMais.disabled    = false;
-            botaoMais.textContent = "Tentar novamente";
-        }
+        if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
+        if (botaoProxima) botaoProxima.disabled = false;
+        if (indicador) indicador.textContent = `Página ${pagina}`;
     }
 }
 
@@ -491,7 +488,7 @@ function iniciarPesquisaGlobal() {
             if (campoPrincipal) {
                 campoPrincipal.value = valor;
                 pesquisaSelecionada  = valor;
-                carregarCatalogo(1, false);
+                carregarCatalogo(1);
             }
             input.value = "";
         }, 400);
@@ -505,24 +502,23 @@ document.addEventListener("DOMContentLoaded", () => {
     iniciarHeroCanvas();
     iniciarPesquisaGlobal();
 
-    carregarCatalogo(1, false);
+    carregarCatalogo(1);
     carregarFiltroGeneros();
     renderizarBiblioteca();
 
-    document.getElementById("carregarMais")?.addEventListener("click", () => {
-        carregarCatalogo(paginaAtual + 1, true);
-    });
+    document.getElementById("paginaAnterior")?.addEventListener("click", () => carregarCatalogo(paginaAtual - 1));
+    document.getElementById("paginaProxima")?.addEventListener("click", () => carregarCatalogo(paginaAtual + 1));
 
     document.getElementById("filtroGenero")?.addEventListener("change", e => {
         generoSelecionado = e.target.value;
-        carregarCatalogo(1, false);
+        carregarCatalogo(1);
     });
 
     document.getElementById("pesquisaJogos")?.addEventListener("input", e => {
         clearTimeout(temporizadorPesquisa);
         temporizadorPesquisa = setTimeout(() => {
             pesquisaSelecionada = e.target.value.trim();
-            carregarCatalogo(1, false);
+            carregarCatalogo(1);
         }, 350);
     });
 

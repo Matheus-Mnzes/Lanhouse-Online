@@ -25,7 +25,7 @@ export default async function handler(request, response) {
             .slice(0, 100)
             .replace(/[\\"]/g, "\\$&");
         const recurso = url.searchParams.get("recurso");
-        const limite = 20;
+        const limite = 15;
         const offset = (pagina - 1) * limite;
 
         // 2. Pegar o Access Token da API

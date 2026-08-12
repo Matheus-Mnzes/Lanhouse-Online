@@ -774,6 +774,50 @@ body.cursor-menu .cursor {
 .btn-carregar:hover { background: var(--dark); color: var(--white); }
 .btn-carregar:disabled { opacity: 0.4; }
 
+.paginacao-jogos {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 40px 32px 48px;
+    border-top: 1px solid var(--light);
+    background: var(--off-white);
+}
+
+.paginacao-jogos button {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    border: 1px solid var(--dark);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--dark);
+    font: 300 24px var(--font-sans);
+    transition: background 0.25s var(--ease), color 0.25s var(--ease), opacity 0.25s;
+}
+
+.paginacao-jogos button:hover:not(:disabled) {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: var(--white);
+}
+
+.paginacao-jogos button:disabled {
+    border-color: var(--mid);
+    color: var(--mid);
+    cursor: not-allowed;
+}
+
+#paginaIndicador {
+    min-width: 88px;
+    color: var(--dark);
+    font: 500 11px var(--font-sans);
+    letter-spacing: 0.12em;
+    text-align: center;
+    text-transform: uppercase;
+}
+
 
 /* ── ESTADO VAZIO ────────────────────────────────────── */
 .estado-vazio {
