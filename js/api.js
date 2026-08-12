@@ -2,10 +2,15 @@
    BUSCAR JOGOS NA API
 ========================= */
 
-async function buscarJogos(pagina = 1) {
+async function buscarJogos(pagina = 1, genero = "") {
     try {
         // Envia a página que queremos buscar
-        const resposta = await fetch(`/api/games?pagina=${pagina}`);
+        const parametros = new URLSearchParams({ pagina: String(pagina) });
+        if (genero) {
+            parametros.set("genero", genero);
+        }
+
+        const resposta = await fetch(`/api/games?${parametros}`);
 
         if (!resposta.ok) {
             const dadosErro = await resposta.json().catch(function() {
@@ -27,4 +32,18 @@ async function buscarJogos(pagina = 1) {
 
         throw erro;
     }
+}
+
+async function buscarGeneros() {
+    const resposta = await fetch("/api/games?recurso=generos");
+
+    if (!resposta.ok) {
+        const dadosErro = await resposta.json().catch(function() {
+            return {};
+        });
+
+        throw new Error(dadosErro.erro || "Erro ao buscar os gêneros");
+    }
+
+    return resposta.json();
 }

@@ -1,4 +1,5 @@
 let paginaAtual = 1;
+let generoSelecionado = "";
 
 function abrirAba(id, botao) {
     document.querySelectorAll(".aba").forEach(function(aba) {
@@ -58,13 +59,13 @@ async function carregarCatalogo(pagina, adicionar) {
     }
 
     try {
-        const dados = await buscarJogos(pagina);
+        const dados = await buscarJogos(pagina, generoSelecionado);
         const jogos = dados.jogos || [];
         const catalogo = document.getElementById("catalogo");
 
         preencherCatalogo(catalogo, jogos, adicionar);
 
-        if (!adicionar) {
+        if (!adicionar && !generoSelecionado) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
                 jogos.slice(0, 3),
@@ -87,7 +88,7 @@ async function carregarCatalogo(pagina, adicionar) {
         const mensagem = erro.message || "Não foi possível carregar os jogos.";
         mostrarErroCatalogo(document.getElementById("catalogo"), mensagem);
 
-        if (!adicionar) {
+        if (!adicionar && !generoSelecionado) {
             mostrarErroCatalogo(document.getElementById("jogos-populares"), mensagem);
         }
 
@@ -169,14 +170,44 @@ function mostrarErroCatalogo(catalogo, texto) {
     catalogo.appendChild(mensagem);
 }
 
+async function carregarFiltroGeneros() {
+    const filtro = document.getElementById("filtroGenero");
+
+    if (!filtro) {
+        return;
+    }
+
+    try {
+        const generos = await buscarGeneros();
+        filtro.replaceChildren(new Option("Todos os gêneros", ""));
+
+        generos.forEach(function(genero) {
+            filtro.add(new Option(genero.name, genero.id));
+        });
+
+        filtro.disabled = false;
+    } catch (erro) {
+        filtro.replaceChildren(new Option("Não foi possível carregar gêneros", ""));
+    }
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     carregarTema();
     carregarCatalogo(1, false);
+    carregarFiltroGeneros();
 
     const botaoMais = document.getElementById("carregarMais");
     if (botaoMais) {
         botaoMais.addEventListener("click", function() {
             carregarCatalogo(paginaAtual + 1, true);
+        });
+    }
+
+    const filtro = document.getElementById("filtroGenero");
+    if (filtro) {
+        filtro.addEventListener("change", function() {
+            generoSelecionado = filtro.value;
+            carregarCatalogo(1, false);
         });
     }
 });
