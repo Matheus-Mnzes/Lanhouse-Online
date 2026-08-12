@@ -19,8 +19,8 @@
                 <span>🎮</span><span>Jogos</span>
             </button>
 
-            <button class="menu-item" onclick="abrirAba('favoritos', this)">
-                <span>⭐</span><span>Favoritos</span>
+            <button class="menu-item" onclick="abrirAba('biblioteca', this)">
+                <span>📚</span><span>Minha biblioteca</span>
             </button>
 
             <button class="menu-item" onclick="abrirAba('configuracoes', this)">
@@ -136,23 +136,23 @@
              FAVORITOS
         ========================= -->
 
-        <section id="favoritos" class="aba">
+        <section id="biblioteca" class="aba">
             <div class="topo">
-                <h1>⭐ Favoritos</h1>
-                <p>Seus jogos favoritos aparecerão aqui.</p>
+                <h1>📚 Minha biblioteca</h1>
+                <p>Seus jogos adicionados aparecerão aqui.</p>
             </div>
 
-            <label class="campo-pesquisa" for="pesquisaFavoritos">
-                <span>Pesquisar favoritos</span>
-                <input id="pesquisaFavoritos" type="search" placeholder="Digite o nome do jogo">
+            <label class="campo-pesquisa" for="pesquisaBiblioteca">
+                <span>Pesquisar na biblioteca</span>
+                <input id="pesquisaBiblioteca" type="search" placeholder="Digite o nome do jogo">
             </label>
 
-            <div id="catalogoFavoritos" class="jogos-grid" aria-live="polite"></div>
+            <div id="catalogoBiblioteca" class="jogos-grid" aria-live="polite"></div>
 
-            <div id="mensagemFavoritosVazia" class="mensagem-vazia">
-                <span>⭐</span>
-                <h2>Nenhum favorito ainda</h2>
-                <p>Adicione seus jogos favoritos para encontrá-los rapidamente.</p>
+            <div id="mensagemBibliotecaVazia" class="mensagem-vazia">
+                <span>📚</span>
+                <h2>Nenhum jogo na biblioteca</h2>
+                <p>Adicione jogos para encontrá-los rapidamente.</p>
             </div>
         </section>
 

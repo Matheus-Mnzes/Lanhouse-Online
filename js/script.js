@@ -1,28 +1,25 @@
 let paginaAtual = 1;
 let generoSelecionado = "";
-let jogosCatalogo = [];
 let pesquisaSelecionada = "";
+let jogosCatalogo = [];
 let temporizadorPesquisa;
 
 const traducoesGeneros = {
     "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro",
-    "Fighting": "Luta", "Hack and slash/Beat 'em up": "Hack and slash",
-    "Indie": "Independente", "Music": "Música", "Pinball": "Pinball", "Platform": "Plataforma",
-    "Point-and-click": "Apontar e clicar", "Puzzle": "Quebra-cabeça", "Quiz/Trivia": "Quiz e trivia",
-    "Racing": "Corrida", "Real Time Strategy (RTS)": "Estratégia em tempo real",
-    "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação",
-    "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático",
-    "Turn-based strategy (TBS)": "Estratégia por turnos", "Visual Novel": "Visual novel"
+    "Fighting": "Luta", "Hack and slash/Beat 'em up": "Hack and slash", "Indie": "Independente",
+    "Music": "Música", "Pinball": "Pinball", "Platform": "Plataforma", "Point-and-click": "Apontar e clicar",
+    "Puzzle": "Quebra-cabeça", "Quiz/Trivia": "Quiz e trivia", "Racing": "Corrida",
+    "Real Time Strategy (RTS)": "Estratégia em tempo real", "Role-playing (RPG)": "RPG",
+    "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia",
+    "Tactical": "Tático", "Turn-based strategy (TBS)": "Estratégia por turnos", "Visual Novel": "Visual novel"
 };
 
 function abrirAba(id, botao) {
     document.querySelectorAll(".aba").forEach(function(aba) { aba.classList.remove("ativa"); });
-    const abaSelecionada = document.getElementById(id);
-    if (abaSelecionada) abaSelecionada.classList.add("ativa");
-
+    document.getElementById(id)?.classList.add("ativa");
     document.querySelectorAll(".menu-item").forEach(function(item) { item.classList.remove("ativo"); });
     if (botao) botao.classList.add("ativo");
-    if (id === "favoritos") renderizarFavoritos();
+    if (id === "biblioteca") renderizarBiblioteca();
 }
 
 function jogar(nomeJogo) { alert("Abrindo o jogo: " + nomeJogo); }
@@ -42,21 +39,25 @@ function carregarTema() {
     if (botao) botao.textContent = "☀️ Desativar";
 }
 
-function obterFavoritos() {
-    try { return JSON.parse(localStorage.getItem("favoritos") || "[]"); }
-    catch { return []; }
+function obterBiblioteca() {
+    try {
+        return JSON.parse(localStorage.getItem("biblioteca") || localStorage.getItem("favoritos") || "[]");
+    } catch { return []; }
 }
 
-function jogoEhFavorito(id) { return obterFavoritos().some(function(jogo) { return jogo.id === id; }); }
+function jogoEstaNaBiblioteca(id) {
+    return obterBiblioteca().some(function(jogo) { return jogo.id === id; });
+}
 
-function alternarFavorito(jogo) {
-    const favoritos = obterFavoritos();
-    const indice = favoritos.findIndex(function(item) { return item.id === jogo.id; });
-    if (indice >= 0) favoritos.splice(indice, 1);
-    else favoritos.push(jogo);
-    localStorage.setItem("favoritos", JSON.stringify(favoritos));
-    renderizarCatalogoAtual();
-    renderizarFavoritos();
+function alternarBiblioteca(jogo) {
+    const biblioteca = obterBiblioteca();
+    const indice = biblioteca.findIndex(function(item) { return item.id === jogo.id; });
+    if (indice >= 0) biblioteca.splice(indice, 1);
+    else biblioteca.push(jogo);
+    localStorage.setItem("biblioteca", JSON.stringify(biblioteca));
+    localStorage.removeItem("favoritos");
+    renderizarCatalogo();
+    renderizarBiblioteca();
 }
 
 async function carregarCatalogo(pagina, adicionar) {
@@ -68,7 +69,7 @@ async function carregarCatalogo(pagina, adicionar) {
         const jogos = dados.jogos || [];
         jogosCatalogo = adicionar ? jogosCatalogo.concat(jogos) : jogos;
         paginaAtual = pagina;
-        renderizarCatalogoAtual();
+        renderizarCatalogo();
 
         if (!adicionar && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(document.getElementById("jogos-populares"), jogos.slice(0, 3));
@@ -80,31 +81,28 @@ async function carregarCatalogo(pagina, adicionar) {
             botaoMais.textContent = "Carregar mais";
         }
     } catch (erro) {
-        mostrarErroCatalogo(document.getElementById("catalogo"), erro.message || "Não foi possível carregar os jogos.");
+        mostrarMensagem(document.getElementById("catalogo"), erro.message || "Não foi possível carregar os jogos.");
         if (botaoMais) { botaoMais.disabled = false; botaoMais.textContent = "Tentar novamente"; }
     }
 }
 
-function renderizarCatalogoAtual() {
+function renderizarCatalogo() {
     preencherCatalogo(document.getElementById("catalogo"), jogosCatalogo, "Nenhum jogo encontrado.");
 }
 
-function preencherCatalogo(catalogo, jogos, mensagemVazia) {
+function preencherCatalogo(catalogo, jogos, mensagemVazia, naBiblioteca) {
     if (!catalogo) return;
     catalogo.replaceChildren();
-
     if (!jogos.length) {
-        if (mensagemVazia) mostrarErroCatalogo(catalogo, mensagemVazia);
+        if (mensagemVazia) mostrarMensagem(catalogo, mensagemVazia);
         return;
     }
-
-    jogos.forEach(function(jogo) { catalogo.appendChild(criarCardJogo(jogo)); });
+    jogos.forEach(function(jogo) { catalogo.appendChild(criarCardJogo(jogo, naBiblioteca)); });
 }
 
-function criarCardJogo(jogo) {
+function criarCardJogo(jogo, naBiblioteca) {
     const card = document.createElement("article");
     card.className = "jogo-card";
-
     const imagem = document.createElement("div");
     imagem.className = "jogo-imagem";
     if (jogo.cover?.image_id) {
@@ -126,19 +124,21 @@ function criarCardJogo(jogo) {
 
     const acoes = document.createElement("div");
     acoes.className = "jogo-acoes";
-    const jogarBotao = document.createElement("button");
-    jogarBotao.type = "button";
-    jogarBotao.textContent = "Jogar";
-    jogarBotao.addEventListener("click", function() { jogar(jogo.name); });
+    if (naBiblioteca) {
+        const jogarBotao = document.createElement("button");
+        jogarBotao.type = "button";
+        jogarBotao.textContent = "Jogar";
+        jogarBotao.addEventListener("click", function() { jogar(jogo.name); });
+        acoes.appendChild(jogarBotao);
+    }
 
-    const favoritoBotao = document.createElement("button");
-    favoritoBotao.type = "button";
-    favoritoBotao.className = "botao-favorito" + (jogoEhFavorito(jogo.id) ? " favorito" : "");
-    favoritoBotao.textContent = jogoEhFavorito(jogo.id) ? "★ Favorito" : "☆ Favoritar";
-    favoritoBotao.setAttribute("aria-label", `Favoritar ${jogo.name}`);
-    favoritoBotao.addEventListener("click", function() { alternarFavorito(jogo); });
+    const bibliotecaBotao = document.createElement("button");
+    bibliotecaBotao.type = "button";
+    bibliotecaBotao.className = "botao-favorito" + (jogoEstaNaBiblioteca(jogo.id) ? " favorito" : "");
+    bibliotecaBotao.textContent = jogoEstaNaBiblioteca(jogo.id) ? "✓ Na biblioteca" : "+ Biblioteca";
+    bibliotecaBotao.addEventListener("click", function() { alternarBiblioteca(jogo); });
+    acoes.appendChild(bibliotecaBotao);
 
-    acoes.append(jogarBotao, favoritoBotao);
     info.append(titulo, genero, acoes);
     card.append(imagem, info);
     return card;
@@ -146,28 +146,20 @@ function criarCardJogo(jogo) {
 
 function traduzirGenero(nome) { return traducoesGeneros[nome] || nome; }
 
-function renderizarFavoritos() {
-    const termo = document.getElementById("pesquisaFavoritos")?.value.trim().toLocaleLowerCase("pt-BR") || "";
-    const favoritos = obterFavoritos().filter(function(jogo) {
-        return jogo.name.toLocaleLowerCase("pt-BR").includes(termo);
-    });
-    const todosFavoritos = obterFavoritos();
-    const mensagem = document.getElementById("mensagemFavoritosVazia");
-    preencherCatalogo(document.getElementById("catalogoFavoritos"), favoritos);
-    if (mensagem) {
-        mensagem.hidden = todosFavoritos.length > 0;
-        if (todosFavoritos.length > 0 && !favoritos.length) {
-            mensagem.hidden = false;
-            mensagem.querySelector("h2").textContent = "Nenhum favorito encontrado";
-            mensagem.querySelector("p").textContent = "Tente outra pesquisa.";
-        } else if (!todosFavoritos.length) {
-            mensagem.querySelector("h2").textContent = "Nenhum favorito ainda";
-            mensagem.querySelector("p").textContent = "Adicione seus jogos favoritos para encontrá-los rapidamente.";
-        }
-    }
+function renderizarBiblioteca() {
+    const termo = document.getElementById("pesquisaBiblioteca")?.value.trim().toLocaleLowerCase("pt-BR") || "";
+    const todosJogos = obterBiblioteca();
+    const jogos = todosJogos.filter(function(jogo) { return jogo.name.toLocaleLowerCase("pt-BR").includes(termo); });
+    preencherCatalogo(document.getElementById("catalogoBiblioteca"), jogos, undefined, true);
+
+    const mensagem = document.getElementById("mensagemBibliotecaVazia");
+    if (!mensagem) return;
+    mensagem.hidden = todosJogos.length > 0 && jogos.length > 0;
+    mensagem.querySelector("h2").textContent = todosJogos.length ? "Nenhum jogo encontrado" : "Nenhum jogo na biblioteca";
+    mensagem.querySelector("p").textContent = todosJogos.length ? "Tente outra pesquisa." : "Adicione jogos para encontrá-los rapidamente.";
 }
 
-function mostrarErroCatalogo(catalogo, texto) {
+function mostrarMensagem(catalogo, texto) {
     if (!catalogo) return;
     catalogo.replaceChildren();
     const mensagem = document.createElement("p");
@@ -184,15 +176,14 @@ async function carregarFiltroGeneros() {
         filtro.replaceChildren(new Option("Todos os gêneros", ""));
         generos.forEach(function(genero) { filtro.add(new Option(traduzirGenero(genero.name), genero.id)); });
         filtro.disabled = false;
-    } catch (erro) { filtro.replaceChildren(new Option("Não foi possível carregar gêneros", "")); }
+    } catch { filtro.replaceChildren(new Option("Não foi possível carregar gêneros", "")); }
 }
 
 document.addEventListener("DOMContentLoaded", function() {
     carregarTema();
     carregarCatalogo(1, false);
     carregarFiltroGeneros();
-    renderizarFavoritos();
-
+    renderizarBiblioteca();
     document.getElementById("carregarMais")?.addEventListener("click", function() { carregarCatalogo(paginaAtual + 1, true); });
     document.getElementById("filtroGenero")?.addEventListener("change", function(evento) {
         generoSelecionado = evento.target.value;
@@ -205,5 +196,5 @@ document.addEventListener("DOMContentLoaded", function() {
             carregarCatalogo(1, false);
         }, 350);
     });
-    document.getElementById("pesquisaFavoritos")?.addEventListener("input", renderizarFavoritos);
+    document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
 });
