@@ -20,6 +20,10 @@ export default async function handler(request, response) {
         const genero = Number.isInteger(generoSolicitado) && generoSolicitado > 0
             ? generoSolicitado
             : null;
+        const pesquisa = (url.searchParams.get("pesquisa") || "")
+            .trim()
+            .slice(0, 100)
+            .replace(/[\\"]/g, "\\$&");
         const recurso = url.searchParams.get("recurso");
         const limite = 20;
         const offset = (pagina - 1) * limite;
@@ -97,6 +101,7 @@ export default async function handler(request, response) {
                         first_release_date,
                         platforms.name;
 
+                    ${pesquisa ? `search "${pesquisa}";` : ""}
                     where cover != null & rating != null${genero ? ` & genres = (${genero})` : ""};
                     sort rating desc;
 

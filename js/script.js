@@ -1,6 +1,8 @@
 let paginaAtual = 1;
 let generoSelecionado = "";
 let jogosCatalogo = [];
+let pesquisaSelecionada = "";
+let temporizadorPesquisa;
 
 const traducoesGeneros = {
     "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro",
@@ -53,7 +55,7 @@ function alternarFavorito(jogo) {
     if (indice >= 0) favoritos.splice(indice, 1);
     else favoritos.push(jogo);
     localStorage.setItem("favoritos", JSON.stringify(favoritos));
-    renderizarCatalogoFiltrado();
+    renderizarCatalogoAtual();
     renderizarFavoritos();
 }
 
@@ -62,13 +64,13 @@ async function carregarCatalogo(pagina, adicionar) {
     if (botaoMais) { botaoMais.disabled = true; botaoMais.textContent = "Carregando..."; }
 
     try {
-        const dados = await buscarJogos(pagina, generoSelecionado);
+        const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada);
         const jogos = dados.jogos || [];
         jogosCatalogo = adicionar ? jogosCatalogo.concat(jogos) : jogos;
         paginaAtual = pagina;
-        renderizarCatalogoFiltrado();
+        renderizarCatalogoAtual();
 
-        if (!adicionar && !generoSelecionado) {
+        if (!adicionar && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(document.getElementById("jogos-populares"), jogos.slice(0, 3));
         }
 
@@ -83,12 +85,8 @@ async function carregarCatalogo(pagina, adicionar) {
     }
 }
 
-function renderizarCatalogoFiltrado() {
-    const termo = document.getElementById("pesquisaJogos")?.value.trim().toLocaleLowerCase("pt-BR") || "";
-    const jogos = jogosCatalogo.filter(function(jogo) {
-        return jogo.name.toLocaleLowerCase("pt-BR").includes(termo);
-    });
-    preencherCatalogo(document.getElementById("catalogo"), jogos, "Nenhum jogo encontrado.");
+function renderizarCatalogoAtual() {
+    preencherCatalogo(document.getElementById("catalogo"), jogosCatalogo, "Nenhum jogo encontrado.");
 }
 
 function preencherCatalogo(catalogo, jogos, mensagemVazia) {
@@ -200,6 +198,12 @@ document.addEventListener("DOMContentLoaded", function() {
         generoSelecionado = evento.target.value;
         carregarCatalogo(1, false);
     });
-    document.getElementById("pesquisaJogos")?.addEventListener("input", renderizarCatalogoFiltrado);
+    document.getElementById("pesquisaJogos")?.addEventListener("input", function(evento) {
+        clearTimeout(temporizadorPesquisa);
+        temporizadorPesquisa = setTimeout(function() {
+            pesquisaSelecionada = evento.target.value.trim();
+            carregarCatalogo(1, false);
+        }, 350);
+    });
     document.getElementById("pesquisaFavoritos")?.addEventListener("input", renderizarFavoritos);
 });
