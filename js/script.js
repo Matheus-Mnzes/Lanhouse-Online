@@ -1,41 +1,42 @@
 /* =========================
-   SCRIPT PRINCIPAL — YCloud
+   SCRIPT PRINCIPAL — YCloud (v2, estilo Lusion)
 ========================= */
 
 "use strict";
 
 // ── Estado global ──────────────────────────────────────────────
-let paginaAtual       = 1;
-let generoSelecionado = "";
-let pesquisaSelecionada = "";
-let jogosCatalogo     = [];
+let paginaAtual         = 1;
+let generoSelecionado    = "";
+let pesquisaSelecionada  = "";
+let jogosCatalogo        = [];
+let catalogoCarregado    = false;
 let temporizadorPesquisa;
-let sidebarAberta     = true;
 
-// ── Traduções de gêneros ───────────────────────────────────────
+// ── Traduções de gêneros (usado só no filtro — a lista de jogos
+//    já vem traduzida do servidor em api/games.js) ──────────────
 const GENEROS = {
-    "Adventure":                     "Aventura",
-    "Arcade":                        "Arcade",
-    "Card & Board Game":             "Cartas e tabuleiro",
-    "Fighting":                      "Luta",
-    "Hack and slash/Beat 'em up":    "Hack and slash",
-    "Indie":                         "Independente",
-    "Music":                         "Música",
-    "Pinball":                       "Pinball",
-    "Platform":                      "Plataforma",
-    "Point-and-click":               "Apontar e clicar",
-    "Puzzle":                        "Quebra-cabeça",
-    "Quiz/Trivia":                   "Quiz e trivia",
-    "Racing":                        "Corrida",
-    "Real Time Strategy (RTS)":      "Estratégia em tempo real",
-    "Role-playing (RPG)":            "RPG",
-    "Shooter":                       "Tiro",
-    "Simulator":                     "Simulação",
-    "Sport":                         "Esporte",
-    "Strategy":                      "Estratégia",
-    "Tactical":                      "Tático",
-    "Turn-based strategy (TBS)":     "Estratégia por turnos",
-    "Visual Novel":                  "Visual Novel",
+    "Adventure":                  "Aventura",
+    "Arcade":                     "Arcade",
+    "Card & Board Game":          "Cartas e tabuleiro",
+    "Fighting":                   "Luta",
+    "Hack and slash/Beat 'em up": "Hack and slash",
+    "Indie":                      "Independente",
+    "Music":                      "Música",
+    "Pinball":                    "Pinball",
+    "Platform":                   "Plataforma",
+    "Point-and-click":            "Apontar e clicar",
+    "Puzzle":                     "Quebra-cabeça",
+    "Quiz/Trivia":                "Quiz e trivia",
+    "Racing":                     "Corrida",
+    "Real Time Strategy (RTS)":   "Estratégia em tempo real",
+    "Role-playing (RPG)":         "RPG",
+    "Shooter":                    "Tiro",
+    "Simulator":                  "Simulação",
+    "Sport":                      "Esporte",
+    "Strategy":                   "Estratégia",
+    "Tactical":                   "Tático",
+    "Turn-based strategy (TBS)":  "Estratégia por turnos",
+    "Visual Novel":               "Visual Novel",
 };
 
 function traduzirGenero(nome) {
@@ -43,103 +44,122 @@ function traduzirGenero(nome) {
 }
 
 
-// ── Navegação por abas ─────────────────────────────────────────
-function abrirAba(id, botao) {
-    document.querySelectorAll(".aba").forEach(el => el.classList.remove("ativa"));
-    document.getElementById(id)?.classList.add("ativa");
+// ── Navegação por painéis ──────────────────────────────────────
+function mostrarPainel(id) {
+    // "Planos" é uma seção dentro do painel "Início", não um painel próprio
+    const idAlvo = id === "planos" ? "inicio" : id;
 
-    document.querySelectorAll(".menu-item").forEach(el => {
-        el.classList.remove("ativo");
-        el.setAttribute("aria-current", "false");
+    document.querySelectorAll(".painel").forEach(el => {
+        const ativo = el.id === `painel-${idAlvo}`;
+        el.classList.toggle("painel-oculto", !ativo);
+        el.classList.toggle("ativo", ativo);
     });
 
-    // Aceita tanto elemento DOM quanto seletor data-aba
-    const itemAtivo = botao instanceof Element
-        ? botao
-        : document.querySelector(`[data-aba="${id}"]`);
-
-    if (itemAtivo) {
-        itemAtivo.classList.add("ativo");
-        itemAtivo.setAttribute("aria-current", "page");
+    if (idAlvo === "jogos" && !catalogoCarregado) {
+        carregarCatalogo(1, false);
     }
 
-    if (id === "biblioteca") renderizarBiblioteca();
+    if (idAlvo === "biblioteca") {
+        renderizarBiblioteca();
+    }
 
-    // Fecha sidebar em mobile ao navegar
-    if (window.innerWidth < 768) fecharSidebar();
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-
-// ── Sidebar toggle ─────────────────────────────────────────────
-function toggleSidebar() {
-    sidebarAberta ? fecharSidebar() : abrirSidebar();
-}
-
-function abrirSidebar() {
-    document.getElementById("sidebar")?.classList.remove("sidebar-fechada");
-    document.getElementById("conteudo")?.classList.remove("conteudo-expandido");
-    sidebarAberta = true;
-}
-
-function fecharSidebar() {
-    document.getElementById("sidebar")?.classList.add("sidebar-fechada");
-    document.getElementById("conteudo")?.classList.add("conteudo-expandido");
-    sidebarAberta = false;
-}
-
-
-// ── Tema ───────────────────────────────────────────────────────
-function alternarTema() {
-    const isLight = document.body.classList.toggle("tema-claro");
-    localStorage.setItem("tema", isLight ? "light" : "dark");
-    sincronizarToggleTema(isLight);
-}
-
-function sincronizarToggleTema(isLight) {
-    const toggle = document.getElementById("temaToggle");
-    if (toggle) toggle.setAttribute("aria-checked", String(isLight));
-    if (isLight) {
-        toggle?.classList.add("ativo");
+    if (id === "planos") {
+        document.getElementById("painel-planos")?.scrollIntoView({ behavior: "smooth" });
     } else {
-        toggle?.classList.remove("ativo");
+        window.scrollTo({ top: 0, behavior: "smooth" });
     }
 }
 
-function carregarTema() {
-    const tema = localStorage.getItem("tema");
-    const isLight = tema === "light";
-    if (isLight) document.body.classList.add("tema-claro");
-    sincronizarToggleTema(isLight);
+function fecharMenuE(id) {
+    fecharMenu();
+    mostrarPainel(id);
 }
 
 
-// ── Animações reduzidas ────────────────────────────────────────
-function alternarAnimacoes() {
-    const ativo = document.documentElement.classList.toggle("reducao-animacao");
-    localStorage.setItem("reducao-animacao", ativo ? "1" : "0");
-    const toggle = document.getElementById("animacaoToggle");
-    if (toggle) toggle.setAttribute("aria-checked", String(ativo));
-    if (ativo) toggle?.classList.add("ativo");
-    else toggle?.classList.remove("ativo");
+// ── Menu overlay ────────────────────────────────────────────────
+function toggleMenu() {
+    document.body.classList.contains("menu-aberto") ? fecharMenu() : abrirMenu();
 }
 
-function carregarAnimacoes() {
-    const ativo = localStorage.getItem("reducao-animacao") === "1"
-        || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (ativo) {
-        document.documentElement.classList.add("reducao-animacao");
-        const toggle = document.getElementById("animacaoToggle");
-        if (toggle) {
-            toggle.setAttribute("aria-checked", "true");
-            toggle.classList.add("ativo");
-        }
+function abrirMenu() {
+    document.body.classList.add("menu-aberto");
+    document.getElementById("menuOverlay")?.setAttribute("aria-hidden", "false");
+    document.getElementById("menuBtn")?.setAttribute("aria-expanded", "true");
+}
+
+function fecharMenu() {
+    document.body.classList.remove("menu-aberto");
+    document.getElementById("menuOverlay")?.setAttribute("aria-hidden", "true");
+    document.getElementById("menuBtn")?.setAttribute("aria-expanded", "false");
+}
+
+
+// ── Cursor customizado ──────────────────────────────────────────
+function iniciarCursor() {
+    const cursor    = document.getElementById("cursor");
+    const cursorDot = document.getElementById("cursorDot");
+    if (!cursor || !cursorDot) return;
+
+    // Dispositivos sem mouse (touch) não precisam do cursor custom
+    if (window.matchMedia("(pointer: coarse)").matches) {
+        cursor.style.display = "none";
+        cursorDot.style.display = "none";
+        return;
     }
+
+    let alvoX = 0, alvoY = 0;
+    let dotX  = 0, dotY  = 0;
+
+    window.addEventListener("mousemove", e => {
+        alvoX = e.clientX;
+        alvoY = e.clientY;
+        cursor.style.left = `${alvoX}px`;
+        cursor.style.top  = `${alvoY}px`;
+    });
+
+    (function seguirPonto() {
+        dotX += (alvoX - dotX) * 0.35;
+        dotY += (alvoY - dotY) * 0.35;
+        cursorDot.style.left = `${dotX}px`;
+        cursorDot.style.top  = `${dotY}px`;
+        requestAnimationFrame(seguirPonto);
+    })();
+
+    const seletorHover = "a, button, input, select, .jogo-card, [role='button']";
+
+    document.addEventListener("mouseover", e => {
+        if (e.target.closest(seletorHover)) document.body.classList.add("cursor-hover");
+    });
+
+    document.addEventListener("mouseout", e => {
+        if (e.target.closest(seletorHover)) document.body.classList.remove("cursor-hover");
+    });
+
+    document.getElementById("menuBtn")?.addEventListener("mouseenter", () => {
+        document.body.classList.add("cursor-menu");
+    });
+    document.getElementById("menuBtn")?.addEventListener("mouseleave", () => {
+        document.body.classList.remove("cursor-menu");
+    });
 }
 
 
-// ── Biblioteca (localStorage) ──────────────────────────────────
+// ── Toast de notificação ────────────────────────────────────────
+function mostrarToast(mensagem) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    clearTimeout(toast._timer);
+    toast.textContent = mensagem;
+    toast.classList.add("visivel");
+
+    toast._timer = setTimeout(() => {
+        toast.classList.remove("visivel");
+    }, 2800);
+}
+
+
+// ── Biblioteca (localStorage) ───────────────────────────────────
 function obterBiblioteca() {
     try {
         return JSON.parse(localStorage.getItem("biblioteca") || "[]");
@@ -169,64 +189,35 @@ function alternarBiblioteca(jogo) {
     renderizarBiblioteca();
 }
 
-function limparBiblioteca() {
-    if (!confirm("Remover todos os jogos da biblioteca?")) return;
-    localStorage.removeItem("biblioteca");
-    renderizarBiblioteca();
-    mostrarToast("Biblioteca limpa");
-}
 
-
-// ── Toast de notificação ───────────────────────────────────────
-function mostrarToast(mensagem) {
-    const existente = document.querySelector(".toast");
-    existente?.remove();
-
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.textContent = mensagem;
-    document.body.appendChild(toast);
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => toast.classList.add("toast-visivel"));
-    });
-
-    setTimeout(() => {
-        toast.classList.remove("toast-visivel");
-        toast.addEventListener("transitionend", () => toast.remove(), { once: true });
-    }, 2800);
-}
-
-
-// ── Carregar e renderizar catálogo ─────────────────────────────
+// ── Carregar e renderizar catálogo ──────────────────────────────
 async function carregarCatalogo(pagina, adicionar) {
     const botaoMais = document.getElementById("carregarMais");
     const catalogo  = document.getElementById("catalogo");
 
     if (botaoMais) {
-        botaoMais.disabled  = true;
+        botaoMais.disabled    = true;
         botaoMais.textContent = "Carregando…";
     }
 
-    // Skeletons ao iniciar nova busca
     if (!adicionar && catalogo) {
         catalogo.replaceChildren(...Array.from({ length: 6 }, () => {
             const sk = document.createElement("div");
-            sk.className = "skeleton-card";
+            sk.className = "skel";
             return sk;
         }));
     }
 
     try {
         const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada);
-        if (!dados) return; // requisição cancelada
+        if (!dados) return;
 
         const jogos = dados.jogos || [];
-        jogosCatalogo = adicionar ? jogosCatalogo.concat(jogos) : jogos;
-        paginaAtual   = pagina;
+        jogosCatalogo   = adicionar ? jogosCatalogo.concat(jogos) : jogos;
+        paginaAtual     = pagina;
+        catalogoCarregado = true;
         renderizarCatalogo();
 
-        // Jogos populares na home (primeira carga, sem filtros)
         if (!adicionar && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
@@ -236,15 +227,15 @@ async function carregarCatalogo(pagina, adicionar) {
 
         if (botaoMais) {
             const temMais = jogos.length >= (dados.limite ?? jogos.length);
-            botaoMais.hidden    = !temMais;
-            botaoMais.disabled  = false;
-            botaoMais.textContent = "Carregar mais jogos";
+            botaoMais.hidden      = !temMais;
+            botaoMais.disabled    = false;
+            botaoMais.textContent = "Carregar mais";
         }
 
     } catch (erro) {
         mostrarErro(catalogo, erro.message || "Não foi possível carregar os jogos.");
         if (botaoMais) {
-            botaoMais.disabled  = false;
+            botaoMais.disabled    = false;
             botaoMais.textContent = "Tentar novamente";
         }
     }
@@ -269,7 +260,6 @@ function preencherCatalogo(container, jogos, mensagemVazia = "", naBiblioteca = 
 
     jogos.forEach((jogo, i) => {
         const card = criarCardJogo(jogo, naBiblioteca);
-        // Atraso escalonado para animação de entrada
         card.style.animationDelay = `${i * 50}ms`;
         container.appendChild(card);
     });
@@ -281,31 +271,26 @@ function criarCardJogo(jogo, naBiblioteca = false) {
     const card = document.createElement("article");
     card.className = "jogo-card";
 
-    // ── Imagem ──
-    const imgWrap = document.createElement("div");
-    imgWrap.className = "jogo-capa";
+    // ── Capa ──
+    const capa = document.createElement("div");
+    capa.className = "jogo-capa";
 
     if (jogo.cover?.image_id) {
         const img = document.createElement("img");
-        img.src     = `https://images.igdb.com/igdb/image/upload/t_cover_big/${jogo.cover.image_id}.jpg`;
-        img.alt     = `Capa de ${jogo.name}`;
-        img.loading = "lazy";
+        img.src      = `https://images.igdb.com/igdb/image/upload/t_cover_big/${jogo.cover.image_id}.jpg`;
+        img.alt      = `Capa de ${jogo.name}`;
+        img.loading  = "lazy";
         img.decoding = "async";
-        imgWrap.appendChild(img);
+        capa.appendChild(img);
     } else {
-        imgWrap.innerHTML = `<div class="jogo-capa-placeholder">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                <rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M7 12h.01M17 12h.01M12 9v6"/>
-            </svg>
-        </div>`;
+        capa.innerHTML = `<div class="jogo-capa-placeholder">Y</div>`;
     }
 
-    // Badge de rating
     if (jogo.rating) {
         const badge = document.createElement("div");
-        badge.className = "jogo-rating";
+        badge.className = "jogo-rating-badge";
         badge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> ${(jogo.rating / 10).toFixed(1)}`;
-        imgWrap.appendChild(badge);
+        capa.appendChild(badge);
     }
 
     // ── Info ──
@@ -319,7 +304,7 @@ function criarCardJogo(jogo, naBiblioteca = false) {
     const generoEl = document.createElement("p");
     generoEl.className = "jogo-genero";
     generoEl.textContent = jogo.genres?.length
-        ? jogo.genres.map(g => traduzirGenero(g.name)).join(", ")
+        ? jogo.genres.map(g => g.name).join(", ")
         : "Gênero não informado";
 
     const acoes = document.createElement("div");
@@ -329,24 +314,22 @@ function criarCardJogo(jogo, naBiblioteca = false) {
         const btnJogar = document.createElement("button");
         btnJogar.type = "button";
         btnJogar.className = "btn-jogar";
-        btnJogar.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Jogar`;
+        btnJogar.textContent = "Jogar";
         btnJogar.addEventListener("click", () => jogar(jogo.name));
         acoes.appendChild(btnJogar);
     }
 
     const btnBib = document.createElement("button");
     btnBib.type = "button";
-    btnBib.className = "btn-biblioteca" + (naBib ? " btn-biblioteca-ativa" : "");
+    btnBib.className = "btn-bib" + (naBib ? " salvo" : "");
     btnBib.setAttribute("aria-pressed", String(naBib));
     btnBib.setAttribute("aria-label", naBib ? "Remover da biblioteca" : "Adicionar à biblioteca");
-    btnBib.innerHTML = naBib
-        ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5"/></svg> Salvo`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Biblioteca`;
+    btnBib.textContent = naBib ? "Salvo" : "Biblioteca";
     btnBib.addEventListener("click", () => alternarBiblioteca(jogo));
     acoes.appendChild(btnBib);
 
     info.append(titulo, generoEl, acoes);
-    card.append(imgWrap, info);
+    card.append(capa, info);
     return card;
 }
 
@@ -359,29 +342,30 @@ function mostrarErro(container, texto) {
 }
 
 
-// ── Biblioteca ─────────────────────────────────────────────────
+// ── Biblioteca ───────────────────────────────────────────────────
 function renderizarBiblioteca() {
     const termo    = document.getElementById("pesquisaBiblioteca")?.value.trim().toLocaleLowerCase("pt-BR") || "";
     const todos    = obterBiblioteca();
     const filtrado = todos.filter(j => j.name.toLocaleLowerCase("pt-BR").includes(termo));
-    const mensagem = document.getElementById("mensagemBibliotecaVazia");
 
     preencherCatalogo(document.getElementById("catalogoBiblioteca"), filtrado, "", true);
 
-    if (!mensagem) return;
-    const vazio = filtrado.length === 0;
-    mensagem.hidden = !vazio;
+    const vazio = document.getElementById("bibVazio");
+    if (!vazio) return;
 
-    if (vazio) {
-        mensagem.querySelector("h2").textContent =
-            todos.length ? "Nenhum resultado" : "Biblioteca vazia";
-        mensagem.querySelector("p").textContent =
-            todos.length ? "Tente outra busca." : "Adicione jogos ao explorar o catálogo.";
+    const semResultados = filtrado.length === 0;
+    vazio.hidden = !semResultados;
+
+    if (semResultados) {
+        const titulo = document.getElementById("bibVazioTitulo");
+        const desc   = document.getElementById("bibVazioDesc");
+        if (titulo) titulo.textContent = todos.length ? "Nenhum resultado" : "Biblioteca vazia";
+        if (desc)   desc.textContent   = todos.length ? "Tente outra busca." : "Adicione jogos ao explorar o catálogo.";
     }
 }
 
 
-// ── Filtro de gêneros ──────────────────────────────────────────
+// ── Filtro de gêneros ─────────────────────────────────────────────
 async function carregarFiltroGeneros() {
     const filtro = document.getElementById("filtroGenero");
     if (!filtro) return;
@@ -397,94 +381,100 @@ async function carregarFiltroGeneros() {
 }
 
 
-// ── Jogar ──────────────────────────────────────────────────────
+// ── Jogar ──────────────────────────────────────────────────────────
 function jogar(nomeJogo) {
     mostrarToast(`Abrindo ${nomeJogo}…`);
 }
 
 
-// ── Canvas hero (partículas) ───────────────────────────────────
+// ── Hero 3D (Three.js) — cluster de formas ao estilo Lusion ────────
 function iniciarHeroCanvas() {
     const canvas = document.getElementById("heroCanvas");
-    if (!canvas) return;
+    if (!canvas || typeof THREE === "undefined") return;
 
-    const ctx    = canvas.getContext("2d");
-    let pontos   = [];
-    let raf;
+    const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduzMovimento) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 9);
+
+    const luz1 = new THREE.DirectionalLight(0xffffff, 1.1);
+    luz1.position.set(4, 6, 6);
+    scene.add(luz1);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    const corAzul  = new THREE.MeshStandardMaterial({ color: 0x1a4bff, roughness: 0.35, metalness: 0.15 });
+    const corPreta = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4, metalness: 0.1 });
+    const corBranca = new THREE.MeshStandardMaterial({ color: 0xf5f5f3, roughness: 0.5, metalness: 0.05 });
+    const materiais = [corAzul, corPreta, corBranca];
+
+    const grupo = new THREE.Group();
+    const total = 14;
+
+    for (let i = 0; i < total; i++) {
+        const tamanho   = 0.5 + Math.random() * 0.7;
+        const geometria = new THREE.BoxGeometry(tamanho, tamanho, tamanho);
+        const cubo      = new THREE.Mesh(geometria, materiais[i % materiais.length]);
+
+        cubo.position.set(
+            (Math.random() - 0.5) * 5,
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4
+        );
+        cubo.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+        );
+        grupo.add(cubo);
+    }
+    scene.add(grupo);
+
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener("mousemove", e => {
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+    });
 
     function redimensionar() {
-        canvas.width  = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        const largura = canvas.clientWidth  || window.innerWidth;
+        const altura  = canvas.clientHeight || window.innerHeight;
+        camera.aspect = largura / altura;
+        camera.updateProjectionMatrix();
+        renderer.setSize(largura, altura, false);
     }
 
-    function criarPontos() {
-        const qtd = Math.floor((canvas.width * canvas.height) / 14000);
-        pontos = Array.from({ length: qtd }, () => ({
-            x:   Math.random() * canvas.width,
-            y:   Math.random() * canvas.height,
-            vx:  (Math.random() - 0.5) * 0.35,
-            vy:  (Math.random() - 0.5) * 0.35,
-            r:   Math.random() * 1.5 + 0.5,
-        }));
-    }
-
+    let raf;
     function desenhar() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        pontos.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            if (p.x < 0 || p.x > canvas.width)  p.vx *= -1;
-            if (p.y < 0 || p.y > canvas.height)  p.vy *= -1;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(134, 239, 22, 0.45)";
-            ctx.fill();
-        });
-
-        // Linhas entre pontos próximos
-        for (let i = 0; i < pontos.length; i++) {
-            for (let j = i + 1; j < pontos.length; j++) {
-                const dx   = pontos[i].x - pontos[j].x;
-                const dy   = pontos[i].y - pontos[j].y;
-                const dist = Math.hypot(dx, dy);
-                if (dist < 100) {
-                    ctx.beginPath();
-                    ctx.moveTo(pontos[i].x, pontos[i].y);
-                    ctx.lineTo(pontos[j].x, pontos[j].y);
-                    ctx.strokeStyle = `rgba(134,239,22,${0.12 * (1 - dist / 100)})`;
-                    ctx.lineWidth   = 0.6;
-                    ctx.stroke();
-                }
-            }
-        }
-
+        grupo.rotation.y += 0.0022;
+        grupo.rotation.x += 0.0007;
+        camera.position.x += (mouseX * 2 - camera.position.x) * 0.03;
+        camera.position.y += (-mouseY * 2 - camera.position.y) * 0.03;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
         raf = requestAnimationFrame(desenhar);
     }
 
-    const pausar = () => cancelAnimationFrame(raf);
-    const retomar = () => { raf = requestAnimationFrame(desenhar); };
-
-    const obs = new IntersectionObserver(entries => {
-        entries[0].isIntersecting ? retomar() : pausar();
-    }, { threshold: 0.1 });
-    obs.observe(canvas);
-
-    window.addEventListener("resize", () => {
-        redimensionar();
-        criarPontos();
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            cancelAnimationFrame(raf);
+        } else {
+            raf = requestAnimationFrame(desenhar);
+        }
     });
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    window.addEventListener("resize", redimensionar);
 
     redimensionar();
-    criarPontos();
     desenhar();
 }
 
 
-// ── Pesquisa global na topbar ──────────────────────────────────
+// ── Pesquisa global na topbar ────────────────────────────────────
 function iniciarPesquisaGlobal() {
     const input = document.getElementById("pesquisaGlobal");
     if (!input) return;
@@ -496,8 +486,7 @@ function iniciarPesquisaGlobal() {
             const valor = input.value.trim();
             if (!valor) return;
 
-            // Vai para a aba de jogos e aplica pesquisa
-            abrirAba("jogos", document.querySelector("[data-aba=jogos]"));
+            mostrarPainel("jogos");
             const campoPrincipal = document.getElementById("pesquisaJogos");
             if (campoPrincipal) {
                 campoPrincipal.value = valor;
@@ -510,10 +499,9 @@ function iniciarPesquisaGlobal() {
 }
 
 
-// ── Init ───────────────────────────────────────────────────────
+// ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    carregarTema();
-    carregarAnimacoes();
+    iniciarCursor();
     iniciarHeroCanvas();
     iniciarPesquisaGlobal();
 
@@ -540,8 +528,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
 
-    // Fechar sidebar ao clicar fora (mobile)
-    document.getElementById("conteudo")?.addEventListener("click", () => {
-        if (window.innerWidth < 768 && sidebarAberta) fecharSidebar();
+    // Fecha o menu com a tecla Esc
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") fecharMenu();
     });
 });
