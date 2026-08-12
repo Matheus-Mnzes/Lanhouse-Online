@@ -493,6 +493,93 @@ body {
     padding: 20px 0;
 }
 
+.titulo-planos {
+    margin-top: 42px;
+}
+
+.planos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.plano-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+}
+
+.plano-card h3 {
+    font-family: var(--font-display);
+    font-size: 24px;
+    text-transform: uppercase;
+}
+
+.plano-preco {
+    margin: 16px 0 22px;
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.plano-preco span {
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.plano-card ul {
+    display: grid;
+    gap: 10px;
+    margin: 0 0 26px;
+    padding: 0;
+    color: var(--text-muted);
+    list-style: none;
+}
+
+.plano-card li::before {
+    content: "✓";
+    margin-right: 9px;
+    color: var(--green-glow);
+    font-weight: 700;
+}
+
+.plano-card button {
+    width: 100%;
+    margin-top: auto;
+    border: none;
+    border-radius: 999px;
+    background: var(--green);
+    color: #fff;
+    padding: 11px;
+    font: 700 13px var(--font-body);
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.plano-destaque {
+    border-color: var(--green-glow);
+    box-shadow: 0 0 0 1px var(--green-glow);
+}
+
+.plano-selo {
+    position: absolute;
+    top: -12px;
+    right: 18px;
+    border-radius: 999px;
+    background: var(--green-glow);
+    color: #0b0b0b;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
 
 /* INFO */
 
@@ -720,6 +807,10 @@ body.dark .sidebar {
     .filtros-jogos select {
         min-width: 0;
         width: 100%;
+    }
+
+    .planos-grid {
+        grid-template-columns: 1fr;
     }
 
 }
