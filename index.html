@@ -25,7 +25,6 @@
             Jogos que você ama,<br>em um só lugar
         </div>
 
-<<<<<<< HEAD
         <!-- =========================
              INÍCIO
         ========================= -->
@@ -133,17 +132,6 @@
             <div class="topo">
                 <h1>📚 Minha biblioteca</h1>
                 <p>Seus jogos adicionados aparecerão aqui.</p>
-=======
-        <div class="header-actions">
-            <button class="btn-cta" onclick="mostrarPainel('jogos')">
-                VER JOGOS <span class="btn-cta-dot">●</span>
-            </button>
-            <button class="btn-menu" id="menuBtn" onclick="toggleMenu()">
-                MENU <span class="btn-menu-icon">+</span>
-            </button>
-        </div>
-    </header>
-
     <!-- ===================== MENU OVERLAY ===================== -->
     <nav class="menu-overlay" id="menuOverlay" aria-hidden="true">
         <div class="menu-overlay-inner">
@@ -168,6 +156,9 @@
                     <span class="menu-link-text">Planos</span>
                     <span class="menu-link-arrow">→</span>
                 </a>
+<<<<<<< HEAD
+>>>>>>> 8b7a45e9eeec744acc84841309633c06eceaf11a
+=======
 >>>>>>> 8b7a45e9eeec744acc84841309633c06eceaf11a
             </div>
 
@@ -187,129 +178,6 @@
         </div>
     </nav>
 
-    <!-- ===================== CANVAS 3D ===================== -->
-    <canvas class="hero-canvas" id="heroCanvas"></canvas>
-
-    <!-- ===================== PAINÉIS ===================== -->
-    <main class="paineis-wrap" id="paineisWrap">
-
-        <!-- INÍCIO -->
-        <section class="painel" id="painel-inicio">
-
-            <!-- Hero section -->
-            <div class="hero-section">
-                <div class="hero-text-wrap">
-                    <h1 class="hero-title">
-                        <em>Sua</em> plataforma<br>de jogos
-                    </h1>
-                </div>
-                <div class="hero-scroll-bar">
-                    <span class="scroll-cross">+</span>
-                    <span class="scroll-cross">+</span>
-                    <span class="scroll-label">SCROLL TO EXPLORE</span>
-                    <span class="scroll-cross">+</span>
-                    <span class="scroll-cross">+</span>
-                </div>
-            </div>
-
-            <!-- Populares -->
-            <div class="secao secao-populares">
-                <div class="secao-header">
-                    <span class="secao-label">EM DESTAQUE</span>
-                    <button class="link-todos" onclick="mostrarPainel('jogos')">Ver todos →</button>
-                </div>
-                <div id="jogos-populares" class="grid-jogos" aria-live="polite">
-                    <div class="skel"></div>
-                    <div class="skel"></div>
-                    <div class="skel"></div>
-                </div>
-            </div>
-
-            <!-- Planos -->
-            <div class="secao secao-planos" id="painel-planos">
-                <div class="secao-header">
-                    <span class="secao-label">PLANOS</span>
-                </div>
-
-                <div class="planos-grid">
-                    <article class="plano">
-                        <div class="plano-nome">Essencial</div>
-                        <div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso a 100+ jogos</li>
-                            <li>1 dispositivo</li>
-                            <li>Full HD</li>
-                            <li>Suporte por e-mail</li>
-                        </ul>
-                        <button class="plano-btn" type="button">Começar</button>
-                    </article>
-
-                    <article class="plano plano-destaque">
-                        <div class="plano-tag">Mais popular</div>
-                        <div class="plano-nome">Premium</div>
-                        <div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso a 500+ jogos</li>
-                            <li>3 dispositivos</li>
-                            <li>4K</li>
-                            <li>Suporte 24/7</li>
-                            <li>Lançamentos no dia</li>
-                        </ul>
-                        <button class="plano-btn plano-btn-destaque" type="button">Assinar agora</button>
-                    </article>
-
-                    <article class="plano">
-                        <div class="plano-nome">Ultimate</div>
-                        <div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso ilimitado</li>
-                            <li>6 dispositivos</li>
-                            <li>8K</li>
-                            <li>VIP dedicado</li>
-                            <li>Acesso beta antecipado</li>
-                            <li>Saves na nuvem</li>
-                        </ul>
-                        <button class="plano-btn" type="button">Falar com vendas</button>
-                    </article>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- JOGOS -->
-        <section class="painel painel-oculto" id="painel-jogos">
-            <div class="painel-header">
-                <h2 class="painel-titulo">Jogos</h2>
-                <p class="painel-sub">Explore o catálogo completo</p>
-            </div>
-
-            <div class="filtros">
-                <div class="filtro-item">
-                    <label class="filtro-label" for="filtroGenero">Gênero</label>
-                    <div class="select-wrap">
-                        <select id="filtroGenero" disabled>
-                            <option value="">Todos</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="filtro-item filtro-busca">
-                    <label class="filtro-label" for="pesquisaJogos">Buscar</label>
-                    <div class="input-wrap">
-                        <input id="pesquisaJogos" type="search" placeholder="Nome do jogo…" autocomplete="off">
-                    </div>
-                </div>
-            </div>
-
-            <div id="catalogo" class="grid-jogos" aria-live="polite">
-                <div class="skel"></div><div class="skel"></div>
-                <div class="skel"></div><div class="skel"></div>
-                <div class="skel"></div><div class="skel"></div>
-            </div>
-
-            <div class="carregar-wrap">
-                <button id="carregarMais" class="btn-carregar" type="button" hidden>
-                    Carregar mais
-                </button>
             </div>
         </section>
 
