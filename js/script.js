@@ -5,6 +5,7 @@ let generoSelecionado = "";
 let pesquisaSelecionada = "";
 let jogosCatalogo = [];
 let temporizadorPesquisa;
+let catalogoCarregado = false;
 
 const GENEROS = { "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro", "Fighting": "Luta", "Indie": "Independente", "Music": "Música", "Platform": "Plataforma", "Puzzle": "Quebra-cabeça", "Racing": "Corrida", "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático", "Visual Novel": "Visual novel" };
 
@@ -16,11 +17,11 @@ function mostrarPainel(id) {
         painel.classList.toggle("ativo", ativo);
     });
 
-    if (idAlvo === "jogos" && !catalogoCarregado) {
+    if (alvo === "jogos" && !catalogoCarregado) {
         carregarCatalogo(1);
     }
 
-    if (idAlvo === "biblioteca") {
+    if (alvo === "biblioteca") {
         renderizarBiblioteca();
     }
 
@@ -145,7 +146,7 @@ async function carregarFiltroGeneros() {
     try {
         const generos = await buscarGeneros();
         filtro.replaceChildren(new Option("Todos os gêneros", ""));
-        generos.forEach(g => filtro.add(new Option(traduzirGenero(g.name), g.id)));
+        generos.forEach(g => filtro.add(new Option(GENEROS[g.name] || g.name, g.id)));
         filtro.disabled = false;
     } catch {
         filtro.replaceChildren(new Option("Erro ao carregar gêneros", ""));
@@ -273,7 +274,6 @@ function iniciarPesquisaGlobal() {
 
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    iniciarCursor();
     iniciarHeroCanvas();
     iniciarPesquisaGlobal();
 
