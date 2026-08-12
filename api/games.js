@@ -11,8 +11,16 @@ export default async function handler(request, response) {
         }
 
         // 1. Paginação
-        const url = new URL(request.url);
-        const pagina = Number(url.searchParams.get("pagina")) || 1;
+        const url = new URL(request.url, "https://ycloud.local");
+        const paginaSolicitada = Number(url.searchParams.get("pagina"));
+        const pagina = Number.isInteger(paginaSolicitada) && paginaSolicitada > 0
+            ? paginaSolicitada
+            : 1;
+        const generoSolicitado = Number(url.searchParams.get("genero"));
+        const genero = Number.isInteger(generoSolicitado) && generoSolicitado > 0
+            ? generoSolicitado
+            : null;
+        const recurso = url.searchParams.get("recurso");
         const limite = 20;
         const offset = (pagina - 1) * limite;
 
@@ -43,6 +51,32 @@ export default async function handler(request, response) {
 
         const accessToken = tokenData.access_token;
 
+        if (recurso === "generos") {
+            const generosResponse = await fetch(
+                "https://api.igdb.com/v4/genres",
+                {
+                    method: "POST",
+                    headers: {
+                        "Client-ID": clientId,
+                        "Authorization": `Bearer ${accessToken}`,
+                        "Content-Type": "text/plain"
+                    },
+                    body: "fields id, name; sort name asc; limit 500;"
+                }
+            );
+
+            const generos = await generosResponse.json();
+
+            if (!generosResponse.ok) {
+                return response.status(generosResponse.status).json({
+                    erro: "Erro ao consultar os gêneros na API",
+                    detalhes: generos
+                });
+            }
+
+            return response.status(200).json(generos);
+        }
+
         // 3. Consultar a API
         const igdbResponse = await fetch(
             "https://api.igdb.com/v4/games",
@@ -63,7 +97,8 @@ export default async function handler(request, response) {
                         first_release_date,
                         platforms.name;
 
-                    where cover != null;
+                    where cover != null & rating != null${genero ? ` & genres = (${genero})` : ""};
+                    sort rating desc;
 
                     limit ${limite};
                     offset ${offset};
