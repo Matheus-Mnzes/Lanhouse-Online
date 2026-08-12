@@ -73,6 +73,40 @@ export default async function handler(request, response) {
 
         const jogos = await igdbResponse.json();
 
+        const traducoesGeneros = {
+            "Pinball": "Pinball",
+            "Adventure": "Aventura",
+            "Indie": "Indie",
+            "Arcade": "Arcade",
+            "Visual Novel": "Visual Novel",
+            "Card & Board Game": "Jogos de Cartas e Tabuleiro",
+            "MOBA": "MOBA",
+            "Point-and-click": "Aponte e Clique",
+            "Fighting": "Luta",
+            "Shooter": "Tiro",
+            "Music": "Música",
+            "Platform": "Plataforma",
+            "Puzzle": "Quebra-cabeça",
+            "Racing": "Corrida",
+            "Real Time Strategy (RTS)": "Estratégia em Tempo Real",
+            "Role-playing (RPG)": "RPG",
+            "Simulator": "Simulação",
+            "Sport": "Esporte",
+            "Strategy": "Estratégia",
+            "Turn-based strategy (TBS)": "Estratégia por Turnos",
+            "Tactical": "Tático",
+            "Hack and slash/Beat 'em up": "Hack and Slash / Beat 'em Up",
+            "Quiz/Trivia": "Quiz/Trivia"
+        };
+
+        jogos.forEach(jogo => {
+            if (jogo.genres) {
+                jogo.genres.forEach(genero => {
+                    genero.name = traducoesGeneros[genero.name] || genero.name;
+                });
+            }
+        });
+
         if (!igdbResponse.ok) {
             return response.status(igdbResponse.status).json({
                 erro: "Erro ao consultar a API",
