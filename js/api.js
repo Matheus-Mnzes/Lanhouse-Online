@@ -3,7 +3,13 @@ async function buscarJogos() {
         const resposta = await fetch("/api/games");
 
         if (!resposta.ok) {
-            throw new Error("Erro ao buscar os jogos");
+            const dadosErro = await resposta.json().catch(function() {
+                return {};
+            });
+
+            throw new Error(
+                dadosErro.erro || `Erro ao buscar os jogos (${resposta.status})`
+            );
         }
 
         const jogos = await resposta.json();
@@ -12,6 +18,6 @@ async function buscarJogos() {
 
     } catch (erro) {
         console.error("Erro ao buscar jogos:", erro);
-        return [];
+        throw erro;
     }
 }

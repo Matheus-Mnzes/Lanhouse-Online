@@ -1,191 +1,138 @@
-/* =========================
-TROCAR DE ABA
-========================= */
-
 function abrirAba(id, botao) {
-
-    // Esconde todas as abas
-    const abas = document.querySelectorAll(".aba");
-
-    abas.forEach(function(aba) {
+    document.querySelectorAll(".aba").forEach(function(aba) {
         aba.classList.remove("ativa");
     });
 
-    // Mostra a aba selecionada
     const abaSelecionada = document.getElementById(id);
-
     if (abaSelecionada) {
         abaSelecionada.classList.add("ativa");
     }
 
-    // Remove o estado ativo dos botões
-    const botoes = document.querySelectorAll(".menu-item");
-
-    botoes.forEach(function(item) {
+    document.querySelectorAll(".menu-item").forEach(function(item) {
         item.classList.remove("ativo");
     });
 
-    // Ativa o botão clicado
     if (botao) {
         botao.classList.add("ativo");
     }
 }
 
-
-/* =========================
-BOTÃO "VER JOGOS"
-========================= */
-
-function irParaJogos() {
-
-    abrirAba("jogos");
-
-}
-
-
-/* =========================
-JOGAR
-========================= */
-
 function jogar(nomeJogo) {
-
     alert("Abrindo o jogo: " + nomeJogo);
-
 }
-
-
-/* =========================
-TEMA
-========================= */
 
 function alternarTema() {
-
     document.body.classList.toggle("dark");
 
-    const estaEscuro =
-        document.body.classList.contains("dark");
+    const estaEscuro = document.body.classList.contains("dark");
+    const botao = document.getElementById("temaBtn");
 
-    const botao =
-        document.getElementById("temaBtn");
-
-    if (estaEscuro) {
-
-        botao.textContent = "☀️ Desativar";
-
-        localStorage.setItem("tema", "dark");
-
-    } else {
-
-        botao.textContent = "🌙 Ativar";
-
-        localStorage.setItem("tema", "light");
-
+    if (botao) {
+        botao.textContent = estaEscuro ? "☀️ Desativar" : "🌙 Ativar";
     }
 
+    localStorage.setItem("tema", estaEscuro ? "dark" : "light");
 }
 
-
-/* =========================
-CARREGAR TEMA SALVO
-========================= */
-
 function carregarTema() {
-
-    const tema =
-        localStorage.getItem("tema");
-
-    if (tema === "dark") {
-
-        document.body.classList.add("dark");
-
-        const botao =
-            document.getElementById("temaBtn");
-
-        if (botao) {
-            botao.textContent = "☀️ Desativar";
-        }
-
-    }
-
-
-/* =========================
-CATÁLOGO DE JOGOS - IGDB
-========================= */
-
-async function carregarCatalogo() {
-
-    const jogos = await buscarJogos();
-
-    const catalogo =
-        document.getElementById("catalogo");
-
-    if (!catalogo) {
-        console.error("Elemento #catalogo não encontrado.");
+    if (localStorage.getItem("tema") !== "dark") {
         return;
     }
 
-    catalogo.innerHTML = "";
+    document.body.classList.add("dark");
 
-    jogos.forEach(function(jogo) {
-
-        const card =
-            document.createElement("div");
-
-        card.classList.add("card-jogo");
-
-        const capa = jogo.cover
-            ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${jogo.cover.image_id}.jpg`
-            : "";
-
-        const genero = jogo.genres?.length
-            ? jogo.genres
-                .map(function(genero) {
-                    return genero.name;
-                })
-                .join(", ")
-            : "Gênero não informado";
-
-        const nota = jogo.rating
-            ? jogo.rating.toFixed(1)
-            : "Sem nota";
-
-        card.innerHTML = `
-
-            ${capa
-                ? `<img src="${capa}" alt="Capa de ${jogo.name}">`
-                : ""
-            }
-
-            <h2>${jogo.name}</h2>
-
-            <p>⭐ ${nota}</p>
-
-            <p>🎮 ${genero}</p>
-
-            <button onclick="jogar('${jogo.name}')">
-                Alugar
-            </button>
-
-        `;
-
-        catalogo.appendChild(card);
-
-    });
-
+    const botao = document.getElementById("temaBtn");
+    if (botao) {
+        botao.textContent = "☀️ Desativar";
+    }
 }
 
+async function carregarCatalogo() {
+    try {
+        const jogos = await buscarJogos();
 
-/* =========================
-INICIALIZAÇÃO
-========================= */
+        preencherCatalogo(document.getElementById("catalogo"), jogos);
+        preencherCatalogo(document.getElementById("jogos-populares"), jogos.slice(0, 3));
+    } catch (erro) {
+        const mensagem = erro.message === "Failed to fetch"
+            ? "A API não está disponível neste servidor. Abra o projeto pela Vercel."
+            : erro.message;
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        carregarTema();
-
-        carregarCatalogo();
-
+        mostrarErroCatalogo(document.getElementById("catalogo"), mensagem);
+        mostrarErroCatalogo(document.getElementById("jogos-populares"), mensagem);
     }
-)};
+}
+
+function preencherCatalogo(catalogo, jogos) {
+    if (!catalogo) {
+        return;
+    }
+
+    catalogo.replaceChildren();
+
+    if (!jogos.length) {
+        const mensagem = document.createElement("p");
+        mensagem.className = "catalogo-status";
+        mensagem.textContent = "A API não retornou jogos no momento.";
+        catalogo.appendChild(mensagem);
+        return;
+    }
+
+    jogos.forEach(function(jogo) {
+        const card = document.createElement("article");
+        card.className = "jogo-card";
+
+        const imagem = document.createElement("div");
+        imagem.className = "jogo-imagem";
+
+        if (jogo.cover?.image_id) {
+            const capa = document.createElement("img");
+            capa.src = `https://images.igdb.com/igdb/image/upload/t_cover_big/${jogo.cover.image_id}.jpg`;
+            capa.alt = `Capa de ${jogo.name}`;
+            capa.loading = "lazy";
+            imagem.appendChild(capa);
+        } else {
+            imagem.textContent = "🎮";
+        }
+
+        const info = document.createElement("div");
+        info.className = "jogo-info";
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = jogo.name;
+
+        const genero = document.createElement("p");
+        genero.textContent = jogo.genres?.length
+            ? jogo.genres.map(function(item) { return item.name; }).join(", ")
+            : "Gênero não informado";
+
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.textContent = "Jogar";
+        botao.addEventListener("click", function() {
+            jogar(jogo.name);
+        });
+
+        info.append(titulo, genero, botao);
+        card.append(imagem, info);
+        catalogo.appendChild(card);
+    });
+}
+
+function mostrarErroCatalogo(catalogo, texto) {
+    if (!catalogo) {
+        return;
+    }
+
+    catalogo.replaceChildren();
+
+    const mensagem = document.createElement("p");
+    mensagem.className = "catalogo-status";
+    mensagem.textContent = texto;
+    catalogo.appendChild(mensagem);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    carregarTema();
+    carregarCatalogo();
+});

@@ -4,6 +4,12 @@ export default async function handler(request, response) {
         const clientId = process.env.TWITCH_CLIENT_ID;
         const clientSecret = process.env.TWITCH_CLIENT_SECRET;
 
+        if (!clientId || !clientSecret) {
+            return response.status(500).json({
+                erro: "Credenciais da Twitch/IGDB não configuradas no servidor."
+            });
+        }
+
         // 1. Pegar o Access Token da API
         const tokenResponse = await fetch(
             "https://id.twitch.tv/oauth2/token",

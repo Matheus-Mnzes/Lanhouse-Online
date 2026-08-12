@@ -6,53 +6,30 @@
     <title>YCloud - Plataforma de Jogos</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
-
-    <!-- SIDEBAR -->
     <aside class="sidebar">
+        <div class="logo">🎮 <span>YCloud</span></div>
 
-        <div class="logo">
-            🎮 <span>YCloud</span>
-        </div>
-
-        <nav class="menu">
-
+        <nav class="menu" aria-label="Navegação principal">
             <button class="menu-item ativo" onclick="abrirAba('inicio', this)">
-                <span>🏠</span>
-                <span>Início</span>
+                <span>🏠</span><span>Início</span>
             </button>
-
             <button class="menu-item" onclick="abrirAba('jogos', this)">
-                <span>🎮</span>
-                <span>Jogos</span>
+                <span>🎮</span><span>Jogos</span>
             </button>
-
             <button class="menu-item" onclick="abrirAba('favoritos', this)">
-                <span>⭐</span>
-                <span>Favoritos</span>
+                <span>⭐</span><span>Favoritos</span>
             </button>
-
             <button class="menu-item" onclick="abrirAba('configuracoes', this)">
-                <span>⚙️</span>
-                <span>Configurações</span>
+                <span>⚙️</span><span>Configurações</span>
             </button>
-
         </nav>
 
-        <div class="sidebar-bottom">
-            <p>GameHub © 2026</p>
-        </div>
-
+        <div class="sidebar-bottom"><p>GameHub © 2026</p></div>
     </aside>
 
-
-    <!-- CONTEÚDO PRINCIPAL -->
     <main class="conteudo">
-
-        <!-- ABA INÍCIO -->
         <section id="inicio" class="aba ativa">
-
             <div class="topo">
                 <div>
                     <h1>Bem-vindo ao YCloud 🎮</h1>
@@ -63,212 +40,55 @@
             <div class="banner">
                 <div>
                     <h2>Prepare-se para jogar!</h2>
-                    <p>
-                        Encontre seus jogos favoritos em um só lugar.
-                    </p>
-
-                    <button onclick="abrirAba('jogos')">
-                        Ver jogos
-                    </button>
+                    <p>Encontre seus jogos favoritos em um só lugar.</p>
+                    <button onclick="abrirAba('jogos')">Ver jogos</button>
                 </div>
             </div>
 
             <h2 class="titulo-secao">Jogos populares</h2>
-
-            <div class="jogos-grid">
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🧱</div>
-
-                    <div class="jogo-info">
-                        <h3>Block World</h3>
-                        <p>Aventura e construção</p>
-
-                        <button onclick="jogar('Block World')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🚀</div>
-
-                    <div class="jogo-info">
-                        <h3>Space War</h3>
-                        <p>Batalha espacial</p>
-
-                        <button onclick="jogar('Space War')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🏎️</div>
-
-                    <div class="jogo-info">
-                        <h3>Speed Racing</h3>
-                        <p>Corridas de alta velocidade</p>
-
-                        <button onclick="jogar('Speed Racing')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
+            <div id="jogos-populares" class="jogos-grid" aria-live="polite">
+                <p class="catalogo-status">Carregando jogos...</p>
             </div>
-
         </section>
 
-
-        <!-- ABA JOGOS -->
         <section id="jogos" class="aba">
-
             <div class="topo">
                 <h1>🎮 Jogos</h1>
                 <p>Todos os jogos disponíveis.</p>
             </div>
-
-            <div class="jogos-grid">
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🧱</div>
-
-                    <div class="jogo-info">
-                        <h3>Block World</h3>
-                        <p>Aventura</p>
-
-                        <button onclick="jogar('Block World')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🚀</div>
-
-                    <div class="jogo-info">
-                        <h3>Space War</h3>
-                        <p>Ação</p>
-
-                        <button onclick="jogar('Space War')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🏎️</div>
-
-                    <div class="jogo-info">
-                        <h3>Speed Racing</h3>
-                        <p>Corrida</p>
-
-                        <button onclick="jogar('Speed Racing')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🧙</div>
-
-                    <div class="jogo-info">
-                        <h3>Magic Quest</h3>
-                        <p>RPG</p>
-
-                        <button onclick="jogar('Magic Quest')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">⚔️</div>
-
-                    <div class="jogo-info">
-                        <h3>War Legends</h3>
-                        <p>Ação</p>
-
-                        <button onclick="jogar('War Legends')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
-
-                <div class="jogo-card">
-                    <div class="jogo-imagem">🧩</div>
-
-                    <div class="jogo-info">
-                        <h3>Mind Puzzle</h3>
-                        <p>Estratégia</p>
-
-                        <button onclick="jogar('Mind Puzzle')">
-                            Jogar
-                        </button>
-                    </div>
-                </div>
-
+            <div id="catalogo" class="jogos-grid" aria-live="polite">
+                <p class="catalogo-status">Carregando jogos...</p>
             </div>
-
         </section>
 
-
-        <!-- ABA FAVORITOS -->
         <section id="favoritos" class="aba">
-
             <div class="topo">
                 <h1>⭐ Favoritos</h1>
                 <p>Seus jogos favoritos aparecerão aqui.</p>
             </div>
-
             <div class="mensagem-vazia">
                 <span>⭐</span>
-
                 <h2>Nenhum favorito ainda</h2>
-
-                <p>
-                    Adicione seus jogos favoritos para encontrá-los rapidamente.
-                </p>
+                <p>Adicione seus jogos favoritos para encontrá-los rapidamente.</p>
             </div>
-
         </section>
 
-
-        <!-- ABA CONFIGURAÇÕES -->
         <section id="configuracoes" class="aba">
-
             <div class="topo">
                 <h1>⚙️ Configurações</h1>
                 <p>Personalize sua experiência.</p>
             </div>
-
             <div class="config-card">
-
                 <div>
                     <h3>Tema escuro</h3>
                     <p>Ative ou desative o tema escuro.</p>
                 </div>
-
-                <button id="temaBtn" onclick="alternarTema()">
-                    🌙 Ativar
-                </button>
-
+                <button id="temaBtn" onclick="alternarTema()">🌙 Ativar</button>
             </div>
-
         </section>
-
     </main>
 
     <script src="js/api.js"></script>
     <script src="js/script.js"></script>
-
 </body>
 </html>
