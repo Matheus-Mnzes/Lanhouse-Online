@@ -113,6 +113,13 @@ export default async function handler(request, response) {
 
         const jogos = await igdbResponse.json();
 
+        if (!igdbResponse.ok) {
+            return response.status(igdbResponse.status).json({
+                erro: "Erro ao consultar a API",
+                detalhes: jogos
+            });
+        }
+
         const traducoesGeneros = {
             "Pinball": "Pinball",
             "Adventure": "Aventura",
@@ -146,13 +153,6 @@ export default async function handler(request, response) {
                 });
             }
         });
-
-        if (!igdbResponse.ok) {
-            return response.status(igdbResponse.status).json({
-                erro: "Erro ao consultar a API",
-                detalhes: jogos
-            });
-        }
 
         // 4. Devolver os jogos para o navegador
         return response.status(200).json({
