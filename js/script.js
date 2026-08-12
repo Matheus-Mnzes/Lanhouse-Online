@@ -37,6 +37,30 @@ function abrirMenu() { document.body.classList.add("menu-aberto"); document.getE
 function fecharMenu() { document.body.classList.remove("menu-aberto"); document.getElementById("menuOverlay")?.setAttribute("aria-hidden", "true"); }
 function fecharMenuE(id) { fecharMenu(); mostrarPainel(id); }
 
+function iniciarCursor() {
+    const cursor = document.getElementById("cursor");
+    const ponto = document.getElementById("cursorDot");
+
+    if (!cursor || !ponto || !window.matchMedia("(pointer: fine)").matches) return;
+
+    document.body.classList.add("cursor-ativo");
+
+    window.addEventListener("pointermove", function(evento) {
+        const posicao = `translate(${evento.clientX}px, ${evento.clientY}px) translate(-50%, -50%)`;
+        cursor.style.transform = posicao;
+        ponto.style.transform = posicao;
+    });
+
+    document.querySelectorAll("a, button, input, select").forEach(function(elemento) {
+        elemento.addEventListener("pointerenter", function() {
+            document.body.classList.add("cursor-hover");
+        });
+        elemento.addEventListener("pointerleave", function() {
+            document.body.classList.remove("cursor-hover");
+        });
+    });
+}
+
 function mostrarToast(texto) {
     const toast = document.getElementById("toast");
     if (!toast) return;
@@ -274,6 +298,7 @@ function iniciarPesquisaGlobal() {
 
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+    iniciarCursor();
     iniciarHeroCanvas();
     iniciarPesquisaGlobal();
 

@@ -37,14 +37,21 @@ body {
     color: var(--dark);
     min-height: 100vh;
     overflow-x: hidden;
-    cursor: none;
     -webkit-font-smoothing: antialiased;
 }
 
 ::selection { background: var(--dark); color: var(--white); }
 
 a { text-decoration: none; color: inherit; }
-button { cursor: none; }
+button { cursor: pointer; }
+
+body.cursor-ativo,
+body.cursor-ativo button,
+body.cursor-ativo a,
+body.cursor-ativo input,
+body.cursor-ativo select {
+    cursor: none;
+}
 
 :focus-visible {
     outline: 2px solid var(--blue);
@@ -857,6 +864,8 @@ body.cursor-menu .cursor {
 
 .titulo-planos {
     margin-top: 42px;
+}
+
 .estado-vazio-icone {
     font-size: 40px;
     opacity: 0.2;
