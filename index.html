@@ -78,6 +78,10 @@
                 <select id="filtroGenero" disabled>
                     <option value="">Carregando gêneros...</option>
                 </select>
+                <label class="campo-pesquisa" for="pesquisaJogos">
+                    <span>Pesquisar jogos</span>
+                    <input id="pesquisaJogos" type="search" placeholder="Digite o nome do jogo">
+                </label>
             </div>
 
             <div id="catalogo" class="jogos-grid" aria-live="polite">
@@ -100,7 +104,14 @@
                 <p>Seus jogos favoritos aparecerão aqui.</p>
             </div>
 
-            <div class="mensagem-vazia">
+            <label class="campo-pesquisa" for="pesquisaFavoritos">
+                <span>Pesquisar favoritos</span>
+                <input id="pesquisaFavoritos" type="search" placeholder="Digite o nome do jogo">
+            </label>
+
+            <div id="catalogoFavoritos" class="jogos-grid" aria-live="polite"></div>
+
+            <div id="mensagemFavoritosVazia" class="mensagem-vazia">
                 <span>⭐</span>
                 <h2>Nenhum favorito ainda</h2>
                 <p>Adicione seus jogos favoritos para encontrá-los rapidamente.</p>
