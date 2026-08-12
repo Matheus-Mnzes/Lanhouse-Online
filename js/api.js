@@ -1,23 +1,28 @@
-async function buscarJogos() {
+/* =========================
+   BUSCAR JOGOS NA API
+========================= */
+
+async function buscarJogos(pagina = 1) {
     try {
-        const resposta = await fetch("/api/games");
+        // Envia a página que queremos buscar
+        const resposta = await fetch(`/api/games?pagina=${pagina}`);
 
         if (!resposta.ok) {
-            const dadosErro = await resposta.json().catch(function() {
-                return {};
-            });
-
-            throw new Error(
-                dadosErro.erro || `Erro ao buscar os jogos (${resposta.status})`
-            );
+            throw new Error("Erro ao buscar os jogos");
         }
 
-        const jogos = await resposta.json();
+        // Converte a resposta para JSON
+        const dados = await resposta.json();
 
-        return jogos;
+        return dados;
 
     } catch (erro) {
         console.error("Erro ao buscar jogos:", erro);
-        throw erro;
+
+        return {
+            pagina: pagina,
+            limite: 20,
+            jogos: []
+        };
     }
 }

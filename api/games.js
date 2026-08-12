@@ -10,7 +10,13 @@ export default async function handler(request, response) {
             });
         }
 
-        // 1. Pegar o Access Token da API
+        // 1. Paginação
+        const url = new URL(request.url);
+        const pagina = Number(url.searchParams.get("pagina")) || 1;
+        const limite = 20;
+        const offset = (pagina - 1) * limite;
+
+        // 2. Pegar o Access Token da API
         const tokenResponse = await fetch(
             "https://id.twitch.tv/oauth2/token",
             {
@@ -37,7 +43,7 @@ export default async function handler(request, response) {
 
         const accessToken = tokenData.access_token;
 
-        // 2. Consultar a API
+        // 3. Consultar a API
         const igdbResponse = await fetch(
             "https://api.igdb.com/v4/games",
             {
@@ -56,8 +62,11 @@ export default async function handler(request, response) {
                         genres.name,
                         first_release_date,
                         platforms.name;
+
                     where cover != null;
-                    limit 10;
+
+                    limit ${limite};
+                    offset ${offset};
                 `
             }
         );
@@ -71,8 +80,12 @@ export default async function handler(request, response) {
             });
         }
 
-        // 3. Devolver os jogos para o navegador
-        return response.status(200).json(jogos);
+        // 4. Devolver os jogos para o navegador
+        return response.status(200).json({
+            pagina: pagina,
+            limite: limite,
+            jogos: jogos
+        });
 
     } catch (erro) {
         return response.status(500).json({
