@@ -15,9 +15,20 @@ function mostrarPainel(id) {
         painel.classList.toggle("painel-oculto", !ativo);
         painel.classList.toggle("ativo", ativo);
     });
-    if (alvo === "biblioteca") renderizarBiblioteca();
-    if (id === "planos") document.getElementById("painel-planos")?.scrollIntoView({ behavior: "smooth" });
-    else window.scrollTo({ top: 0, behavior: "smooth" });
+
+    if (idAlvo === "jogos" && !catalogoCarregado) {
+        carregarCatalogo(1);
+    }
+
+    if (idAlvo === "biblioteca") {
+        renderizarBiblioteca();
+    }
+
+    if (id === "planos") {
+        document.getElementById("painel-planos")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 }
 
 function toggleMenu() { document.body.classList.contains("menu-aberto") ? fecharMenu() : abrirMenu(); }
@@ -47,26 +58,51 @@ function alternarBiblioteca(jogo) {
     renderizarBiblioteca();
 }
 
+
+// ── Carregar e renderizar catálogo ──────────────────────────────
 async function carregarCatalogo(pagina) {
-    const anterior = document.getElementById("paginaAnterior");
-    const proxima = document.getElementById("paginaProxima");
+    const botaoAnterior = document.getElementById("paginaAnterior");
+    const botaoProxima = document.getElementById("paginaProxima");
     const indicador = document.getElementById("paginaIndicador");
-    if (anterior) anterior.disabled = true;
-    if (proxima) proxima.disabled = true;
+    const catalogo  = document.getElementById("catalogo");
+
+    if (botaoAnterior) botaoAnterior.disabled = true;
+    if (botaoProxima) botaoProxima.disabled = true;
     if (indicador) indicador.textContent = "Carregando...";
+
+    if (catalogo) {
+        catalogo.replaceChildren(...Array.from({ length: 6 }, () => {
+            const sk = document.createElement("div");
+            sk.className = "skel";
+            return sk;
+        }));
+    }
+
     try {
         const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada);
-        jogosCatalogo = dados.jogos || [];
-        paginaAtual = pagina;
+        if (!dados) return;
+
+        const jogos = dados.jogos || [];
+        jogosCatalogo   = jogos;
+        paginaAtual     = pagina;
+        catalogoCarregado = true;
         renderizarCatalogo();
-        if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) preencherCatalogo(document.getElementById("jogos-populares"), jogosCatalogo.slice(0, 3));
-        if (anterior) anterior.disabled = pagina === 1;
-        if (proxima) proxima.disabled = jogosCatalogo.length < (dados.limite || 15);
+
+        if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) {
+            preencherCatalogo(
+                document.getElementById("jogos-populares"),
+                jogos.slice(0, 4)
+            );
+        }
+
+        if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
+        if (botaoProxima) botaoProxima.disabled = jogos.length < (dados.limite ?? 15);
         if (indicador) indicador.textContent = `Página ${pagina}`;
+
     } catch (erro) {
-        mostrarErro(document.getElementById("catalogo"), erro.message || "Não foi possível carregar os jogos.");
-        if (anterior) anterior.disabled = pagina === 1;
-        if (proxima) proxima.disabled = false;
+        mostrarErro(catalogo, erro.message || "Não foi possível carregar os jogos.");
+        if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
+        if (botaoProxima) botaoProxima.disabled = false;
         if (indicador) indicador.textContent = `Página ${pagina}`;
     }
 }
@@ -100,12 +136,171 @@ function renderizarBiblioteca() {
 }
 async function carregarFiltroGeneros() { const filtro = document.getElementById("filtroGenero"); if (!filtro) return; try { const generos = await buscarGeneros(); filtro.replaceChildren(new Option("Todos", "")); generos.forEach(function(genero) { filtro.add(new Option(GENEROS[genero.name] || genero.name, genero.id)); }); filtro.disabled = false; } catch { filtro.replaceChildren(new Option("Erro ao carregar gêneros", "")); } }
 
-document.addEventListener("DOMContentLoaded", function() {
-    carregarCatalogo(1); carregarFiltroGeneros(); renderizarBiblioteca();
-    document.getElementById("paginaAnterior")?.addEventListener("click", function() { carregarCatalogo(paginaAtual - 1); });
-    document.getElementById("paginaProxima")?.addEventListener("click", function() { carregarCatalogo(paginaAtual + 1); });
-    document.getElementById("filtroGenero")?.addEventListener("change", function(evento) { generoSelecionado = evento.target.value; carregarCatalogo(1); });
-    document.getElementById("pesquisaJogos")?.addEventListener("input", function(evento) { clearTimeout(temporizadorPesquisa); temporizadorPesquisa = setTimeout(function() { pesquisaSelecionada = evento.target.value.trim(); carregarCatalogo(1); }, 350); });
+
+// ── Filtro de gêneros ─────────────────────────────────────────────
+async function carregarFiltroGeneros() {
+    const filtro = document.getElementById("filtroGenero");
+    if (!filtro) return;
+
+    try {
+        const generos = await buscarGeneros();
+        filtro.replaceChildren(new Option("Todos os gêneros", ""));
+        generos.forEach(g => filtro.add(new Option(traduzirGenero(g.name), g.id)));
+        filtro.disabled = false;
+    } catch {
+        filtro.replaceChildren(new Option("Erro ao carregar gêneros", ""));
+    }
+}
+
+
+// ── Jogar ──────────────────────────────────────────────────────────
+function jogar(nomeJogo) {
+    mostrarToast(`Abrindo ${nomeJogo}…`);
+}
+
+
+// ── Hero 3D (Three.js) — cluster de formas ao estilo Lusion ────────
+function iniciarHeroCanvas() {
+    const canvas = document.getElementById("heroCanvas");
+    if (!canvas || typeof THREE === "undefined") return;
+
+    const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduzMovimento) return;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.set(0, 0, 9);
+
+    const luz1 = new THREE.DirectionalLight(0xffffff, 1.1);
+    luz1.position.set(4, 6, 6);
+    scene.add(luz1);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+
+    const corAzul  = new THREE.MeshStandardMaterial({ color: 0x1a4bff, roughness: 0.35, metalness: 0.15 });
+    const corPreta = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4, metalness: 0.1 });
+    const corBranca = new THREE.MeshStandardMaterial({ color: 0xf5f5f3, roughness: 0.5, metalness: 0.05 });
+    const materiais = [corAzul, corPreta, corBranca];
+
+    const grupo = new THREE.Group();
+    const total = 14;
+
+    for (let i = 0; i < total; i++) {
+        const tamanho   = 0.5 + Math.random() * 0.7;
+        const geometria = new THREE.BoxGeometry(tamanho, tamanho, tamanho);
+        const cubo      = new THREE.Mesh(geometria, materiais[i % materiais.length]);
+
+        cubo.position.set(
+            (Math.random() - 0.5) * 5,
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4
+        );
+        cubo.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+        );
+        grupo.add(cubo);
+    }
+    scene.add(grupo);
+
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener("mousemove", e => {
+        mouseX = (e.clientX / window.innerWidth) - 0.5;
+        mouseY = (e.clientY / window.innerHeight) - 0.5;
+    });
+
+    function redimensionar() {
+        const largura = canvas.clientWidth  || window.innerWidth;
+        const altura  = canvas.clientHeight || window.innerHeight;
+        camera.aspect = largura / altura;
+        camera.updateProjectionMatrix();
+        renderer.setSize(largura, altura, false);
+    }
+
+    let raf;
+    function desenhar() {
+        grupo.rotation.y += 0.0022;
+        grupo.rotation.x += 0.0007;
+        camera.position.x += (mouseX * 2 - camera.position.x) * 0.03;
+        camera.position.y += (-mouseY * 2 - camera.position.y) * 0.03;
+        camera.lookAt(0, 0, 0);
+        renderer.render(scene, camera);
+        raf = requestAnimationFrame(desenhar);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            cancelAnimationFrame(raf);
+        } else {
+            raf = requestAnimationFrame(desenhar);
+        }
+    });
+
+    window.addEventListener("resize", redimensionar);
+
+    redimensionar();
+    desenhar();
+}
+
+
+// ── Pesquisa global na topbar ────────────────────────────────────
+function iniciarPesquisaGlobal() {
+    const input = document.getElementById("pesquisaGlobal");
+    if (!input) return;
+
+    let timer;
+    input.addEventListener("input", () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            const valor = input.value.trim();
+            if (!valor) return;
+
+            mostrarPainel("jogos");
+            const campoPrincipal = document.getElementById("pesquisaJogos");
+            if (campoPrincipal) {
+                campoPrincipal.value = valor;
+                pesquisaSelecionada  = valor;
+                carregarCatalogo(1);
+            }
+            input.value = "";
+        }, 400);
+    });
+}
+
+
+// ── Init ───────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    iniciarCursor();
+    iniciarHeroCanvas();
+    iniciarPesquisaGlobal();
+
+    carregarCatalogo(1);
+    carregarFiltroGeneros();
+    renderizarBiblioteca();
+
+    document.getElementById("paginaAnterior")?.addEventListener("click", () => carregarCatalogo(paginaAtual - 1));
+    document.getElementById("paginaProxima")?.addEventListener("click", () => carregarCatalogo(paginaAtual + 1));
+
+    document.getElementById("filtroGenero")?.addEventListener("change", e => {
+        generoSelecionado = e.target.value;
+        carregarCatalogo(1);
+    });
+
+    document.getElementById("pesquisaJogos")?.addEventListener("input", e => {
+        clearTimeout(temporizadorPesquisa);
+        temporizadorPesquisa = setTimeout(() => {
+            pesquisaSelecionada = e.target.value.trim();
+            carregarCatalogo(1);
+        }, 350);
+    });
+
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
-    document.addEventListener("keydown", function(evento) { if (evento.key === "Escape") fecharMenu(); });
+
+    // Fecha o menu com a tecla Esc
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") fecharMenu();
+    });
 });

@@ -39,10 +39,39 @@
             </div></div>
         </section>
         <section class="painel painel-oculto" id="painel-jogos">
-            <div class="painel-header"><h2 class="painel-titulo">Jogos</h2><p class="painel-sub">Explore o catálogo completo</p></div>
-            <div class="filtros"><div class="filtro-item"><label class="filtro-label" for="filtroGenero">Gênero</label><div class="select-wrap"><select id="filtroGenero" disabled><option value="">Todos</option></select></div></div><div class="filtro-item filtro-busca"><label class="filtro-label" for="pesquisaJogos">Buscar</label><div class="input-wrap"><input id="pesquisaJogos" type="search" placeholder="Nome do jogo…" autocomplete="off"></div></div></div>
-            <div id="catalogo" class="grid-jogos" aria-live="polite"></div>
-            <nav class="paginacao" aria-label="Paginação de jogos"><button id="paginaAnterior" type="button" aria-label="Página anterior">←</button><span id="paginaIndicador">Página 1</span><button id="paginaProxima" type="button" aria-label="Próxima página">→</button></nav>
+            <div class="painel-header">
+                <h2 class="painel-titulo">Jogos</h2>
+                <p class="painel-sub">Explore o catálogo completo</p>
+            </div>
+
+            <div class="filtros">
+                <div class="filtro-item">
+                    <label class="filtro-label" for="filtroGenero">Gênero</label>
+                    <div class="select-wrap">
+                        <select id="filtroGenero" disabled>
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filtro-item filtro-busca">
+                    <label class="filtro-label" for="pesquisaJogos">Buscar</label>
+                    <div class="input-wrap">
+                        <input id="pesquisaJogos" type="search" placeholder="Nome do jogo…" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <div id="catalogo" class="grid-jogos" aria-live="polite">
+                <div class="skel"></div><div class="skel"></div>
+                <div class="skel"></div><div class="skel"></div>
+                <div class="skel"></div><div class="skel"></div>
+            </div>
+
+            <nav class="paginacao-jogos" aria-label="Paginação de jogos">
+                <button id="paginaAnterior" type="button" aria-label="Página anterior">←</button>
+                <span id="paginaIndicador" aria-live="polite">Página 1</span>
+                <button id="paginaProxima" type="button" aria-label="Próxima página">→</button>
+            </nav>
         </section>
         <section class="painel painel-oculto" id="painel-biblioteca">
             <div class="painel-header painel-header-flex"><div><h2 class="painel-titulo">Biblioteca</h2><p class="painel-sub">Seus jogos salvos</p></div><div class="input-wrap"><input id="pesquisaBiblioteca" type="search" placeholder="Buscar na biblioteca…" autocomplete="off"></div></div>
