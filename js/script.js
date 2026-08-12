@@ -1,41 +1,27 @@
-/* =========================
-   TROCAR DE ABA
-========================= */
+let paginaAtual = 1;
 
 function abrirAba(id, botao) {
-    // Esconde todas as abas
     document.querySelectorAll(".aba").forEach(function(aba) {
         aba.classList.remove("ativa");
     });
 
-    // Mostra a aba selecionada
     const abaSelecionada = document.getElementById(id);
     if (abaSelecionada) {
         abaSelecionada.classList.add("ativa");
     }
 
-    // Remove o estado ativo dos botões
     document.querySelectorAll(".menu-item").forEach(function(item) {
         item.classList.remove("ativo");
     });
 
-    // Ativa o botão clicado
     if (botao) {
         botao.classList.add("ativo");
     }
 }
 
-/* =========================
-   JOGAR
-========================= */
-
 function jogar(nomeJogo) {
     alert("Abrindo o jogo: " + nomeJogo);
 }
-
-/* =========================
-   TEMA
-========================= */
 
 function alternarTema() {
     document.body.classList.toggle("dark");
@@ -50,10 +36,6 @@ function alternarTema() {
     localStorage.setItem("tema", estaEscuro ? "dark" : "light");
 }
 
-/* =========================
-   CARREGAR TEMA SALVO
-========================= */
-
 function carregarTema() {
     if (localStorage.getItem("tema") !== "dark") {
         return;
@@ -67,48 +49,65 @@ function carregarTema() {
     }
 }
 
-/* =========================
-   CATÁLOGO DE JOGOS
-========================= */
+async function carregarCatalogo(pagina, adicionar) {
+    const botaoMais = document.getElementById("carregarMais");
 
-let paginaAtual = 1;
+    if (botaoMais) {
+        botaoMais.disabled = true;
+        botaoMais.textContent = "Carregando...";
+    }
 
-async function carregarCatalogo(pagina = 1) {
     try {
-        // Busca os jogos através do api.js
         const dados = await buscarJogos(pagina);
-        const jogos = dados.jogos;
-
+        const jogos = dados.jogos || [];
         const catalogo = document.getElementById("catalogo");
 
-        if (!catalogo) {
-            console.error("Elemento #catalogo não encontrado.");
-            return;
+        preencherCatalogo(catalogo, jogos, adicionar);
+
+        if (!adicionar) {
+            preencherCatalogo(
+                document.getElementById("jogos-populares"),
+                jogos.slice(0, 3),
+                false
+            );
         }
 
-        preencherCatalogo(catalogo, jogos);
         paginaAtual = pagina;
 
+        if (botaoMais) {
+            if (jogos.length < dados.limite) {
+                botaoMais.hidden = true;
+            } else {
+                botaoMais.hidden = false;
+                botaoMais.disabled = false;
+                botaoMais.textContent = "Carregar mais";
+            }
+        }
     } catch (erro) {
-        console.error("Erro ao carregar catálogo:", erro);
+        const mensagem = erro.message || "Não foi possível carregar os jogos.";
+        mostrarErroCatalogo(document.getElementById("catalogo"), mensagem);
 
-        const catalogo = document.getElementById("catalogo");
-        mostrarErroCatalogo(catalogo, "Não foi possível carregar os jogos.");
+        if (!adicionar) {
+            mostrarErroCatalogo(document.getElementById("jogos-populares"), mensagem);
+        }
+
+        if (botaoMais) {
+            botaoMais.disabled = false;
+            botaoMais.textContent = "Tentar novamente";
+        }
     }
 }
 
-/* =========================
-   PREENCHER CATÁLOGO
-========================= */
-
-function preencherCatalogo(catalogo, jogos) {
+function preencherCatalogo(catalogo, jogos, adicionar) {
     if (!catalogo) {
         return;
     }
 
-    catalogo.replaceChildren();
+    if (!adicionar) {
+        catalogo.replaceChildren();
+    }
 
-    if (!jogos || !jogos.length) {
+    if (!jogos.length && !adicionar) {
         const mensagem = document.createElement("p");
         mensagem.className = "catalogo-status";
         mensagem.textContent = "A API não retornou jogos no momento.";
@@ -116,12 +115,9 @@ function preencherCatalogo(catalogo, jogos) {
         return;
     }
 
-    // Cria um card para cada jogo
     jogos.forEach(function(jogo) {
         const card = document.createElement("article");
         card.className = "jogo-card";
-
-        /* CAPA DO JOGO */
 
         const imagem = document.createElement("div");
         imagem.className = "jogo-imagem";
@@ -136,8 +132,6 @@ function preencherCatalogo(catalogo, jogos) {
             imagem.textContent = "🎮";
         }
 
-        /* INFORMAÇÕES DO JOGO */
-
         const info = document.createElement("div");
         info.className = "jogo-info";
 
@@ -146,17 +140,12 @@ function preencherCatalogo(catalogo, jogos) {
 
         const genero = document.createElement("p");
         genero.textContent = jogo.genres?.length
-            ? jogo.genres.map(function(item) {
-                return item.name;
-            }).join(", ")
+            ? jogo.genres.map(function(item) { return item.name; }).join(", ")
             : "Gênero não informado";
-
-        /* BOTÃO JOGAR */
 
         const botao = document.createElement("button");
         botao.type = "button";
         botao.textContent = "Jogar";
-
         botao.addEventListener("click", function() {
             jogar(jogo.name);
         });
@@ -166,10 +155,6 @@ function preencherCatalogo(catalogo, jogos) {
         catalogo.appendChild(card);
     });
 }
-
-/* =========================
-   ERRO DO CATÁLOGO
-========================= */
 
 function mostrarErroCatalogo(catalogo, texto) {
     if (!catalogo) {
@@ -184,11 +169,14 @@ function mostrarErroCatalogo(catalogo, texto) {
     catalogo.appendChild(mensagem);
 }
 
-/* =========================
-   INICIALIZAÇÃO
-========================= */
-
 document.addEventListener("DOMContentLoaded", function() {
     carregarTema();
-    carregarCatalogo(1);
+    carregarCatalogo(1, false);
+
+    const botaoMais = document.getElementById("carregarMais");
+    if (botaoMais) {
+        botaoMais.addEventListener("click", function() {
+            carregarCatalogo(paginaAtual + 1, true);
+        });
+    }
 });

@@ -11,8 +11,11 @@ export default async function handler(request, response) {
         }
 
         // 1. Paginação
-        const url = new URL(request.url);
-        const pagina = Number(url.searchParams.get("pagina")) || 1;
+        const url = new URL(request.url, "https://ycloud.local");
+        const paginaSolicitada = Number(url.searchParams.get("pagina"));
+        const pagina = Number.isInteger(paginaSolicitada) && paginaSolicitada > 0
+            ? paginaSolicitada
+            : 1;
         const limite = 20;
         const offset = (pagina - 1) * limite;
 
@@ -63,7 +66,8 @@ export default async function handler(request, response) {
                         first_release_date,
                         platforms.name;
 
-                    where cover != null;
+                    where cover != null & rating != null;
+                    sort rating desc;
 
                     limit ${limite};
                     offset ${offset};
