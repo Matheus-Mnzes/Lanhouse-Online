@@ -102,7 +102,7 @@ export default async function handler(request, response) {
                         platforms.name;
 
                     ${pesquisa ? `search "${pesquisa}";` : ""}
-                    where cover != null & rating != null & rating_count >= 500 ${genero ? ` & genres = (${genero})` : ""};
+                    where cover != null & rating != null ${pesquisa ? "" : " & rating_count >= 500"}${genero ? ` & genres = (${genero})` : ""};
 
                     ${pesquisa ? "" : "sort rating desc;"}
 
