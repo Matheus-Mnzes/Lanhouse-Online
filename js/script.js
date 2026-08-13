@@ -12,8 +12,14 @@ const USUARIOS_DEMO = [
     { usuario: "joao", senha: "1234" },
     { usuario: "maria", senha: "senha" }
 ];
+let modoCadastro = false;
 
 function obterUsuarioLogado() { return localStorage.getItem("ycloudUsuarioLogado"); }
+function obterUsuariosCadastrados() {
+    try { return JSON.parse(localStorage.getItem("ycloudUsuarios") || "[]"); }
+    catch { return []; }
+}
+function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
 function atualizarBotaoLogin() {
     const botao = document.getElementById("loginBtn");
     if (!botao) return;
@@ -26,8 +32,22 @@ function abrirLogin() {
     if (!modal) return;
     modal.classList.add("aberto");
     modal.setAttribute("aria-hidden", "false");
+    configurarModoLogin(false);
     document.getElementById("loginUsuario")?.focus();
 }
+function configurarModoLogin(cadastro) {
+    modoCadastro = cadastro;
+    const titulo = document.getElementById("loginTitulo");
+    const ajuda = document.getElementById("loginAjuda");
+    const enviar = document.querySelector(".login-enviar");
+    const alternar = document.getElementById("loginAlternar");
+    if (titulo) titulo.textContent = cadastro ? "Crie sua conta" : "Entre na sua conta";
+    if (ajuda) ajuda.innerHTML = cadastro ? "Escolha um usuário e uma senha para salvar neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
+    if (enviar) enviar.textContent = cadastro ? "Criar conta" : "Entrar";
+    if (alternar) alternar.textContent = cadastro ? "Já tenho uma conta" : "Criar uma conta nova";
+    document.getElementById("loginErro").textContent = "";
+}
+function alternarModoLogin() { configurarModoLogin(!modoCadastro); }
 function fecharLogin() {
     const modal = document.getElementById("loginModal");
     if (!modal) return;
@@ -39,8 +59,25 @@ function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
     const senha = document.getElementById("loginSenha").value;
-    const valido = USUARIOS_DEMO.some(item => item.usuario === usuario && item.senha === senha);
+    const usuarios = obterTodosUsuarios();
+    const valido = usuarios.some(item => item.usuario === usuario && item.senha === senha);
     const erro = document.getElementById("loginErro");
+    if (modoCadastro) {
+        if (usuario.length < 3) { erro.textContent = "O usuário deve ter ao menos 3 caracteres."; return; }
+        if (senha.length < 3) { erro.textContent = "A senha deve ter ao menos 3 caracteres."; return; }
+        if (usuarios.some(item => item.usuario.toLowerCase() === usuario.toLowerCase())) {
+            erro.textContent = "Este nome de usuário já existe.";
+            return;
+        }
+        const cadastrados = obterUsuariosCadastrados();
+        cadastrados.push({ usuario, senha });
+        localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
+        localStorage.setItem("ycloudUsuarioLogado", usuario);
+        fecharLogin();
+        atualizarBotaoLogin();
+        mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
+        return;
+    }
     if (!valido) {
         erro.textContent = "Usuário ou senha inválidos.";
         return;

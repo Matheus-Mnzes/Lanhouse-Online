@@ -88,7 +88,7 @@
             <button class="login-fechar" type="button" onclick="fecharLogin()" aria-label="Fechar login">×</button>
             <p class="login-sobretitulo">ÁREA DO JOGADOR</p>
             <h2 id="loginTitulo">Entre na sua conta</h2>
-            <p class="login-ajuda">Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.</p>
+            <p class="login-ajuda" id="loginAjuda">Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.</p>
             <form id="loginForm" class="login-form">
                 <label for="loginUsuario">Usuário</label>
                 <input id="loginUsuario" name="usuario" type="text" autocomplete="username" required>
@@ -97,6 +97,7 @@
                 <p class="login-erro" id="loginErro" role="alert"></p>
                 <button class="login-enviar" type="submit">Entrar</button>
             </form>
+            <button class="login-alternar" id="loginAlternar" type="button" onclick="alternarModoLogin()">Criar uma conta nova</button>
         </section>
     </div>
     <div class="toast" id="toast"></div>

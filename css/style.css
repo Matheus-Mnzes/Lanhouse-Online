@@ -1088,6 +1088,7 @@ body.cursor-menu .cursor {
 .login-erro { min-height: 18px; color: #c52828; font-size: 12px; }
 .login-enviar { margin-top: 4px; border: 0; background: var(--dark); color: var(--white); padding: 14px; font: 500 12px var(--font-sans); letter-spacing: 0.08em; text-transform: uppercase; }
 .login-enviar:hover { background: var(--blue); }
+.login-alternar { align-self: center; margin-top: 20px; border: 0; background: transparent; color: var(--blue); font: 400 12px var(--font-sans); text-decoration: underline; text-underline-offset: 3px; }
 
 .toast {
     position: fixed;
