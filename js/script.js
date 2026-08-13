@@ -20,6 +20,17 @@ function obterUsuariosCadastrados() {
     catch { return []; }
 }
 function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
+function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
+    return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
+}
+function migrarBibliotecaLegada() {
+    const chave = chaveBibliotecaDoUsuario();
+    const bibliotecaAntiga = localStorage.getItem("biblioteca") || localStorage.getItem("favoritos");
+    if (!chave || !bibliotecaAntiga || localStorage.getItem(chave)) return;
+    localStorage.setItem(chave, bibliotecaAntiga);
+    localStorage.removeItem("biblioteca");
+    localStorage.removeItem("favoritos");
+}
 function atualizarBotaoLogin() {
     const botao = document.getElementById("loginBtn");
     if (!botao) return;
@@ -73,6 +84,7 @@ function fazerLogin(evento) {
         cadastrados.push({ usuario, senha });
         localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
         localStorage.setItem("ycloudUsuarioLogado", usuario);
+        migrarBibliotecaLegada();
         fecharLogin();
         atualizarBotaoLogin();
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
@@ -83,6 +95,7 @@ function fazerLogin(evento) {
         return;
     }
     localStorage.setItem("ycloudUsuarioLogado", usuario);
+    migrarBibliotecaLegada();
     fecharLogin();
     atualizarBotaoLogin();
     mostrarToast(`Bem-vindo, ${usuario}!`);
@@ -161,15 +174,23 @@ function mostrarToast(texto) {
     toast._timer = setTimeout(function() { toast.classList.remove("visivel"); }, 2800);
 }
 
-function obterBiblioteca() { try { return JSON.parse(localStorage.getItem("biblioteca") || localStorage.getItem("favoritos") || "[]"); } catch { return []; } }
+function obterBiblioteca() {
+    const chave = chaveBibliotecaDoUsuario();
+    if (!chave) return [];
+    try { return JSON.parse(localStorage.getItem(chave) || "[]"); } catch { return []; }
+}
 function jogoEstaNaBiblioteca(id) { return obterBiblioteca().some(function(jogo) { return jogo.id === id; }); }
 function alternarBiblioteca(jogo) {
+    if (!obterUsuarioLogado()) {
+        abrirLogin();
+        mostrarToast("Entre para salvar jogos na biblioteca.");
+        return;
+    }
     const biblioteca = obterBiblioteca();
     const indice = biblioteca.findIndex(function(item) { return item.id === jogo.id; });
     if (indice >= 0) { biblioteca.splice(indice, 1); mostrarToast(`${jogo.name} removido da biblioteca`); }
     else { biblioteca.push(jogo); mostrarToast(`"${jogo.name}" adicionado a biblioteca`); }
-    localStorage.setItem("biblioteca", JSON.stringify(biblioteca));
-    localStorage.removeItem("favoritos");
+    localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
     renderizarCatalogo();
     renderizarBiblioteca();
 }
