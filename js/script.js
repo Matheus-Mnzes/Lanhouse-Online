@@ -8,8 +8,62 @@ let temporizadorPesquisa;
 let catalogoCarregado = false;
 
 const GENEROS = { "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro", "Fighting": "Luta", "Indie": "Independente", "Music": "Música", "Platform": "Plataforma", "Puzzle": "Quebra-cabeça", "Racing": "Corrida", "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático", "Visual Novel": "Visual novel" };
+const USUARIOS_DEMO = [
+    { usuario: "joao", senha: "1234" },
+    { usuario: "maria", senha: "senha" }
+];
+
+function obterUsuarioLogado() { return localStorage.getItem("ycloudUsuarioLogado"); }
+function atualizarBotaoLogin() {
+    const botao = document.getElementById("loginBtn");
+    if (!botao) return;
+    const usuario = obterUsuarioLogado();
+    botao.textContent = usuario ? `SAIR (${usuario})` : "ENTRAR";
+    botao.onclick = usuario ? sair : abrirLogin;
+}
+function abrirLogin() {
+    const modal = document.getElementById("loginModal");
+    if (!modal) return;
+    modal.classList.add("aberto");
+    modal.setAttribute("aria-hidden", "false");
+    document.getElementById("loginUsuario")?.focus();
+}
+function fecharLogin() {
+    const modal = document.getElementById("loginModal");
+    if (!modal) return;
+    modal.classList.remove("aberto");
+    modal.setAttribute("aria-hidden", "true");
+    document.getElementById("loginErro").textContent = "";
+}
+function fazerLogin(evento) {
+    evento.preventDefault();
+    const usuario = document.getElementById("loginUsuario").value.trim();
+    const senha = document.getElementById("loginSenha").value;
+    const valido = USUARIOS_DEMO.some(item => item.usuario === usuario && item.senha === senha);
+    const erro = document.getElementById("loginErro");
+    if (!valido) {
+        erro.textContent = "Usuário ou senha inválidos.";
+        return;
+    }
+    localStorage.setItem("ycloudUsuarioLogado", usuario);
+    fecharLogin();
+    atualizarBotaoLogin();
+    mostrarToast(`Bem-vindo, ${usuario}!`);
+}
+function sair() {
+    localStorage.removeItem("ycloudUsuarioLogado");
+    atualizarBotaoLogin();
+    mostrarPainel("inicio");
+    mostrarToast("Você saiu da conta.");
+}
 
 function mostrarPainel(id) {
+    if (id === "biblioteca" && !obterUsuarioLogado()) {
+        fecharMenu();
+        abrirLogin();
+        mostrarToast("Entre para acessar sua biblioteca.");
+        return;
+    }
     const alvo = id === "planos" ? "inicio" : id;
     document.querySelectorAll(".painel").forEach(function(painel) {
         const ativo = painel.id === `painel-${alvo}`;
@@ -272,6 +326,7 @@ function iniciarHeroCanvas() {
 document.addEventListener("DOMContentLoaded", () => {
     iniciarCursor();
     iniciarHeroCanvas();
+    atualizarBotaoLogin();
 
     carregarCatalogo(1);
     carregarFiltroGeneros();
@@ -294,9 +349,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
+    document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
 
     // Fecha o menu com a tecla Esc
     document.addEventListener("keydown", e => {
-        if (e.key === "Escape") fecharMenu();
+        if (e.key === "Escape") { fecharMenu(); fecharLogin(); }
     });
 });

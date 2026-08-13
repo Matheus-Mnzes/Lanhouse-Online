@@ -16,6 +16,7 @@
         <div class="header-tagline" id="headerTagline">Jogos que você ama,<br>em um só lugar</div>
         <div class="header-actions">
             <button class="btn-cta" onclick="mostrarPainel('jogos')">VER JOGOS <span class="btn-cta-dot">●</span></button>
+            <button class="btn-login" id="loginBtn" type="button" onclick="abrirLogin()">ENTRAR</button>
             <button class="btn-menu" id="menuBtn" onclick="toggleMenu()" aria-expanded="false">MENU <span class="btn-menu-icon">+</span></button>
         </div>
     </header>
@@ -81,6 +82,23 @@
             <div id="catalogoBiblioteca" class="grid-jogos" aria-live="polite"></div><div id="bibVazio" class="estado-vazio" hidden><div class="estado-vazio-icone">⊙</div><h3 id="bibVazioTitulo">Biblioteca vazia</h3><p id="bibVazioDesc">Adicione jogos ao explorar o catálogo.</p><button class="btn-outline" onclick="mostrarPainel('jogos')">Ver catálogo</button></div>
         </section>
     </main>
+    <div class="login-modal" id="loginModal" aria-hidden="true">
+        <div class="login-backdrop" onclick="fecharLogin()"></div>
+        <section class="login-card" role="dialog" aria-modal="true" aria-labelledby="loginTitulo">
+            <button class="login-fechar" type="button" onclick="fecharLogin()" aria-label="Fechar login">×</button>
+            <p class="login-sobretitulo">ÁREA DO JOGADOR</p>
+            <h2 id="loginTitulo">Entre na sua conta</h2>
+            <p class="login-ajuda">Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.</p>
+            <form id="loginForm" class="login-form">
+                <label for="loginUsuario">Usuário</label>
+                <input id="loginUsuario" name="usuario" type="text" autocomplete="username" required>
+                <label for="loginSenha">Senha</label>
+                <input id="loginSenha" name="senha" type="password" autocomplete="current-password" required>
+                <p class="login-erro" id="loginErro" role="alert"></p>
+                <button class="login-enviar" type="submit">Entrar</button>
+            </form>
+        </section>
+    </div>
     <div class="toast" id="toast"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script><script src="js/api.js"></script><script src="js/script.js"></script>
 </body>
