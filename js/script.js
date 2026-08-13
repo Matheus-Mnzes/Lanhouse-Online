@@ -159,9 +159,6 @@ function renderizarBiblioteca() {
     preencherCatalogo(document.getElementById("catalogoBiblioteca"), jogos, "", true);
     const vazio = document.getElementById("bibVazio"); if (vazio) vazio.hidden = jogos.length > 0;
 }
-async function carregarFiltroGeneros() { const filtro = document.getElementById("filtroGenero"); if (!filtro) return; try { const generos = await buscarGeneros(); filtro.replaceChildren(new Option("Todos", "")); generos.forEach(function(genero) { filtro.add(new Option(GENEROS[genero.name] || genero.name, genero.id)); }); filtro.disabled = false; } catch { filtro.replaceChildren(new Option("Erro ao carregar gêneros", "")); } }
-
-
 // ── Filtro de gêneros ─────────────────────────────────────────────
 async function carregarFiltroGeneros() {
     const filtro = document.getElementById("filtroGenero");
@@ -271,36 +268,10 @@ function iniciarHeroCanvas() {
 }
 
 
-// ── Pesquisa global na topbar ────────────────────────────────────
-function iniciarPesquisaGlobal() {
-    const input = document.getElementById("pesquisaGlobal");
-    if (!input) return;
-
-    let timer;
-    input.addEventListener("input", () => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-            const valor = input.value.trim();
-            if (!valor) return;
-
-            mostrarPainel("jogos");
-            const campoPrincipal = document.getElementById("pesquisaJogos");
-            if (campoPrincipal) {
-                campoPrincipal.value = valor;
-                pesquisaSelecionada  = valor;
-                carregarCatalogo(1);
-            }
-            input.value = "";
-        }, 400);
-    });
-}
-
-
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     iniciarCursor();
     iniciarHeroCanvas();
-    iniciarPesquisaGlobal();
 
     carregarCatalogo(1);
     carregarFiltroGeneros();

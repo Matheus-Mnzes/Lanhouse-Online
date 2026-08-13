@@ -1,4 +1,6 @@
-# YCloud
+# YCloud — Lanhouse Online
+
+Projeto acadêmico de uma plataforma de locação de jogos (front-end com catálogo via API).
 
 ## Configuração da API de jogos
 
@@ -9,4 +11,3 @@ O catálogo usa a API IGDB por meio de uma função da Vercel. Para funcionar, o
 3. Faça um novo deploy.
 
 Para testar localmente, instale a CLI da Vercel, crie um arquivo `.env.local` a partir de `.env.example` com suas credenciais e execute `vercel dev` na pasta do projeto.
-Me Leia
