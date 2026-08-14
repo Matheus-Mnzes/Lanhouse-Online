@@ -27,7 +27,6 @@
             <a class="menu-link" href="#" onclick="fecharMenuE('biblioteca'); return false;"><span class="menu-link-num">03</span><span class="menu-link-text">Biblioteca</span><span class="menu-link-arrow">→</span></a>
             <a class="menu-link" href="#" onclick="fecharMenuE('planos'); return false;"><span class="menu-link-num">04</span><span class="menu-link-text">Planos</span><span class="menu-link-arrow">→</span></a>
         </div><div class="menu-bottom">
-            <div class="menu-newsletter"><p>Receba novidades</p><div class="menu-newsletter-input"><input type="email" placeholder="seu@email.com"><button type="button">→</button></div></div>
             <div class="menu-labs"><span>⊙ YCloud Labs</span><span>↗</span></div>
         </div></div>
     </nav>
@@ -37,9 +36,9 @@
             <div class="hero-section"><div class="hero-text-wrap"><h1 class="hero-title"><em>Sua</em> plataforma<br>de jogos</h1></div><div class="hero-scroll-bar"><span class="scroll-cross">+</span><span class="scroll-cross">+</span><span class="scroll-label">SCROLL TO EXPLORE</span><span class="scroll-cross">+</span><span class="scroll-cross">+</span></div></div>
             <div class="secao secao-populares"><div class="secao-header"><span class="secao-label">EM DESTAQUE</span><button class="link-todos" onclick="mostrarPainel('jogos')">Ver todos →</button></div><div id="jogos-populares" class="grid-jogos" aria-live="polite"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></div>
             <div class="secao secao-planos" id="painel-planos"><div class="secao-header"><span class="secao-label">PLANOS</span></div><div class="planos-grid">
-                <article class="plano"><div class="plano-nome">Essencial</div><div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso a 100+ jogos</li><li>1 dispositivo</li><li>Full HD</li><li>Suporte por e-mail</li></ul><button class="plano-btn" type="button">Começar</button></article>
-                <article class="plano plano-destaque"><div class="plano-tag">Mais popular</div><div class="plano-nome">Premium</div><div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso a 500+ jogos</li><li>3 dispositivos</li><li>4K</li><li>Suporte 24/7</li><li>Lançamentos no dia</li></ul><button class="plano-btn plano-btn-destaque" type="button">Assinar agora</button></article>
-                <article class="plano"><div class="plano-nome">Ultimate</div><div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso ilimitado</li><li>6 dispositivos</li><li>8K</li><li>VIP dedicado</li><li>Acesso beta antecipado</li><li>Saves na nuvem</li></ul><button class="plano-btn" type="button">Falar com vendas</button></article>
+                <article class="plano" data-plano="Essencial"><div class="plano-nome">Essencial</div><div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso a 100+ jogos</li><li>1 dispositivo</li><li>Full HD</li><li>Suporte por e-mail</li></ul><button class="plano-btn" type="button" data-plano="Essencial">Começar</button></article>
+                <article class="plano plano-destaque" data-plano="Premium"><div class="plano-tag">Mais popular</div><div class="plano-nome">Premium</div><div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso a 500+ jogos</li><li>3 dispositivos</li><li>4K</li><li>Suporte 24/7</li><li>Lançamentos no dia</li></ul><button class="plano-btn plano-btn-destaque" type="button" data-plano="Premium">Assinar agora</button></article>
+                <article class="plano" data-plano="Ultimate"><div class="plano-nome">Ultimate</div><div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div><ul class="plano-lista"><li>Acesso ilimitado</li><li>6 dispositivos</li><li>8K</li><li>VIP dedicado</li><li>Acesso beta antecipado</li><li>Saves na nuvem</li></ul><button class="plano-btn" type="button" data-plano="Ultimate">Falar com vendas</button></article>
             </div></div>
         </section>
         <section class="painel painel-oculto" id="painel-jogos">
@@ -79,6 +78,7 @@
         </section>
         <section class="painel painel-oculto" id="painel-biblioteca">
             <div class="painel-header painel-header-flex"><div><h2 class="painel-titulo">Biblioteca</h2><p class="painel-sub">Seus jogos salvos</p></div><div class="input-wrap"><input id="pesquisaBiblioteca" type="search" placeholder="Buscar na biblioteca…" autocomplete="off"></div></div>
+            <section class="conta-plano" aria-labelledby="contaPlanoTitulo"><div><span class="conta-plano-label">MINHA ASSINATURA</span><h3 id="contaPlanoTitulo">Plano não selecionado</h3><p id="contaPlanoDescricao">Escolha um plano para sua conta.</p></div><button class="btn-outline" id="contaPlanoBotao" type="button" onclick="mostrarPainel('planos')">Ver planos</button></section>
             <div id="catalogoBiblioteca" class="grid-jogos" aria-live="polite"></div><div id="bibVazio" class="estado-vazio" hidden><div class="estado-vazio-icone">⊙</div><h3 id="bibVazioTitulo">Biblioteca vazia</h3><p id="bibVazioDesc">Adicione jogos ao explorar o catálogo.</p><button class="btn-outline" onclick="mostrarPainel('jogos')">Ver catálogo</button></div>
         </section>
     </main>

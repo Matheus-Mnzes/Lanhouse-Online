@@ -13,6 +13,13 @@ const USUARIOS_DEMO = [
     { usuario: "maria", senha: "senha" }
 ];
 let modoCadastro = false;
+let planoPendente = null;
+
+const PLANOS = {
+    Essencial: { descricao: "R$ 14,90 por mês · 1 dispositivo · Full HD" },
+    Premium: { descricao: "R$ 29,90 por mês · 3 dispositivos · 4K" },
+    Ultimate: { descricao: "R$ 49,90 por mês · 6 dispositivos · 8K" }
+};
 
 function obterUsuarioLogado() { return localStorage.getItem("ycloudUsuarioLogado"); }
 function obterUsuariosCadastrados() {
@@ -22,6 +29,56 @@ function obterUsuariosCadastrados() {
 function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
+}
+function chavePlanoDoUsuario(usuario = obterUsuarioLogado()) {
+    return usuario ? `ycloudPlano_${encodeURIComponent(usuario.toLowerCase())}` : null;
+}
+function obterPlanoDoUsuario(usuario = obterUsuarioLogado()) {
+    const chave = chavePlanoDoUsuario(usuario);
+    const plano = chave ? localStorage.getItem(chave) : null;
+    return PLANOS[plano] ? plano : null;
+}
+function atualizarAreaPlano() {
+    const plano = obterPlanoDoUsuario();
+    const titulo = document.getElementById("contaPlanoTitulo");
+    const descricao = document.getElementById("contaPlanoDescricao");
+    const botao = document.getElementById("contaPlanoBotao");
+
+    if (titulo) titulo.textContent = plano ? `Plano ${plano}` : "Plano não selecionado";
+    if (descricao) descricao.textContent = plano ? PLANOS[plano].descricao : "Escolha um plano para sua conta.";
+    if (botao) botao.textContent = plano ? "Alterar plano" : "Ver planos";
+
+    document.querySelectorAll(".plano").forEach(function(cartao) {
+        const selecionado = cartao.dataset.plano === plano;
+        cartao.classList.toggle("plano-selecionado", selecionado);
+        const botaoPlano = cartao.querySelector(".plano-btn");
+        if (botaoPlano) {
+            botaoPlano.textContent = selecionado ? "Plano atual" : "Escolher plano";
+            botaoPlano.setAttribute("aria-pressed", String(selecionado));
+        }
+    });
+}
+function selecionarPlano(plano) {
+    if (!PLANOS[plano]) return;
+    if (!obterUsuarioLogado()) {
+        planoPendente = plano;
+        abrirLogin();
+        mostrarToast("Entre ou crie uma conta para escolher um plano.");
+        return;
+    }
+    localStorage.setItem(chavePlanoDoUsuario(), plano);
+    planoPendente = null;
+    atualizarAreaPlano();
+    mostrarToast(`Plano ${plano} selecionado para sua conta.`);
+}
+function aplicarPlanoPendente() {
+    if (!planoPendente) {
+        atualizarAreaPlano();
+        return;
+    }
+    const plano = planoPendente;
+    planoPendente = null;
+    selecionarPlano(plano);
 }
 function migrarBibliotecaLegada() {
     const chave = chaveBibliotecaDoUsuario();
@@ -87,6 +144,7 @@ function fazerLogin(evento) {
         migrarBibliotecaLegada();
         fecharLogin();
         atualizarBotaoLogin();
+        aplicarPlanoPendente();
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
     }
@@ -98,11 +156,13 @@ function fazerLogin(evento) {
     migrarBibliotecaLegada();
     fecharLogin();
     atualizarBotaoLogin();
+    aplicarPlanoPendente();
     mostrarToast(`Bem-vindo, ${usuario}!`);
 }
 function sair() {
     localStorage.removeItem("ycloudUsuarioLogado");
     atualizarBotaoLogin();
+    atualizarAreaPlano();
     mostrarPainel("inicio");
     mostrarToast("Você saiu da conta.");
 }
@@ -127,6 +187,7 @@ function mostrarPainel(id) {
 
     if (alvo === "biblioteca") {
         renderizarBiblioteca();
+        atualizarAreaPlano();
     }
 
     if (id === "planos") {
@@ -385,6 +446,7 @@ document.addEventListener("DOMContentLoaded", () => {
     iniciarCursor();
     iniciarHeroCanvas();
     atualizarBotaoLogin();
+    atualizarAreaPlano();
 
     carregarCatalogo(1);
     carregarFiltroGeneros();
@@ -408,6 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
     document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
+    document.querySelectorAll(".plano-btn").forEach(function(botao) {
+        botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
+    });
 
     // Fecha o menu com a tecla Esc
     document.addEventListener("keydown", e => {
