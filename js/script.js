@@ -141,29 +141,6 @@ function abrirMenu() { document.body.classList.add("menu-aberto"); document.getE
 function fecharMenu() { document.body.classList.remove("menu-aberto"); document.getElementById("menuOverlay")?.setAttribute("aria-hidden", "true"); }
 function fecharMenuE(id) { fecharMenu(); mostrarPainel(id); }
 
-function iniciarCursor() {
-    const cursor = document.getElementById("cursor");
-    const ponto = document.getElementById("cursorDot");
-
-    if (!cursor || !ponto || !window.matchMedia("(pointer: fine)").matches) return;
-
-    document.body.classList.add("cursor-ativo");
-
-    window.addEventListener("pointermove", function(evento) {
-        const posicao = `translate(${evento.clientX}px, ${evento.clientY}px) translate(-50%, -50%)`;
-        cursor.style.transform = posicao;
-        ponto.style.transform = posicao;
-    });
-
-    document.querySelectorAll("a, button, input, select").forEach(function(elemento) {
-        elemento.addEventListener("pointerenter", function() {
-            document.body.classList.add("cursor-hover");
-        });
-        elemento.addEventListener("pointerleave", function() {
-            document.body.classList.remove("cursor-hover");
-        });
-    });
-}
 
 function mostrarToast(texto) {
     const toast = document.getElementById("toast");
@@ -293,97 +270,8 @@ function jogar(nomeJogo) {
 }
 
 
-// ── Hero 3D (Three.js) — cluster de formas ao estilo Lusion ────────
-function iniciarHeroCanvas() {
-    const canvas = document.getElementById("heroCanvas");
-    if (!canvas || typeof THREE === "undefined") return;
-
-    const reduzMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduzMovimento) return;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const scene  = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-    camera.position.set(0, 0, 9);
-
-    const luz1 = new THREE.DirectionalLight(0xffffff, 1.1);
-    luz1.position.set(4, 6, 6);
-    scene.add(luz1);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-
-    const corAzul  = new THREE.MeshStandardMaterial({ color: 0x1a4bff, roughness: 0.35, metalness: 0.15 });
-    const corPreta = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4, metalness: 0.1 });
-    const corBranca = new THREE.MeshStandardMaterial({ color: 0xf5f5f3, roughness: 0.5, metalness: 0.05 });
-    const materiais = [corAzul, corPreta, corBranca];
-
-    const grupo = new THREE.Group();
-    const total = 14;
-
-    for (let i = 0; i < total; i++) {
-        const tamanho   = 0.5 + Math.random() * 0.7;
-        const geometria = new THREE.BoxGeometry(tamanho, tamanho, tamanho);
-        const cubo      = new THREE.Mesh(geometria, materiais[i % materiais.length]);
-
-        cubo.position.set(
-            (Math.random() - 0.5) * 5,
-            (Math.random() - 0.5) * 4,
-            (Math.random() - 0.5) * 4
-        );
-        cubo.rotation.set(
-            Math.random() * Math.PI,
-            Math.random() * Math.PI,
-            Math.random() * Math.PI
-        );
-        grupo.add(cubo);
-    }
-    scene.add(grupo);
-
-    let mouseX = 0, mouseY = 0;
-    window.addEventListener("mousemove", e => {
-        mouseX = (e.clientX / window.innerWidth) - 0.5;
-        mouseY = (e.clientY / window.innerHeight) - 0.5;
-    });
-
-    function redimensionar() {
-        const largura = canvas.clientWidth  || window.innerWidth;
-        const altura  = canvas.clientHeight || window.innerHeight;
-        camera.aspect = largura / altura;
-        camera.updateProjectionMatrix();
-        renderer.setSize(largura, altura, false);
-    }
-
-    let raf;
-    function desenhar() {
-        grupo.rotation.y += 0.0022;
-        grupo.rotation.x += 0.0007;
-        camera.position.x += (mouseX * 2 - camera.position.x) * 0.03;
-        camera.position.y += (-mouseY * 2 - camera.position.y) * 0.03;
-        camera.lookAt(0, 0, 0);
-        renderer.render(scene, camera);
-        raf = requestAnimationFrame(desenhar);
-    }
-
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-            cancelAnimationFrame(raf);
-        } else {
-            raf = requestAnimationFrame(desenhar);
-        }
-    });
-
-    window.addEventListener("resize", redimensionar);
-
-    redimensionar();
-    desenhar();
-}
-
-
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    iniciarCursor();
-    iniciarHeroCanvas();
     atualizarBotaoLogin();
 
     carregarCatalogo(1);
