@@ -33,6 +33,9 @@ function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
 function chavePlanoDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudPlano_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
+function chaveFotoDoUsuario(usuario = obterUsuarioLogado()) {
+    return usuario ? `ycloudFoto_${encodeURIComponent(usuario.toLowerCase())}` : null;
+}
 function obterPlanoDoUsuario(usuario = obterUsuarioLogado()) {
     const chave = chavePlanoDoUsuario(usuario);
     const plano = chave ? localStorage.getItem(chave) : null;
@@ -42,11 +45,11 @@ function atualizarAreaPlano() {
     const plano = obterPlanoDoUsuario();
     const titulo = document.getElementById("contaPlanoTitulo");
     const descricao = document.getElementById("contaPlanoDescricao");
-    const botao = document.getElementById("contaPlanoBotao");
+    const botaoCancelar = document.getElementById("cancelarPlanoBotao");
 
     if (titulo) titulo.textContent = plano ? `Plano ${plano}` : "Plano não selecionado";
     if (descricao) descricao.textContent = plano ? PLANOS[plano].descricao : "Escolha um plano para sua conta.";
-    if (botao) botao.textContent = plano ? "Alterar plano" : "Ver planos";
+    if (botaoCancelar) botaoCancelar.hidden = !plano;
 
     document.querySelectorAll(".plano").forEach(function(cartao) {
         const selecionado = cartao.dataset.plano === plano;
@@ -57,6 +60,35 @@ function atualizarAreaPlano() {
             botaoPlano.setAttribute("aria-pressed", String(selecionado));
         }
     });
+}
+function atualizarPerfil() {
+    const usuario = obterUsuarioLogado();
+    const nome = document.getElementById("perfilUsuario");
+    const foto = document.getElementById("perfilFoto");
+    const iniciais = document.getElementById("perfilIniciais");
+    const fotoCabecalho = document.getElementById("headerAvatarFoto");
+    const iniciaisCabecalho = document.getElementById("headerAvatarIniciais");
+    const imagem = usuario ? localStorage.getItem(chaveFotoDoUsuario(usuario)) : null;
+
+    if (nome) nome.textContent = usuario || "Jogador";
+    if (iniciais) iniciais.textContent = usuario ? usuario.slice(0, 2).toUpperCase() : "Y";
+    if (foto) {
+        foto.hidden = !imagem;
+        foto.src = imagem || "";
+    }
+    if (iniciais) iniciais.hidden = Boolean(imagem);
+    if (fotoCabecalho) {
+        fotoCabecalho.hidden = !imagem;
+        fotoCabecalho.src = imagem || "";
+    }
+    if (iniciaisCabecalho) {
+        iniciaisCabecalho.textContent = usuario ? usuario.slice(0, 2).toUpperCase() : "Y";
+        iniciaisCabecalho.hidden = Boolean(imagem);
+    }
+}
+function abrirContaPeloAvatar() {
+    if (obterUsuarioLogado()) mostrarPainel("conta");
+    else abrirLogin();
 }
 function selecionarPlano(plano) {
     if (!PLANOS[plano]) return;
@@ -70,6 +102,36 @@ function selecionarPlano(plano) {
     planoPendente = null;
     atualizarAreaPlano();
     mostrarToast(`Plano ${plano} selecionado para sua conta.`);
+}
+function cancelarPlano() {
+    const plano = obterPlanoDoUsuario();
+    if (!plano) return;
+    if (!window.confirm(`Cancelar o plano ${plano}? Você perderá os benefícios ao fim do período atual.`)) return;
+    localStorage.removeItem(chavePlanoDoUsuario());
+    atualizarAreaPlano();
+    mostrarToast("Seu plano foi cancelado.");
+}
+function salvarFotoPerfil(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (!obterUsuarioLogado()) return;
+    if (arquivo.size > 2 * 1024 * 1024) {
+        mostrarToast("Escolha uma imagem de até 2 MB.");
+        evento.target.value = "";
+        return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = function() {
+        try {
+            localStorage.setItem(chaveFotoDoUsuario(), leitor.result);
+            atualizarPerfil();
+            mostrarToast("Foto de perfil atualizada.");
+        } catch {
+            mostrarToast("Não foi possível salvar essa imagem. Tente uma menor.");
+        }
+    };
+    leitor.readAsDataURL(arquivo);
+    evento.target.value = "";
 }
 function aplicarPlanoPendente() {
     if (!planoPendente) {
@@ -92,8 +154,8 @@ function atualizarBotaoLogin() {
     const botao = document.getElementById("loginBtn");
     if (!botao) return;
     const usuario = obterUsuarioLogado();
-    botao.textContent = usuario ? `SAIR (${usuario})` : "ENTRAR";
-    botao.onclick = usuario ? sair : abrirLogin;
+    botao.textContent = usuario ? `CONTA (${usuario})` : "ENTRAR";
+    botao.onclick = usuario ? function() { mostrarPainel("conta"); } : abrirLogin;
 }
 function abrirLogin() {
     const modal = document.getElementById("loginModal");
@@ -144,6 +206,7 @@ function fazerLogin(evento) {
         migrarBibliotecaLegada();
         fecharLogin();
         atualizarBotaoLogin();
+        atualizarPerfil();
         aplicarPlanoPendente();
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
@@ -156,6 +219,7 @@ function fazerLogin(evento) {
     migrarBibliotecaLegada();
     fecharLogin();
     atualizarBotaoLogin();
+    atualizarPerfil();
     aplicarPlanoPendente();
     mostrarToast(`Bem-vindo, ${usuario}!`);
 }
@@ -163,12 +227,13 @@ function sair() {
     localStorage.removeItem("ycloudUsuarioLogado");
     atualizarBotaoLogin();
     atualizarAreaPlano();
+    atualizarPerfil();
     mostrarPainel("inicio");
     mostrarToast("Você saiu da conta.");
 }
 
 function mostrarPainel(id) {
-    if (id === "biblioteca" && !obterUsuarioLogado()) {
+    if ((id === "biblioteca" || id === "conta") && !obterUsuarioLogado()) {
         fecharMenu();
         abrirLogin();
         mostrarToast("Entre para acessar sua biblioteca.");
@@ -187,7 +252,10 @@ function mostrarPainel(id) {
 
     if (alvo === "biblioteca") {
         renderizarBiblioteca();
+    }
+    if (alvo === "conta") {
         atualizarAreaPlano();
+        atualizarPerfil();
     }
 
     if (id === "planos") {
@@ -335,6 +403,7 @@ function jogar(nomeJogo) {
 document.addEventListener("DOMContentLoaded", () => {
     atualizarBotaoLogin();
     atualizarAreaPlano();
+    atualizarPerfil();
 
     carregarCatalogo(1);
     carregarFiltroGeneros();
@@ -358,6 +427,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
     document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
+    document.getElementById("inputFotoPerfil")?.addEventListener("change", salvarFotoPerfil);
     document.querySelectorAll(".plano-btn").forEach(function(botao) {
         botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
     });

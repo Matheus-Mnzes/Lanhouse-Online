@@ -11,7 +11,7 @@
 </head>
 <body>
     <header class="header" id="header">
-        <div class="header-logo"><button class="logo-btn" onclick="mostrarPainel('inicio')">YCloud</button></div>
+        <div class="header-logo"><button class="header-avatar" id="headerAvatar" type="button" onclick="abrirContaPeloAvatar()" aria-label="Abrir minha conta"><img id="headerAvatarFoto" alt=""><span id="headerAvatarIniciais" aria-hidden="true">Y</span></button><button class="logo-btn" onclick="mostrarPainel('inicio')">YCloud</button></div>
         <div class="header-tagline" id="headerTagline">Jogos que você ama,<br>em um só lugar</div>
         <div class="header-actions">
             <button class="btn-cta" onclick="mostrarPainel('jogos')">VER JOGOS <span class="btn-cta-dot">●</span></button>
@@ -25,6 +25,7 @@
             <a class="menu-link" href="#" onclick="fecharMenuE('jogos'); return false;"><span class="menu-link-num">02</span><span class="menu-link-text">Jogos</span><span class="menu-link-arrow">→</span></a>
             <a class="menu-link" href="#" onclick="fecharMenuE('biblioteca'); return false;"><span class="menu-link-num">03</span><span class="menu-link-text">Biblioteca</span><span class="menu-link-arrow">→</span></a>
             <a class="menu-link" href="#" onclick="fecharMenuE('planos'); return false;"><span class="menu-link-num">04</span><span class="menu-link-text">Planos</span><span class="menu-link-arrow">→</span></a>
+            <a class="menu-link" href="#" onclick="fecharMenuE('conta'); return false;"><span class="menu-link-num">05</span><span class="menu-link-text">Minha conta</span><span class="menu-link-arrow">→</span></a>
         </div><div class="menu-bottom">
             <div class="menu-labs"><span>⊙ YCloud Labs</span><span>↗</span></div>
         </div></div>
@@ -76,8 +77,25 @@
         </section>
         <section class="painel painel-oculto" id="painel-biblioteca">
             <div class="painel-header painel-header-flex"><div><h2 class="painel-titulo">Biblioteca</h2><p class="painel-sub">Seus jogos salvos</p></div><div class="input-wrap"><input id="pesquisaBiblioteca" type="search" placeholder="Buscar na biblioteca…" autocomplete="off"></div></div>
-            <section class="conta-plano" aria-labelledby="contaPlanoTitulo"><div><span class="conta-plano-label">MINHA ASSINATURA</span><h3 id="contaPlanoTitulo">Plano não selecionado</h3><p id="contaPlanoDescricao">Escolha um plano para sua conta.</p></div><button class="btn-outline" id="contaPlanoBotao" type="button" onclick="mostrarPainel('planos')">Ver planos</button></section>
             <div id="catalogoBiblioteca" class="grid-jogos" aria-live="polite"></div><div id="bibVazio" class="estado-vazio" hidden><div class="estado-vazio-icone">⊙</div><h3 id="bibVazioTitulo">Biblioteca vazia</h3><p id="bibVazioDesc">Adicione jogos ao explorar o catálogo.</p><button class="btn-outline" onclick="mostrarPainel('jogos')">Ver catálogo</button></div>
+        </section>
+        <section class="painel painel-oculto" id="painel-conta">
+            <div class="painel-header"><h2 class="painel-titulo">Minha conta</h2><p class="painel-sub">Gerencie seu perfil e sua assinatura</p></div>
+            <div class="conta-area">
+                <section class="conta-perfil" aria-labelledby="perfilTitulo">
+                    <div class="perfil-foto-wrap"><img id="perfilFoto" class="perfil-foto" alt="Foto de perfil"><span id="perfilIniciais" class="perfil-iniciais" aria-hidden="true"></span></div>
+                    <div class="perfil-dados"><span class="conta-plano-label">PERFIL</span><h3 id="perfilTitulo"><span id="perfilUsuario">Jogador</span></h3><p>Personalize a imagem exibida na sua conta.</p><label class="btn-outline btn-foto" for="inputFotoPerfil">Escolher foto</label><input id="inputFotoPerfil" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
+                </section>
+                <section class="conta-assinatura" aria-labelledby="contaPlanoTitulo">
+                    <div class="conta-assinatura-topo"><div><span class="conta-plano-label">MINHA ASSINATURA</span><h3 id="contaPlanoTitulo">Plano não selecionado</h3><p id="contaPlanoDescricao">Escolha um plano para sua conta.</p></div><button class="btn-cancelar" id="cancelarPlanoBotao" type="button" onclick="cancelarPlano()" hidden>Cancelar plano</button></div>
+                    <div class="conta-planos" aria-label="Opções de plano">
+                        <article class="plano plano-conta" data-plano="Essencial"><div class="plano-nome">Essencial</div><div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div><p class="plano-resumo">100+ jogos · 1 dispositivo · Full HD</p><button class="plano-btn" type="button" data-plano="Essencial">Escolher plano</button></article>
+                        <article class="plano plano-conta plano-destaque" data-plano="Premium"><div class="plano-nome">Premium</div><div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div><p class="plano-resumo">500+ jogos · 3 dispositivos · 4K</p><button class="plano-btn plano-btn-destaque" type="button" data-plano="Premium">Escolher plano</button></article>
+                        <article class="plano plano-conta" data-plano="Ultimate"><div class="plano-nome">Ultimate</div><div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div><p class="plano-resumo">Acesso ilimitado · 6 dispositivos · 8K</p><button class="plano-btn" type="button" data-plano="Ultimate">Escolher plano</button></article>
+                    </div>
+                </section>
+                <button class="conta-sair" type="button" onclick="sair()">Sair da conta</button>
+            </div>
         </section>
     </main>
     <div class="login-modal" id="loginModal" aria-hidden="true">
