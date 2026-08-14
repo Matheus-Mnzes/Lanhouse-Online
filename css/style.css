@@ -45,14 +45,6 @@ body {
 a { text-decoration: none; color: inherit; }
 button { cursor: pointer; }
 
-body.cursor-ativo,
-body.cursor-ativo button,
-body.cursor-ativo a,
-body.cursor-ativo input,
-body.cursor-ativo select {
-    cursor: none;
-}
-
 :focus-visible {
     outline: 2px solid var(--blue);
     outline-offset: 3px;
@@ -62,57 +54,6 @@ body.cursor-ativo select {
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--off-white); }
 ::-webkit-scrollbar-thumb { background: var(--mid); border-radius: 6px; }
-
-
-/* ── CURSOR CUSTOMIZADO ──────────────────────────────── */
-.cursor {
-    position: fixed;
-    width: 36px;
-    height: 36px;
-    border: 1.5px solid var(--dark);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 9999;
-    transform: translate(-50%, -50%);
-    transition: transform 0.12s var(--ease-out), width 0.25s var(--ease), height 0.25s var(--ease), border-color 0.25s;
-    mix-blend-mode: difference;
-}
-
-.cursor-dot {
-    position: fixed;
-    width: 5px;
-    height: 5px;
-    background: var(--dark);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 10000;
-    transform: translate(-50%, -50%);
-    transition: transform 0.06s linear;
-    mix-blend-mode: difference;
-}
-
-body.cursor-hover .cursor {
-    width: 60px;
-    height: 60px;
-    border-color: var(--blue);
-}
-
-body.cursor-menu .cursor {
-    width: 80px;
-    height: 80px;
-    background: var(--dark);
-    border-color: var(--dark);
-}
-
-
-/* ── CANVAS HERO ─────────────────────────────────────── */
-.hero-canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 0;
-    pointer-events: none;
-}
 
 
 /* ── HEADER ──────────────────────────────────────────── */
@@ -558,21 +499,18 @@ body.cursor-menu .cursor {
 /* ── GRID DE JOGOS ───────────────────────────────────── */
 .grid-jogos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 0;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
     border-left: 1px solid var(--light);
     border-top: 1px solid var(--light);
-    padding: 0 32px;
-    padding-left: 0;
+    padding: 32px;
     margin: 0;
 }
 
 .secao .grid-jogos {
     border: none;
     padding: 0;
-    gap: 0;
-    border-top: 1px solid var(--light);
-    border-left: 1px solid var(--light);
+    gap: 16px;
 }
 
 
@@ -1144,7 +1082,7 @@ body.cursor-menu .cursor {
     .carregar-wrap { padding: 32px 20px; }
     .filtro-busca { margin-left: 0; }
     .input-wrap input { min-width: 0; width: 100%; }
-    .grid-jogos { grid-template-columns: repeat(2, 1fr); }
+    .grid-jogos { grid-template-columns: repeat(2, 1fr); padding: 0; gap: 12px; }
     .jogo-capa { aspect-ratio: 2/3; }
     .conta-plano { align-items: flex-start; flex-direction: column; padding: 24px 20px; }
 }
