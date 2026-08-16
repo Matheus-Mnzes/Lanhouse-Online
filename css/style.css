@@ -25,6 +25,15 @@
     --ease-out:   cubic-bezier(0, 0, 0.3, 1);
 
     --header-h:   72px;
+
+    /* Tema ──────────────────────────────────────────── */
+    --bg-primary: var(--white);
+    --bg-secondary: var(--off-white);
+    --bg-card: var(--white);
+    --text-primary: var(--dark);
+    --text-secondary: #555;
+    --border-color: var(--light);
+    --input-bg: var(--white);
 }
 
 /* ── Reset ───────────────────────────────────────────── */
@@ -1139,4 +1148,341 @@ button { cursor: pointer; }
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
     }
+}
+
+/* ── MODO ESCURO ──────────────────────────────────────── */
+
+body.dark-mode {
+    --white: #111111;
+    --off-white: #181818;
+    --light: #2c2c2c;
+    --mid: #777777;
+    --dark: #f2f2f2;
+    --black: #ffffff;
+
+    --blue: #4d72ff;
+    --blue-light: #182447;
+}
+
+/* Fundo e texto principal */
+body.dark-mode {
+    background: var(--white);
+    color: var(--dark);
+}
+
+/* Seleção de texto */
+body.dark-mode ::selection {
+    background: var(--dark);
+    color: #111111;
+}
+
+/* Scrollbar */
+body.dark-mode ::-webkit-scrollbar-track {
+    background: var(--off-white);
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: var(--mid);
+}
+
+/* Header */
+body.dark-mode .header {
+    background: rgba(17, 17, 17, 0.92);
+    border-color: var(--light);
+}
+
+body.dark-mode .header-logo .logo-btn {
+    color: var(--dark);
+}
+
+body.dark-mode .header-avatar {
+    background: var(--blue-light);
+    color: var(--blue);
+    border-color: var(--light);
+}
+
+/* Botões */
+body.dark-mode .btn-login {
+    border-color: var(--dark);
+    color: var(--dark);
+}
+
+body.dark-mode .btn-login:hover {
+    background: var(--dark);
+    color: #111111;
+}
+
+body.dark-mode .btn-menu {
+    background: var(--off-white);
+    color: var(--dark);
+    border-color: var(--light);
+}
+
+body.dark-mode .btn-menu:hover {
+    background: var(--light);
+}
+
+/* Menu */
+body.dark-mode .menu-overlay {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+body.dark-mode .menu-link {
+    color: var(--dark);
+    border-color: var(--light);
+}
+
+body.dark-mode .menu-labs {
+    color: var(--dark);
+    border-color: var(--light);
+}
+
+body.dark-mode .menu-labs:hover {
+    background: var(--off-white);
+}
+
+/* Hero */
+body.dark-mode .hero-title {
+    color: var(--dark);
+    mix-blend-mode: normal;
+}
+
+body.dark-mode .hero-scroll-bar {
+    background: rgba(17, 17, 17, 0.6);
+    border-color: var(--light);
+}
+
+/* Seções */
+body.dark-mode .secao {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+/* Painéis */
+body.dark-mode .painel-header {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+body.dark-mode .painel-titulo {
+    color: var(--dark);
+}
+
+/* Filtros */
+body.dark-mode .filtros {
+    background: var(--off-white);
+    border-color: var(--light);
+}
+
+body.dark-mode .select-wrap select,
+body.dark-mode .input-wrap {
+    background: #151515;
+    border-color: var(--light);
+    color: var(--dark);
+}
+
+body.dark-mode .select-wrap select {
+    color-scheme: dark;
+}
+
+body.dark-mode .input-wrap input {
+    color: var(--dark);
+}
+
+body.dark-mode .input-wrap input::placeholder {
+    color: var(--mid);
+}
+
+/* Cards de jogos */
+body.dark-mode .jogo-card {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+body.dark-mode .jogo-card:hover {
+    background: var(--off-white);
+}
+
+body.dark-mode .jogo-info {
+    border-color: var(--light);
+}
+
+body.dark-mode .jogo-capa {
+    background: var(--light);
+}
+
+body.dark-mode .jogo-capa-placeholder {
+    color: var(--dark);
+}
+
+body.dark-mode .jogo-rating-badge {
+    background: rgba(20, 20, 20, 0.92);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: var(--dark);
+}
+
+/* Botão Biblioteca */
+body.dark-mode .btn-bib {
+    border-color: var(--light);
+    color: var(--dark);
+}
+
+body.dark-mode .btn-bib:hover {
+    background: var(--off-white);
+    border-color: var(--dark);
+}
+
+body.dark-mode .btn-bib.salvo {
+    background: var(--blue-light);
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+/* Skeleton */
+body.dark-mode .skel {
+    background: var(--light);
+    border-color: var(--white);
+}
+
+/* Paginação */
+body.dark-mode .paginacao-jogos {
+    background: var(--off-white);
+    border-color: var(--light);
+}
+
+body.dark-mode .paginacao-jogos button {
+    border-color: var(--dark);
+    color: var(--dark);
+}
+
+/* Estado vazio */
+body.dark-mode .estado-vazio h3 {
+    color: var(--dark);
+}
+
+/* Planos */
+body.dark-mode .secao-planos {
+    background: var(--off-white);
+}
+
+body.dark-mode .plano {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+body.dark-mode .plano:hover {
+    background: var(--off-white);
+}
+
+body.dark-mode .plano-preco {
+    color: var(--dark);
+}
+
+body.dark-mode .plano-lista {
+    color: #b5b5b5;
+}
+
+body.dark-mode .plano-btn {
+    background: var(--off-white);
+    border-color: var(--light);
+    color: var(--dark);
+}
+
+body.dark-mode .plano-btn:hover {
+    background: var(--dark);
+    color: #111111;
+    border-color: var(--dark);
+}
+
+/* Plano Premium */
+body.dark-mode .plano-destaque {
+    background: #080808;
+    color: var(--dark);
+}
+
+body.dark-mode .plano-btn-destaque {
+    background: var(--dark);
+    color: #111111;
+    border-color: var(--dark);
+}
+
+body.dark-mode .plano-btn-destaque:hover {
+    background: var(--blue);
+    color: #ffffff;
+    border-color: var(--blue);
+}
+
+/* Conta */
+body.dark-mode .conta-area {
+    background: var(--off-white);
+}
+
+body.dark-mode .conta-perfil,
+body.dark-mode .conta-assinatura {
+    background: var(--white);
+    border-color: var(--light);
+}
+
+body.dark-mode .conta-assinatura-topo {
+    border-color: var(--light);
+}
+
+body.dark-mode .perfil-dados p,
+body.dark-mode .conta-assinatura p,
+body.dark-mode .conta-plano p {
+    color: #aaa;
+}
+
+/* Modal de login */
+body.dark-mode .login-card {
+    background: #151515;
+    border-color: var(--light);
+}
+
+body.dark-mode .login-form input {
+    background: #101010;
+    border-color: var(--light);
+    color: var(--dark);
+}
+
+body.dark-mode .login-form input::placeholder {
+    color: var(--mid);
+}
+
+body.dark-mode .login-fechar {
+    color: var(--dark);
+}
+
+/* Toast */
+body.dark-mode .toast {
+    background: var(--dark);
+    color: #111111;
+}
+
+/* Botão de tema */
+.btn-tema {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border: 1px solid var(--light);
+    border-radius: 50%;
+    background: var(--off-white);
+    color: var(--dark);
+    font-size: 16px;
+    transition:
+        background 0.2s,
+        border-color 0.2s,
+        transform 0.2s;
+}
+
+.btn-tema:hover {
+    background: var(--light);
+    transform: rotate(15deg);
+}
+
+body.dark-mode .btn-tema {
+    background: var(--off-white);
+    color: var(--dark);
 }
