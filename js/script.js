@@ -398,9 +398,44 @@ function jogar(nomeJogo) {
     mostrarToast(`Abrindo ${nomeJogo}…`);
 }
 
+// ── Modo Escuro ──────────────────────────────────────────────────────────
+
+function atualizarBotaoTema() {
+    const botao = document.getElementById("btnTema");
+    if (!botao) return;
+
+    const modoEscuro = document.body.classList.contains("dark-mode");
+
+    botao.textContent = modoEscuro ? "☀" : "☾";
+    botao.setAttribute(
+        "aria-label",
+        modoEscuro ? "Ativar modo claro" : "Ativar modo escuro"
+    );
+}
+
+function alternarTema() {
+    const modoEscuro = document.body.classList.toggle("dark-mode");
+
+    localStorage.setItem(
+        "ycloudTema",
+        modoEscuro ? "escuro" : "claro"
+    );
+
+    atualizarBotaoTema();
+}
 
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+    const temaSalvo = localStorage.getItem("ycloudTema");
+
+    if (temaSalvo === "escuro") {
+        document.body.classList.add("dark-mode");
+    }
+
+    atualizarBotaoTema();
+
+    document.getElementById("btnTema")?.addEventListener("click", alternarTema);
+
     atualizarBotaoLogin();
     atualizarAreaPlano();
     atualizarPerfil();
