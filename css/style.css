@@ -1537,7 +1537,7 @@ body.dark-mode .btn-tema {
     animation: none;
 }
 
-.jogo-card.scroll-card.visivel {
+.jogo-card.scroll-card.visible {
     opacity: 1;
     transform: translate3d(0, 0, 0);
 }
