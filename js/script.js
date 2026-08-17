@@ -299,6 +299,13 @@ function alternarBiblioteca(jogo) {
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
     renderizarCatalogo();
     renderizarBiblioteca();
+
+    if (paginaAtual === 1 && !generoSelecionado && !pesquisaSelecionada) {
+        preencherCatalogo(
+            document.getElementById("jogos-populares"),
+            jogosCatalogo.slice(0, 4)
+        );
+    }
 }
 
 
