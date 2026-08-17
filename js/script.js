@@ -27,6 +27,10 @@ function obterUsuariosCadastrados() {
     catch { return []; }
 }
 function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
+function obterDadosUsuario(usuario = obterUsuarioLogado()) {
+    if (!usuario) return null;
+    return obterTodosUsuarios().find(item => item.usuario.toLowerCase() === usuario.toLowerCase()) || null;
+}
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
@@ -63,7 +67,9 @@ function atualizarAreaPlano() {
 }
 function atualizarPerfil() {
     const usuario = obterUsuarioLogado();
+    const dadosUsuario = obterDadosUsuario(usuario);
     const nome = document.getElementById("perfilUsuario");
+    const info = document.getElementById("perfilInfo");
     const foto = document.getElementById("perfilFoto");
     const iniciais = document.getElementById("perfilIniciais");
     const fotoCabecalho = document.getElementById("headerAvatarFoto");
@@ -71,6 +77,24 @@ function atualizarPerfil() {
     const imagem = usuario ? localStorage.getItem(chaveFotoDoUsuario(usuario)) : null;
 
     if (nome) nome.textContent = usuario || "Jogador";
+    if (info) {
+        const detalhes = dadosUsuario ? [
+            ["CPF", dadosUsuario.cpf],
+            ["Nascimento", formatarData(dadosUsuario.dataNascimento)],
+            ["Gmail", dadosUsuario.gmail],
+            ["Telefone", dadosUsuario.telefone],
+            ["Cadastro", formatarDataHora(dadosUsuario.dataCadastro)]
+        ].filter(item => item[1]) : [];
+
+        info.replaceChildren(...detalhes.flatMap(function(item) {
+            const termo = document.createElement("dt");
+            const descricao = document.createElement("dd");
+            termo.textContent = item[0];
+            descricao.textContent = item[1];
+            return [termo, descricao];
+        }));
+        info.hidden = detalhes.length === 0;
+    }
     if (iniciais) iniciais.textContent = usuario ? usuario.slice(0, 2).toUpperCase() : "Y";
     if (foto) {
         foto.hidden = !imagem;
@@ -171,10 +195,18 @@ function configurarModoLogin(cadastro) {
     const ajuda = document.getElementById("loginAjuda");
     const enviar = document.querySelector(".login-enviar");
     const alternar = document.getElementById("loginAlternar");
+    const camposCadastro = document.querySelector(".campos-cadastro");
+    const camposExtras = camposCadastro?.querySelectorAll("input") || [];
     if (titulo) titulo.textContent = cadastro ? "Crie sua conta" : "Entre na sua conta";
-    if (ajuda) ajuda.innerHTML = cadastro ? "Escolha um usuário e uma senha para salvar neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
+    if (ajuda) ajuda.innerHTML = cadastro ? "Preencha seus dados para salvar a conta neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
     if (enviar) enviar.textContent = cadastro ? "Criar conta" : "Entrar";
     if (alternar) alternar.textContent = cadastro ? "Já tenho uma conta" : "Criar uma conta nova";
+    if (camposCadastro) camposCadastro.hidden = !cadastro;
+    camposExtras.forEach(function(campo) {
+        campo.required = cadastro;
+    });
+    const senha = document.getElementById("loginSenha");
+    if (senha) senha.autocomplete = cadastro ? "new-password" : "current-password";
     document.getElementById("loginErro").textContent = "";
 }
 function alternarModoLogin() { configurarModoLogin(!modoCadastro); }
@@ -189,18 +221,24 @@ function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
     const senha = document.getElementById("loginSenha").value;
+    const cpf = document.getElementById("cadastroCpf")?.value.trim() || "";
+    const dataNascimento = document.getElementById("cadastroNascimento")?.value || "";
+    const gmail = document.getElementById("cadastroGmail")?.value.trim() || "";
+    const telefone = document.getElementById("cadastroTelefone")?.value.trim() || "";
     const usuarios = obterTodosUsuarios();
     const valido = usuarios.some(item => item.usuario === usuario && item.senha === senha);
     const erro = document.getElementById("loginErro");
     if (modoCadastro) {
         if (usuario.length < 3) { erro.textContent = "O usuário deve ter ao menos 3 caracteres."; return; }
         if (senha.length < 3) { erro.textContent = "A senha deve ter ao menos 3 caracteres."; return; }
+        if (!cpf || !dataNascimento || !gmail || !telefone) { erro.textContent = "Preencha todos os dados do cadastro."; return; }
+        if (!gmail.toLowerCase().endsWith("@gmail.com")) { erro.textContent = "Informe um endereço Gmail válido."; return; }
         if (usuarios.some(item => item.usuario.toLowerCase() === usuario.toLowerCase())) {
             erro.textContent = "Este nome de usuário já existe.";
             return;
         }
         const cadastrados = obterUsuariosCadastrados();
-        cadastrados.push({ usuario, senha });
+        cadastrados.push({ usuario, senha, cpf, dataNascimento, gmail, telefone, dataCadastro: new Date().toISOString() });
         localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
         localStorage.setItem("ycloudUsuarioLogado", usuario);
         migrarBibliotecaLegada();
@@ -230,6 +268,20 @@ function sair() {
     atualizarPerfil();
     mostrarPainel("inicio");
     mostrarToast("Você saiu da conta.");
+}
+
+function formatarData(data) {
+    if (!data) return "";
+    const partes = data.split("-");
+    if (partes.length !== 3) return data;
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function formatarDataHora(data) {
+    if (!data) return "";
+    const valor = new Date(data);
+    if (Number.isNaN(valor.getTime())) return data;
+    return valor.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
 }
 
 function mostrarPainel(id) {

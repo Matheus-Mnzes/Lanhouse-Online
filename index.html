@@ -89,7 +89,7 @@
             <div class="conta-area">
                 <section class="conta-perfil" aria-labelledby="perfilTitulo">
                     <div class="perfil-foto-wrap"><img id="perfilFoto" class="perfil-foto" alt="Foto de perfil"><span id="perfilIniciais" class="perfil-iniciais" aria-hidden="true"></span></div>
-                    <div class="perfil-dados"><span class="conta-plano-label">PERFIL</span><h3 id="perfilTitulo"><span id="perfilUsuario">Jogador</span></h3><p>Personalize a imagem exibida na sua conta.</p><label class="btn-outline btn-foto" for="inputFotoPerfil">Escolher foto</label><input id="inputFotoPerfil" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
+                    <div class="perfil-dados"><span class="conta-plano-label">PERFIL</span><h3 id="perfilTitulo"><span id="perfilUsuario">Jogador</span></h3><p>Personalize a imagem exibida na sua conta.</p><dl class="perfil-info" id="perfilInfo"></dl><label class="btn-outline btn-foto" for="inputFotoPerfil">Escolher foto</label><input id="inputFotoPerfil" type="file" accept="image/png,image/jpeg,image/webp" hidden></div>
                 </section>
                 <section class="conta-assinatura" aria-labelledby="contaPlanoTitulo">
                     <div class="conta-assinatura-topo"><div><span class="conta-plano-label">MINHA ASSINATURA</span><h3 id="contaPlanoTitulo">Plano não selecionado</h3><p id="contaPlanoDescricao">Escolha um plano para sua conta.</p></div><button class="btn-cancelar" id="cancelarPlanoBotao" type="button" onclick="cancelarPlano()" hidden>Cancelar plano</button></div>
@@ -113,6 +113,16 @@
             <form id="loginForm" class="login-form">
                 <label for="loginUsuario">Usuário</label>
                 <input id="loginUsuario" name="usuario" type="text" autocomplete="username" required>
+                <div class="campos-cadastro" hidden>
+                    <label for="cadastroCpf">CPF</label>
+                    <input id="cadastroCpf" name="cpf" type="text" inputmode="numeric" autocomplete="off" maxlength="14">
+                    <label for="cadastroNascimento">Data de nascimento</label>
+                    <input id="cadastroNascimento" name="dataNascimento" type="date">
+                    <label for="cadastroGmail">Gmail</label>
+                    <input id="cadastroGmail" name="gmail" type="email" autocomplete="email" placeholder="seunome@gmail.com">
+                    <label for="cadastroTelefone">Telefone</label>
+                    <input id="cadastroTelefone" name="telefone" type="tel" autocomplete="tel" placeholder="(00) 00000-0000">
+                </div>
                 <label for="loginSenha">Senha</label>
                 <input id="loginSenha" name="senha" type="password" autocomplete="current-password" required>
                 <p class="login-erro" id="loginErro" role="alert"></p>
