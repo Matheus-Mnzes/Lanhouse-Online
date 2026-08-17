@@ -1013,6 +1013,46 @@ button { cursor: pointer; }
 .perfil-dados p, .conta-assinatura p { margin-top: 8px; color: #555; font-size: 13px; }
 .btn-foto { display: inline-block; margin-top: 18px; cursor: pointer; }
 .conta-assinatura { margin-top: 20px; }
+.conta-dados {
+    margin-top: 20px;
+    background: var(--white);
+    border: 1px solid var(--light);
+}
+.conta-dados-head {
+    padding: 28px 28px 12px;
+    border-bottom: 1px solid var(--light);
+}
+.conta-dados-head h3 {
+    font: 400 32px/1 var(--font-serif);
+    font-style: italic;
+}
+.conta-dados-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 24px 28px 28px;
+}
+.conta-dado-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 18px;
+    background: var(--off-white);
+    border: 1px solid var(--light);
+}
+.conta-dado-item span {
+    color: var(--mid);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.conta-dado-item strong {
+    color: var(--dark);
+    font-size: 15px;
+    font-weight: 500;
+    word-break: break-word;
+}
 .conta-assinatura-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding: 28px; border-bottom: 1px solid var(--light); }
 .conta-planos { display: grid; grid-template-columns: repeat(3, 1fr); }
 .plano-conta { min-height: 250px; padding: 28px; }
@@ -1023,6 +1063,119 @@ button { cursor: pointer; }
 .btn-cancelar:hover, .conta-sair:hover { background: #c52828; color: var(--white); }
 .conta-sair { margin-top: 20px; }
 
+
+/* ── ADMINISTRAÇÃO ───────────────────────────────────── */
+.admin-area {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding: 32px;
+    background: var(--off-white);
+}
+
+.admin-card {
+    background: var(--white);
+    border: 1px solid var(--light);
+    padding: 24px;
+}
+
+.admin-card h3 {
+    font-family: var(--font-serif);
+    font-size: 30px;
+    font-style: italic;
+    font-weight: 400;
+    margin-bottom: 18px;
+}
+
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.admin-form label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    font-weight: 500;
+}
+
+.admin-form input,
+.admin-form textarea {
+    border: 1px solid var(--light);
+    background: var(--white);
+    color: var(--dark);
+    padding: 12px 14px;
+    font: 400 14px var(--font-sans);
+    outline: none;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus {
+    border-color: var(--blue);
+}
+
+.admin-form textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.tipo-conta {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tipo-conta-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mid);
+    font-weight: 500;
+}
+
+.tipo-conta-opcoes {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--dark);
+}
+
+.tipo-conta-opcoes label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.dados-cadastro {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dados-cadastro label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.dados-cadastro input {
+    border: 1px solid var(--light);
+    border-radius: 3px;
+    padding: 12px;
+    font: 400 14px var(--font-sans);
+    outline: none;
+}
+
+.dados-cadastro input:focus {
+    border-color: var(--blue);
+}
 
 /* ── TOAST ───────────────────────────────────────────── */
 .login-modal {

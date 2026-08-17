@@ -14,8 +14,9 @@ const HERO_INTERVAL = 6000;
 
 const GENEROS = { "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro", "Fighting": "Luta", "Indie": "Independente", "Music": "Música", "Platform": "Plataforma", "Puzzle": "Quebra-cabeça", "Racing": "Corrida", "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático", "Visual Novel": "Visual novel" };
 const USUARIOS_DEMO = [
-    { usuario: "joao", senha: "1234" },
-    { usuario: "maria", senha: "senha" }
+    { usuario: "joao", senha: "1234", admin: false },
+    { usuario: "maria", senha: "senha", admin: false },
+    { usuario: "admin", senha: "admin", admin: true }
 ];
 let modoCadastro = false;
 let planoPendente = null;
@@ -26,9 +27,56 @@ const PLANOS = {
     Ultimate: { descricao: "R$ 49,90 por mês · 6 dispositivos · 8K" }
 };
 
+function obterPlanosCustom() {
+    try {
+        return JSON.parse(localStorage.getItem("ycloudPlanosCustom") || "{}");
+    } catch {
+        return {};
+    }
+}
+
+function obterPlanosDisponiveis() {
+    return { ...PLANOS, ...obterPlanosCustom() };
+}
+
 function obterUsuarioLogado() { return localStorage.getItem("ycloudUsuarioLogado"); }
+function obterDadosUsuario(usuario = obterUsuarioLogado()) {
+    if (!usuario) return null;
+    const usuarios = obterTodosUsuarios();
+    return usuarios.find(item => String(item.usuario).toLowerCase() === String(usuario).trim().toLowerCase()) || null;
+}
+function usuarioEhAdmin(usuario = obterUsuarioLogado()) {
+    return Boolean(obterDadosUsuario(usuario)?.admin);
+}
+function normalizarTexto(valor) {
+    return String(valor ?? "").trim();
+}
+function formatarDataBrasileira(dataValor) {
+    const valor = normalizarTexto(dataValor);
+    if (!valor) return "Não informado";
+    const data = new Date(valor);
+    if (Number.isNaN(data.getTime())) return valor;
+    return new Intl.DateTimeFormat("pt-BR").format(data);
+}
 function obterUsuariosCadastrados() {
-    try { return JSON.parse(localStorage.getItem("ycloudUsuarios") || "[]"); }
+    try {
+        const usuarios = JSON.parse(localStorage.getItem("ycloudUsuarios") || "[]");
+        return usuarios.map(function(item) {
+            if (typeof item === "object" && item) {
+                return {
+                    usuario: item.usuario,
+                    senha: item.senha,
+                    admin: Boolean(item.admin),
+                    cpf: item.cpf || "",
+                    dataNascimento: item.dataNascimento || "",
+                    gmail: item.gmail || "",
+                    telefone: item.telefone || "",
+                    dataCadastro: item.dataCadastro || ""
+                };
+            }
+            return { usuario: String(item), senha: "", admin: false, cpf: "", dataNascimento: "", gmail: "", telefone: "", dataCadastro: "" };
+        });
+    }
     catch { return []; }
 }
 function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
@@ -41,19 +89,33 @@ function chavePlanoDoUsuario(usuario = obterUsuarioLogado()) {
 function chaveFotoDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudFoto_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
+function obterJogosCustom() {
+    try {
+        return JSON.parse(localStorage.getItem("ycloudJogosCustom") || "[]");
+    } catch {
+        return [];
+    }
+}
+
+function obterJogosCatalogoComCustom(jogos = []) {
+    const custom = obterJogosCustom();
+    return [...custom, ...jogos];
+}
+
 function obterPlanoDoUsuario(usuario = obterUsuarioLogado()) {
     const chave = chavePlanoDoUsuario(usuario);
     const plano = chave ? localStorage.getItem(chave) : null;
-    return PLANOS[plano] ? plano : null;
+    return obterPlanosDisponiveis()[plano] ? plano : null;
 }
 function atualizarAreaPlano() {
     const plano = obterPlanoDoUsuario();
     const titulo = document.getElementById("contaPlanoTitulo");
     const descricao = document.getElementById("contaPlanoDescricao");
     const botaoCancelar = document.getElementById("cancelarPlanoBotao");
+    const planosDisponiveis = obterPlanosDisponiveis();
 
     if (titulo) titulo.textContent = plano ? `Plano ${plano}` : "Plano não selecionado";
-    if (descricao) descricao.textContent = plano ? PLANOS[plano].descricao : "Escolha um plano para sua conta.";
+    if (descricao) descricao.textContent = plano ? planosDisponiveis[plano].descricao : "Escolha um plano para sua conta.";
     if (botaoCancelar) botaoCancelar.hidden = !plano;
 
     document.querySelectorAll(".plano").forEach(function(cartao) {
@@ -66,6 +128,40 @@ function atualizarAreaPlano() {
         }
     });
 }
+function renderizarPlanos() {
+    const containers = document.querySelectorAll("#planosGrid, #contaPlanos");
+    if (!containers.length) return;
+
+    const planos = Object.entries(obterPlanosDisponiveis());
+    const planoAtual = obterPlanoDoUsuario();
+
+    containers.forEach(function(container) {
+        const cards = planos.map(function([nome, info]) {
+            const selecionado = nome === planoAtual;
+            const destaque = nome === "Premium" ? " plano-destaque" : "";
+            const resumo = info.descricao || "Plano disponível";
+            const preco = resumo.includes("R$") ? resumo.split(" · ")[0] : "R$ 0,00";
+            const precoFormatado = preco.includes("R$") ? preco : `R$ ${Number(info.preco || 0).toFixed(2).replace(".", ",")}`;
+            const html = `
+                <article class="plano plano-conta${destaque}${selecionado ? " plano-selecionado" : ""}" data-plano="${nome}">
+                    <div class="plano-nome">${nome}</div>
+                    <div class="plano-preco">${precoFormatado}<small>/mês</small></div>
+                    <p class="plano-resumo">${resumo.replace(/^R\$\s*[^\s]+\s*por\s*mês\s*·\s*/i, "").replace(/\s*\·\s*/g, " · ")}</p>
+                    <button class="plano-btn${nome === "Premium" ? " plano-btn-destaque" : ""}" type="button" data-plano="${nome}">${selecionado ? "Plano atual" : "Escolher plano"}</button>
+                </article>
+            `;
+            return html;
+        }).join("");
+
+        container.innerHTML = cards;
+        container.querySelectorAll(".plano-btn").forEach(function(botao) {
+            botao.addEventListener("click", function() {
+                selecionarPlano(botao.dataset.plano);
+            });
+        });
+    });
+}
+
 function atualizarPerfil() {
     const usuario = obterUsuarioLogado();
     const nome = document.getElementById("perfilUsuario");
@@ -90,13 +186,39 @@ function atualizarPerfil() {
         iniciaisCabecalho.textContent = usuario ? usuario.slice(0, 2).toUpperCase() : "Y";
         iniciaisCabecalho.hidden = Boolean(imagem);
     }
+    atualizarDadosConta();
+}
+
+function atualizarDadosConta() {
+    const container = document.getElementById("contaDadosGrid");
+    if (!container) return;
+
+    const usuario = obterDadosUsuario();
+    const dados = usuario || {};
+    const itens = [
+        ["CPF", dados.cpf || "Não informado"],
+        ["Data de nascimento", formatarDataBrasileira(dados.dataNascimento)],
+        ["Gmail", dados.gmail || "Não informado"],
+        ["Telefone", dados.telefone || "Não informado"],
+        ["Data de cadastro", formatarDataBrasileira(dados.dataCadastro)]
+    ];
+
+    container.innerHTML = itens.map(function([label, valor]) {
+        return `
+            <div class="conta-dado-item">
+                <span>${label}</span>
+                <strong>${valor}</strong>
+            </div>
+        `;
+    }).join("");
 }
 function abrirContaPeloAvatar() {
     if (obterUsuarioLogado()) mostrarPainel("conta");
     else abrirLogin();
 }
 function selecionarPlano(plano) {
-    if (!PLANOS[plano]) return;
+    const planosDisponiveis = obterPlanosDisponiveis();
+    if (!planosDisponiveis[plano]) return;
     if (!obterUsuarioLogado()) {
         planoPendente = plano;
         abrirLogin();
@@ -106,14 +228,65 @@ function selecionarPlano(plano) {
     localStorage.setItem(chavePlanoDoUsuario(), plano);
     planoPendente = null;
     atualizarAreaPlano();
+    renderizarPlanos();
     mostrarToast(`Plano ${plano} selecionado para sua conta.`);
 }
+function adicionarPlanoCustom(evento) {
+    evento.preventDefault();
+    const nome = document.getElementById("novoPlanoNome")?.value.trim();
+    const preco = Number(document.getElementById("novoPlanoPreco")?.value || 0);
+    const descricao = document.getElementById("novoPlanoDescricao")?.value.trim();
+
+    if (!nome || !descricao || Number.isNaN(preco) || preco < 0) {
+        mostrarToast("Preencha nome, preço e descrição do plano.");
+        return;
+    }
+
+    const planos = obterPlanosCustom();
+    const chave = nome;
+    planos[chave] = {
+        descricao: `R$ ${preco.toFixed(2).replace(".", ",")} por mês · ${descricao}`,
+        preco: preco
+    };
+    localStorage.setItem("ycloudPlanosCustom", JSON.stringify(planos));
+    document.getElementById("formNovoPlano")?.reset();
+    renderizarPlanos();
+    atualizarAreaPlano();
+    mostrarToast(`Plano "${chave}" cadastrado.`);
+}
+
+function adicionarJogoCustom(evento) {
+    evento.preventDefault();
+    const nome = document.getElementById("novoJogoNome")?.value.trim();
+    const genero = document.getElementById("novoJogoGenero")?.value.trim() || "Indie";
+    const imagem = document.getElementById("novoJogoImagem")?.value.trim();
+
+    if (!nome) {
+        mostrarToast("Informe o nome do jogo.");
+        return;
+    }
+
+    const jogos = obterJogosCustom();
+    jogos.push({
+        id: `custom-${Date.now()}`,
+        name: nome,
+        genres: [{ name: genero }],
+        cover: imagem ? { url: imagem } : null
+    });
+    localStorage.setItem("ycloudJogosCustom", JSON.stringify(jogos));
+    document.getElementById("formNovoJogo")?.reset();
+    carregarCatalogo(1);
+    renderizarBiblioteca();
+    mostrarToast(`Jogo "${nome}" adicionado ao catálogo.`);
+}
+
 function cancelarPlano() {
     const plano = obterPlanoDoUsuario();
     if (!plano) return;
     if (!window.confirm(`Cancelar o plano ${plano}? Você perderá os benefícios ao fim do período atual.`)) return;
     localStorage.removeItem(chavePlanoDoUsuario());
     atualizarAreaPlano();
+    renderizarPlanos();
     mostrarToast("Seu plano foi cancelado.");
 }
 function salvarFotoPerfil(evento) {
@@ -161,6 +334,13 @@ function atualizarBotaoLogin() {
     const usuario = obterUsuarioLogado();
     botao.textContent = usuario ? `CONTA (${usuario})` : "ENTRAR";
     botao.onclick = usuario ? function() { mostrarPainel("conta"); } : abrirLogin;
+    atualizarMenuAdmin();
+}
+
+function atualizarMenuAdmin() {
+    const link = document.getElementById("menuAdmin");
+    if (!link) return;
+    link.hidden = !usuarioEhAdmin();
 }
 function abrirLogin() {
     const modal = document.getElementById("loginModal");
@@ -176,10 +356,36 @@ function configurarModoLogin(cadastro) {
     const ajuda = document.getElementById("loginAjuda");
     const enviar = document.querySelector(".login-enviar");
     const alternar = document.getElementById("loginAlternar");
+    const tipoContaWrap = document.getElementById("tipoContaWrap");
+    const dadosCadastroWrap = document.getElementById("dadosCadastroWrap");
+    const camposCadastro = [
+        document.getElementById("cadastroCpf"),
+        document.getElementById("cadastroNascimento"),
+        document.getElementById("cadastroGmail"),
+        document.getElementById("cadastroTelefone")
+    ];
+
     if (titulo) titulo.textContent = cadastro ? "Crie sua conta" : "Entre na sua conta";
-    if (ajuda) ajuda.innerHTML = cadastro ? "Escolha um usuário e uma senha para salvar neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
+    if (ajuda) ajuda.innerHTML = cadastro ? "Escolha um usuário, uma senha, o tipo de conta e os dados pessoais." : "Para testar: <strong>joao / 1234</strong>, <strong>maria / senha</strong> ou <strong>admin / admin</strong>.";
     if (enviar) enviar.textContent = cadastro ? "Criar conta" : "Entrar";
     if (alternar) alternar.textContent = cadastro ? "Já tenho uma conta" : "Criar uma conta nova";
+    if (tipoContaWrap) {
+        tipoContaWrap.hidden = !cadastro;
+        tipoContaWrap.style.display = cadastro ? "" : "none";
+    }
+    if (dadosCadastroWrap) {
+        dadosCadastroWrap.hidden = !cadastro;
+        dadosCadastroWrap.style.display = cadastro ? "" : "none";
+    }
+
+    camposCadastro.forEach(function(campo) {
+        if (!campo) return;
+        campo.disabled = !cadastro;
+        campo.required = cadastro;
+        campo.setAttribute("aria-hidden", cadastro ? "false" : "true");
+    });
+
+    document.getElementById("loginForm")?.reset();
     document.getElementById("loginErro").textContent = "";
 }
 function alternarModoLogin() { configurarModoLogin(!modoCadastro); }
@@ -190,10 +396,69 @@ function fecharLogin() {
     modal.setAttribute("aria-hidden", "true");
     document.getElementById("loginErro").textContent = "";
 }
+function limparMascara(valor, tipo) {
+    if (!valor) return "";
+    const texto = String(valor).replace(/\D/g, "");
+    if (tipo === "cpf") return texto.slice(0, 11);
+    if (tipo === "telefone") return texto.slice(0, 11);
+    return texto;
+}
+
+function formatarMascara(valor, tipo) {
+    const texto = limparMascara(valor, tipo);
+    if (tipo === "cpf") {
+        if (texto.length <= 3) return texto;
+        if (texto.length <= 6) return `${texto.slice(0, 3)}.${texto.slice(3)}`;
+        if (texto.length <= 9) return `${texto.slice(0, 3)}.${texto.slice(3, 6)}.${texto.slice(6)}`;
+        return `${texto.slice(0, 3)}.${texto.slice(3, 6)}.${texto.slice(6, 9)}-${texto.slice(9, 11)}`;
+    }
+    if (tipo === "telefone") {
+        if (texto.length <= 2) return texto;
+        if (texto.length <= 7) return `(${texto.slice(0, 2)}) ${texto.slice(2)}`;
+        return `(${texto.slice(0, 2)}) ${texto.slice(2, 7)}-${texto.slice(7, 11)}`;
+    }
+    return texto;
+}
+
+function aplicarMascaraCampo(campoId, tipo) {
+    const campo = document.getElementById(campoId);
+    if (!campo) return;
+
+    campo.addEventListener("input", function() {
+        campo.value = formatarMascara(campo.value, tipo);
+    });
+}
+
+function obterDadosCadastroFormulario() {
+    return {
+        cpf: limparMascara(document.getElementById("cadastroCpf")?.value, "cpf"),
+        dataNascimento: normalizarTexto(document.getElementById("cadastroNascimento")?.value),
+        gmail: normalizarTexto(document.getElementById("cadastroGmail")?.value),
+        telefone: limparMascara(document.getElementById("cadastroTelefone")?.value, "telefone")
+    };
+}
+
+function validarDadosCadastro(dados) {
+    if (!dados.cpf || dados.cpf.length !== 11) {
+        return "Informe um CPF válido com 11 dígitos.";
+    }
+    if (!dados.dataNascimento) {
+        return "Informe a data de nascimento.";
+    }
+    if (!dados.gmail || !/^[^\s@]+@gmail\.com$/i.test(dados.gmail)) {
+        return "Informe um Gmail válido no formato nome@gmail.com.";
+    }
+    if (!dados.telefone || dados.telefone.length !== 11) {
+        return "Informe um telefone válido com 11 dígitos.";
+    }
+    return "";
+}
+
 function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
     const senha = document.getElementById("loginSenha").value;
+    const tipoConta = document.querySelector('input[name="tipoConta"]:checked')?.value || "usuario";
     const usuarios = obterTodosUsuarios();
     const valido = usuarios.some(item => item.usuario === usuario && item.senha === senha);
     const erro = document.getElementById("loginErro");
@@ -204,8 +469,25 @@ function fazerLogin(evento) {
             erro.textContent = "Este nome de usuário já existe.";
             return;
         }
+
+        const dadosCadastro = obterDadosCadastroFormulario();
+        const erroCadastro = validarDadosCadastro(dadosCadastro);
+        if (erroCadastro) {
+            erro.textContent = erroCadastro;
+            return;
+        }
+
         const cadastrados = obterUsuariosCadastrados();
-        cadastrados.push({ usuario, senha });
+        cadastrados.push({
+            usuario,
+            senha,
+            admin: tipoConta === "admin",
+            cpf: dadosCadastro.cpf,
+            dataNascimento: dadosCadastro.dataNascimento,
+            gmail: dadosCadastro.gmail,
+            telefone: dadosCadastro.telefone,
+            dataCadastro: new Date().toISOString()
+        });
         localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
         localStorage.setItem("ycloudUsuarioLogado", usuario);
         migrarBibliotecaLegada();
@@ -218,6 +500,11 @@ function fazerLogin(evento) {
     }
     if (!valido) {
         erro.textContent = "Usuário ou senha inválidos.";
+        return;
+    }
+    const dadosUsuario = obterDadosUsuario(usuario);
+    if (!dadosUsuario) {
+        erro.textContent = "Usuário não encontrado.";
         return;
     }
     localStorage.setItem("ycloudUsuarioLogado", usuario);
@@ -238,10 +525,15 @@ function sair() {
 }
 
 function mostrarPainel(id) {
-    if ((id === "biblioteca" || id === "conta") && !obterUsuarioLogado()) {
+    if ((id === "biblioteca" || id === "conta" || id === "admin") && !obterUsuarioLogado()) {
         fecharMenu();
         abrirLogin();
-        mostrarToast("Entre para acessar sua biblioteca.");
+        mostrarToast(id === "admin" ? "Entre com uma conta de administrador." : "Entre para acessar sua biblioteca.");
+        return;
+    }
+    if (id === "admin" && !usuarioEhAdmin()) {
+        fecharMenu();
+        mostrarToast("Acesso restrito a administradores.");
         return;
     }
     const alvo = id === "planos" ? "inicio" : id;
@@ -343,7 +635,8 @@ async function carregarCatalogo(pagina) {
         if (!dados) return;
 
         const jogos = dados.jogos || [];
-        jogosCatalogo   = jogos;
+        const jogosComCustom = obterJogosCatalogoComCustom(jogos);
+        jogosCatalogo   = jogosComCustom;
         paginaAtual     = pagina;
         catalogoCarregado = true;
         renderizarCatalogo();
@@ -352,9 +645,9 @@ async function carregarCatalogo(pagina) {
         if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
-                jogos.slice(0, 4)
+                jogosComCustom.slice(0, 4)
             );
-            montarHero(jogos);
+            montarHero(jogosComCustom);
             iniciarAnimacoesScroll();
         }
 
@@ -380,7 +673,16 @@ function preencherCatalogo(container, jogos, mensagem = "", naBiblioteca = false
 function criarCardJogo(jogo, naBiblioteca) {
     const card = document.createElement("article"); card.className = "jogo-card scroll-card";
     const capa = document.createElement("div"); capa.className = "jogo-capa";
-    if (jogo.cover?.image_id) { const imagem = document.createElement("img"); imagem.src = urlCapaJogo(jogo); imagem.alt = `Capa de ${jogo.name}`; imagem.loading = "lazy"; capa.appendChild(imagem); } else capa.textContent = "Y";
+    const temCapa = Boolean(jogo.cover?.image_id || jogo.cover?.url);
+    if (temCapa) {
+        const imagem = document.createElement("img");
+        imagem.src = urlCapaJogo(jogo);
+        imagem.alt = `Capa de ${jogo.name}`;
+        imagem.loading = "lazy";
+        capa.appendChild(imagem);
+    } else {
+        capa.textContent = "Y";
+    }
     const info = document.createElement("div"); info.className = "jogo-info";
     const titulo = document.createElement("h3"); titulo.className = "jogo-titulo"; titulo.textContent = jogo.name;
     const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogo);
@@ -436,6 +738,7 @@ function jogar(nomeJogo) {
 }
 
 function urlCapaJogo(jogo, tamanho = "t_cover_big") {
+    if (jogo.cover?.url) return jogo.cover.url;
     if (!jogo.cover?.image_id) return null;
     return `https://images.igdb.com/igdb/image/upload/${tamanho}/${jogo.cover.image_id}.jpg`;
 }
@@ -642,6 +945,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     atualizarBotaoLogin();
     atualizarAreaPlano();
+    renderizarPlanos();
     atualizarPerfil();
 
     carregarCatalogo(1);
@@ -665,8 +969,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
+    aplicarMascaraCampo("cadastroCpf", "cpf");
+    aplicarMascaraCampo("cadastroTelefone", "telefone");
+
     document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
     document.getElementById("inputFotoPerfil")?.addEventListener("change", salvarFotoPerfil);
+    document.getElementById("formNovoJogo")?.addEventListener("submit", adicionarJogoCustom);
+    document.getElementById("formNovoPlano")?.addEventListener("submit", adicionarPlanoCustom);
     document.querySelectorAll(".plano-btn").forEach(function(botao) {
         botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
     });
