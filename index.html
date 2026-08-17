@@ -180,11 +180,8 @@
                 </section>
                 <section class="conta-dados" aria-labelledby="contaDadosTitulo">
                     <div class="conta-dados-head">
-                        <div>
-                            <span class="conta-plano-label">SEUS DADOS</span>
-                            <h3 id="contaDadosTitulo">Informações da conta</h3>
-                        </div>
-                        <button class="btn-outline btn-editar-conta" type="button" onclick="abrirEdicaoConta()">Editar informações</button>
+                        <span class="conta-plano-label">SEUS DADOS</span>
+                        <h3 id="contaDadosTitulo">Informações da conta</h3>
                     </div>
                     <div class="conta-dados-grid" id="contaDadosGrid">
                         <div class="conta-dado-item"><span>CPF</span><strong>Carregando...</strong></div>
@@ -192,27 +189,6 @@
                         <div class="conta-dado-item"><span>Gmail</span><strong>Carregando...</strong></div>
                         <div class="conta-dado-item"><span>Telefone</span><strong>Carregando...</strong></div>
                         <div class="conta-dado-item"><span>Data de cadastro</span><strong>Carregando...</strong></div>
-                    </div>
-
-                    <div id="contaEdicaoWrap" class="conta-edicao-wrap" hidden>
-                        <form id="formEditarConta" class="admin-form conta-form">
-                            <label for="contaEditCpf">CPF</label>
-                            <input id="contaEditCpf" name="cpf" type="text" inputmode="numeric" maxlength="14" placeholder="000.000.000-00">
-
-                            <label for="contaEditNascimento">Data de nascimento</label>
-                            <input id="contaEditNascimento" name="dataNascimento" type="date">
-
-                            <label for="contaEditGmail">Gmail</label>
-                            <input id="contaEditGmail" name="gmail" type="email" maxlength="100" placeholder="nome@gmail.com">
-
-                            <label for="contaEditTelefone">Telefone</label>
-                            <input id="contaEditTelefone" name="telefone" type="tel" inputmode="numeric" maxlength="15" placeholder="(00) 00000-0000">
-
-                            <div class="conta-form-actions">
-                                <button class="btn btn-dark" type="submit">Salvar alterações</button>
-                                <button class="btn btn-outline" type="button" onclick="fecharEdicaoConta()">Cancelar</button>
-                            </div>
-                        </form>
                     </div>
                 </section>
 

@@ -212,98 +212,6 @@ function atualizarDadosConta() {
         `;
     }).join("");
 }
-
-function preencherFormularioEdicaoConta() {
-    const usuario = obterDadosUsuario();
-    if (!usuario) return;
-
-    const cpfInput = document.getElementById("contaEditCpf");
-    const nascimentoInput = document.getElementById("contaEditNascimento");
-    const gmailInput = document.getElementById("contaEditGmail");
-    const telefoneInput = document.getElementById("contaEditTelefone");
-
-    if (cpfInput) cpfInput.value = usuario.cpf ? formatarMascara(usuario.cpf, "cpf") : "";
-    if (nascimentoInput) nascimentoInput.value = usuario.dataNascimento || "";
-    if (gmailInput) gmailInput.value = usuario.gmail || "";
-    if (telefoneInput) telefoneInput.value = usuario.telefone ? formatarMascara(usuario.telefone, "telefone") : "";
-}
-
-function abrirEdicaoConta() {
-    const usuario = obterUsuarioLogado();
-    if (!usuario) {
-        abrirLogin();
-        mostrarToast("Entre para editar sua conta.");
-        return;
-    }
-
-    preencherFormularioEdicaoConta();
-    const formulario = document.getElementById("contaEdicaoWrap");
-    if (formulario) formulario.hidden = false;
-}
-
-function fecharEdicaoConta() {
-    const formulario = document.getElementById("contaEdicaoWrap");
-    const form = document.getElementById("formEditarConta");
-    if (form) form.reset();
-    if (formulario) formulario.hidden = true;
-}
-
-function salvarEdicaoConta(evento) {
-    evento.preventDefault();
-
-    const usuarioLogado = obterUsuarioLogado();
-    if (!usuarioLogado) {
-        mostrarToast("Entre para atualizar sua conta.");
-        return;
-    }
-
-    const dados = {
-        cpf: limparMascara(document.getElementById("contaEditCpf")?.value, "cpf"),
-        dataNascimento: normalizarTexto(document.getElementById("contaEditNascimento")?.value),
-        gmail: normalizarTexto(document.getElementById("contaEditGmail")?.value),
-        telefone: limparMascara(document.getElementById("contaEditTelefone")?.value, "telefone")
-    };
-
-    const erroCadastro = validarDadosCadastro(dados);
-    if (erroCadastro) {
-        mostrarToast(erroCadastro);
-        return;
-    }
-
-    const usuariosCadastrados = obterUsuariosCadastrados();
-    const indice = usuariosCadastrados.findIndex(function(item) {
-        return String(item.usuario).toLowerCase() === String(usuarioLogado).toLowerCase();
-    });
-
-    const senhaDemo = USUARIOS_DEMO.find(function(item) {
-        return String(item.usuario).toLowerCase() === String(usuarioLogado).toLowerCase();
-    })?.senha || "";
-
-    const usuarioAtual = obterDadosUsuario(usuarioLogado) || {};
-    const usuarioAtualizado = {
-        usuario: usuarioLogado,
-        senha: indice >= 0 ? usuariosCadastrados[indice].senha : senhaDemo,
-        admin: Boolean(indice >= 0 ? usuariosCadastrados[indice].admin : usuarioAtual.admin),
-        cpf: dados.cpf,
-        dataNascimento: dados.dataNascimento,
-        gmail: dados.gmail,
-        telefone: dados.telefone,
-        dataCadastro: indice >= 0 ? (usuariosCadastrados[indice].dataCadastro || new Date().toISOString()) : new Date().toISOString()
-    };
-
-    if (indice >= 0) {
-        usuariosCadastrados[indice] = usuarioAtualizado;
-    } else {
-        usuariosCadastrados.push(usuarioAtualizado);
-    }
-
-    localStorage.setItem("ycloudUsuarios", JSON.stringify(usuariosCadastrados));
-    fecharEdicaoConta();
-    atualizarDadosConta();
-    atualizarPerfil();
-    mostrarToast("Informações da conta atualizadas.");
-}
-
 function abrirContaPeloAvatar() {
     if (obterUsuarioLogado()) mostrarPainel("conta");
     else abrirLogin();
@@ -674,72 +582,31 @@ function mostrarToast(texto) {
     toast._timer = setTimeout(function() { toast.classList.remove("visivel"); }, 2800);
 }
 
-function normalizarIdJogo(id) {
-    return String(id ?? "").trim();
-}
-
 function obterBiblioteca() {
     const chave = chaveBibliotecaDoUsuario();
     if (!chave) return [];
     try { return JSON.parse(localStorage.getItem(chave) || "[]"); } catch { return []; }
 }
-
-function jogoEstaNaBiblioteca(id) {
-    const idNormalizado = normalizarIdJogo(id);
-    return obterBiblioteca().some(function(jogo) {
-        return normalizarIdJogo(jogo?.id) === idNormalizado;
-    });
-}
-
-function atualizarEstadoBotaoBibliotecaEmCards() {
-    const identificador = document.querySelectorAll("#catalogo .jogo-card, #catalogoBiblioteca .jogo-card, #jogos-populares .jogo-card");
-    identificador.forEach(function(card) {
-        const botao = card.querySelector(".btn-bib");
-        if (!botao) return;
-
-        const jogo = card._jogo || null;
-        if (!jogo) return;
-
-        const salvo = jogoEstaNaBiblioteca(jogo.id);
-        botao.classList.toggle("salvo", salvo);
-        botao.textContent = salvo ? "Salvo" : "Biblioteca";
-        botao.setAttribute("aria-pressed", String(salvo));
-    });
-}
-
+function jogoEstaNaBiblioteca(id) { return obterBiblioteca().some(function(jogo) { return jogo.id === id; }); }
 function alternarBiblioteca(jogo) {
     if (!obterUsuarioLogado()) {
         abrirLogin();
         mostrarToast("Entre para salvar jogos na biblioteca.");
         return;
     }
-
     const biblioteca = obterBiblioteca();
-    const idNormalizado = normalizarIdJogo(jogo?.id);
-    const indice = biblioteca.findIndex(function(item) {
-        return normalizarIdJogo(item?.id) === idNormalizado;
-    });
-
-    if (indice >= 0) {
-        biblioteca.splice(indice, 1);
-        mostrarToast(`${jogo.name} removido da biblioteca`);
-    } else {
-        biblioteca.push(jogo);
-        mostrarToast(`"${jogo.name}" adicionado a biblioteca`);
-    }
-
+    const indice = biblioteca.findIndex(function(item) { return item.id === jogo.id; });
+    if (indice >= 0) { biblioteca.splice(indice, 1); mostrarToast(`${jogo.name} removido da biblioteca`); }
+    else { biblioteca.push(jogo); mostrarToast(`"${jogo.name}" adicionado a biblioteca`); }
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
-
     renderizarCatalogo();
     renderizarBiblioteca();
-    atualizarEstadoBotaoBibliotecaEmCards();
 
     if (paginaAtual === 1 && !generoSelecionado && !pesquisaSelecionada) {
         preencherCatalogo(
             document.getElementById("jogos-populares"),
             jogosCatalogo.slice(0, 4)
         );
-        atualizarEstadoBotaoBibliotecaEmCards();
     }
 }
 
@@ -805,7 +672,6 @@ function preencherCatalogo(container, jogos, mensagem = "", naBiblioteca = false
 }
 function criarCardJogo(jogo, naBiblioteca) {
     const card = document.createElement("article"); card.className = "jogo-card scroll-card";
-    card._jogo = jogo;
     const capa = document.createElement("div"); capa.className = "jogo-capa";
     const temCapa = Boolean(jogo.cover?.image_id || jogo.cover?.url);
     if (temCapa) {
@@ -822,13 +688,7 @@ function criarCardJogo(jogo, naBiblioteca) {
     const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogo);
     const acoes = document.createElement("div"); acoes.className = "jogo-acoes";
     if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogo.name}...`); }); acoes.appendChild(jogar); }
-    const biblioteca = document.createElement("button");
-    const salvo = jogoEstaNaBiblioteca(jogo.id);
-    biblioteca.className = "btn-bib" + (salvo ? " salvo" : "");
-    biblioteca.textContent = salvo ? "Salvo" : "Biblioteca";
-    biblioteca.setAttribute("aria-pressed", String(salvo));
-    biblioteca.addEventListener("click", function() { alternarBiblioteca(jogo); });
-    acoes.appendChild(biblioteca);
+    const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogo.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogo.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogo); }); acoes.appendChild(biblioteca);
     info.append(titulo, genero, acoes); card.append(capa, info); return card;
 }
 function mostrarErro(container, texto) { if (!container) return; const estado = document.createElement("p"); estado.className = "estado-texto"; estado.textContent = texto; container.replaceChildren(estado); }
@@ -1111,11 +971,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
     aplicarMascaraCampo("cadastroCpf", "cpf");
     aplicarMascaraCampo("cadastroTelefone", "telefone");
-    aplicarMascaraCampo("contaEditCpf", "cpf");
-    aplicarMascaraCampo("contaEditTelefone", "telefone");
 
     document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
-    document.getElementById("formEditarConta")?.addEventListener("submit", salvarEdicaoConta);
     document.getElementById("inputFotoPerfil")?.addEventListener("change", salvarFotoPerfil);
     document.getElementById("formNovoJogo")?.addEventListener("submit", adicionarJogoCustom);
     document.getElementById("formNovoPlano")?.addEventListener("submit", adicionarPlanoCustom);
