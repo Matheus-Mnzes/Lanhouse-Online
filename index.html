@@ -95,45 +95,7 @@
                 <div class="secao-header">
                     <span class="secao-label">Planos</span>
                 </div>
-                <div class="planos-grid" id="planosGrid">
-                    <article class="plano" data-plano="Essencial">
-                        <div class="plano-nome">Essencial</div>
-                        <div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso a 100+ jogos</li>
-                            <li>1 dispositivo</li>
-                            <li>Full HD</li>
-                            <li>Suporte por e-mail</li>
-                        </ul>
-                        <button class="plano-btn" type="button" data-plano="Essencial">Começar</button>
-                    </article>
-                    <article class="plano plano-destaque" data-plano="Premium">
-                        <div class="plano-tag">Mais popular</div>
-                        <div class="plano-nome">Premium</div>
-                        <div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso a 500+ jogos</li>
-                            <li>3 dispositivos</li>
-                            <li>4K</li>
-                            <li>Suporte 24/7</li>
-                            <li>Lançamentos no dia</li>
-                        </ul>
-                        <button class="plano-btn plano-btn-destaque" type="button" data-plano="Premium">Assinar agora</button>
-                    </article>
-                    <article class="plano" data-plano="Ultimate">
-                        <div class="plano-nome">Ultimate</div>
-                        <div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div>
-                        <ul class="plano-lista">
-                            <li>Acesso ilimitado</li>
-                            <li>6 dispositivos</li>
-                            <li>8K</li>
-                            <li>VIP dedicado</li>
-                            <li>Acesso beta antecipado</li>
-                            <li>Saves na nuvem</li>
-                        </ul>
-                        <button class="plano-btn" type="button" data-plano="Ultimate">Falar com vendas</button>
-                    </article>
-                </div>
+                <div class="planos-grid" id="planosGrid"></div>
             </section>
 
             <footer class="site-footer">
@@ -263,26 +225,7 @@
                         </div>
                         <button class="btn-cancelar" id="cancelarPlanoBotao" type="button" onclick="cancelarPlano()" hidden>Cancelar plano</button>
                     </div>
-                    <div class="conta-planos" id="contaPlanos" aria-label="Opções de plano">
-                        <article class="plano plano-conta" data-plano="Essencial">
-                            <div class="plano-nome">Essencial</div>
-                            <div class="plano-preco">R$ 14<sup>,90</sup><small>/mês</small></div>
-                            <p class="plano-resumo">100+ jogos · 1 dispositivo · Full HD</p>
-                            <button class="plano-btn" type="button" data-plano="Essencial">Escolher plano</button>
-                        </article>
-                        <article class="plano plano-conta plano-destaque" data-plano="Premium">
-                            <div class="plano-nome">Premium</div>
-                            <div class="plano-preco">R$ 29<sup>,90</sup><small>/mês</small></div>
-                            <p class="plano-resumo">500+ jogos · 3 dispositivos · 4K</p>
-                            <button class="plano-btn plano-btn-destaque" type="button" data-plano="Premium">Escolher plano</button>
-                        </article>
-                        <article class="plano plano-conta" data-plano="Ultimate">
-                            <div class="plano-nome">Ultimate</div>
-                            <div class="plano-preco">R$ 49<sup>,90</sup><small>/mês</small></div>
-                            <p class="plano-resumo">Acesso ilimitado · 6 dispositivos · 8K</p>
-                            <button class="plano-btn" type="button" data-plano="Ultimate">Escolher plano</button>
-                        </article>
-                    </div>
+                    <div class="conta-planos" id="contaPlanos" aria-label="Opções de plano"></div>
                 </section>
                 <button class="conta-sair" type="button" onclick="sair()">Sair da conta</button>
             </div>

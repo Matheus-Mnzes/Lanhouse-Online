@@ -70,141 +70,6 @@ button { cursor: pointer; }
 ::-webkit-scrollbar-thumb { background: var(--mid); border-radius: 6px; }
 
 
-/* ── HEADER ──────────────────────────────────────────── */
-.header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: var(--header-h);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    z-index: 100;
-    border-bottom: 1px solid var(--light);
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(12px);
-    transition: border-color 0.3s, background 0.3s;
-}
-
-.header-logo { display: flex; align-items: center; gap: 12px; }
-
-.header-avatar {
-    display: grid;
-    width: 36px;
-    height: 36px;
-    place-items: center;
-    overflow: hidden;
-    border: 1px solid var(--light);
-    border-radius: 50%;
-    background: var(--blue-light);
-    color: var(--blue);
-    font: 400 14px var(--font-serif);
-    font-style: italic;
-    transition: transform .2s var(--ease), border-color .2s;
-}
-
-.header-avatar:hover { transform: scale(1.08); border-color: var(--blue); }
-.header-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.header-logo .logo-btn {
-    font-family: var(--font-serif);
-    font-size: 22px;
-    font-style: italic;
-    font-weight: 400;
-    background: none;
-    border: none;
-    color: var(--dark);
-    letter-spacing: -0.02em;
-    padding: 0;
-}
-
-.header-tagline {
-    font-size: 12px;
-    font-weight: 300;
-    color: #888;
-    text-align: center;
-    line-height: 1.5;
-    letter-spacing: 0.01em;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Botão CTA */
-.btn-cta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--dark);
-    color: var(--white);
-    border: none;
-    border-radius: 999px;
-    padding: 10px 20px;
-    font: 500 12px var(--font-sans);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background 0.22s var(--ease), transform 0.22s var(--ease);
-}
-
-.btn-cta:hover { background: var(--blue); transform: scale(1.03); }
-
-.btn-login {
-    border: 1px solid var(--dark);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--dark);
-    padding: 9px 16px;
-    font: 500 11px var(--font-sans);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background 0.2s, color 0.2s;
-}
-
-.btn-login:hover { background: var(--dark); color: var(--white); }
-
-.btn-cta-dot {
-    font-size: 8px;
-    opacity: 0.6;
-    animation: dot-pulse 2s ease-in-out infinite;
-}
-
-@keyframes dot-pulse {
-    0%, 100% { opacity: 0.6; }
-    50%       { opacity: 1; }
-}
-
-/* Botão Menu */
-.btn-menu {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--off-white);
-    color: var(--dark);
-    border: 1px solid var(--light);
-    border-radius: 999px;
-    padding: 10px 20px;
-    font: 500 12px var(--font-sans);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background 0.22s, border-color 0.22s;
-}
-
-.btn-menu:hover { background: var(--light); }
-
-.btn-menu-icon {
-    font-size: 16px;
-    font-weight: 300;
-    line-height: 1;
-    transition: transform 0.3s var(--ease), content 0.3s;
-    display: inline-block;
-}
-
-.menu-aberto .btn-menu-icon { transform: rotate(45deg); }
-
-
 /* ── MENU OVERLAY ────────────────────────────────────── */
 .menu-overlay {
     position: fixed;
@@ -322,68 +187,6 @@ button { cursor: pointer; }
 .painel.ativo { display: block; }
 
 
-/* ── HERO SECTION ────────────────────────────────────── */
-.hero-section {
-    position: relative;
-    min-height: calc(100vh - var(--header-h));
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-}
-
-.hero-text-wrap {
-    padding: 0 32px 80px;
-    pointer-events: none;
-}
-
-.hero-title {
-    font-family: var(--font-serif);
-    font-size: clamp(56px, 9vw, 130px);
-    font-weight: 400;
-    font-style: normal;
-    line-height: 0.95;
-    letter-spacing: -0.03em;
-    color: var(--dark);
-    mix-blend-mode: multiply;
-}
-
-.hero-title em {
-    font-style: italic;
-    color: var(--blue);
-}
-
-/* Barra de scroll */
-.hero-scroll-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 32px;
-    border-top: 1px solid var(--light);
-    background: rgba(255,255,255,0.6);
-    backdrop-filter: blur(4px);
-}
-
-.scroll-cross {
-    font-size: 14px;
-    color: var(--mid);
-    font-weight: 300;
-}
-
-.scroll-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--mid);
-    font-weight: 400;
-    animation: scroll-blink 2.5s ease-in-out infinite;
-}
-
-@keyframes scroll-blink {
-    0%, 100% { opacity: 0.5; }
-    50%       { opacity: 1; }
-}
-
-
 /* ── SEÇÕES ──────────────────────────────────────────── */
 .secao {
     padding: 80px 32px;
@@ -405,17 +208,6 @@ button { cursor: pointer; }
     color: var(--mid);
     font-weight: 500;
 }
-
-.link-todos {
-    background: none;
-    border: none;
-    font: 400 13px var(--font-sans);
-    color: var(--blue);
-    letter-spacing: 0.02em;
-    transition: opacity 0.2s;
-}
-
-.link-todos:hover { opacity: 0.6; }
 
 
 /* ── PAINEL INTERIOR (Jogos, Biblioteca) ─────────────── */
@@ -588,36 +380,6 @@ button { cursor: pointer; }
     filter: grayscale(0%);
 }
 
-.jogo-capa-placeholder {
-    width: 100%; height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 48px;
-    opacity: 0.15;
-    font-family: var(--font-serif);
-    font-style: italic;
-    color: var(--dark);
-    letter-spacing: -0.02em;
-}
-
-.jogo-rating-badge {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(6px);
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--dark);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
 .jogo-info {
     padding: 18px 20px;
     border-top: 1px solid var(--light);
@@ -708,29 +470,6 @@ button { cursor: pointer; }
     50%       { opacity: 0.5; }
 }
 
-
-/* ── CARREGAR MAIS ───────────────────────────────────── */
-.carregar-wrap {
-    display: flex;
-    justify-content: center;
-    padding: 40px 32px;
-    border-top: 1px solid var(--light);
-}
-
-.btn-carregar {
-    border: 1px solid var(--dark);
-    background: transparent;
-    color: var(--dark);
-    border-radius: 999px;
-    padding: 14px 36px;
-    font: 400 13px var(--font-sans);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    transition: background 0.2s, color 0.2s;
-}
-
-.btn-carregar:hover { background: var(--dark); color: var(--white); }
-.btn-carregar:disabled { opacity: 0.4; }
 
 .paginacao-jogos {
     display: flex;
@@ -1303,18 +1042,13 @@ button { cursor: pointer; }
 @media (max-width: 960px) {
     .planos-grid { grid-template-columns: 1fr; }
     .menu-overlay { width: 100%; }
-    .header-tagline { display: none; }
 }
 
 @media (max-width: 640px) {
-    .header { padding: 0 20px; }
-    .hero-text-wrap { padding: 0 20px 60px; }
-    .hero-scroll-bar { padding: 14px 20px; }
     .secao { padding: 60px 20px; }
     .painel-header { padding: 36px 20px 28px; }
     .filtros { padding: 20px; }
     .grid-jogos { padding: 0; }
-    .carregar-wrap { padding: 32px 20px; }
     .filtro-busca { margin-left: 0; }
     .input-wrap input { min-width: 0; width: 100%; }
     .grid-jogos { grid-template-columns: repeat(2, 1fr); padding: 0; gap: 12px; }
@@ -1332,177 +1066,6 @@ button { cursor: pointer; }
     }
 }
 
-/* ── MODO ESCURO ──────────────────────────────────────── */
-
-body.dark-mode {
-    --white: #111111;
-    --off-white: #181818;
-    --light: #2c2c2c;
-    --mid: #777777;
-    --dark: #f2f2f2;
-    --black: #ffffff;
-
-    --blue: #4d72ff;
-    --blue-light: #182447;
-}
-
-/* Fundo e texto principal */
-body.dark-mode {
-    background: var(--white);
-    color: var(--dark);
-}
-
-/* Seleção de texto */
-body.dark-mode ::selection {
-    background: var(--dark);
-    color: #111111;
-}
-
-/* Scrollbar */
-body.dark-mode ::-webkit-scrollbar-track {
-    background: var(--off-white);
-}
-
-body.dark-mode ::-webkit-scrollbar-thumb {
-    background: var(--mid);
-}
-
-/* Header */
-body.dark-mode .header {
-    background: rgba(17, 17, 17, 0.92);
-    border-color: var(--light);
-}
-
-body.dark-mode .header-logo .logo-btn {
-    color: var(--dark);
-}
-
-body.dark-mode .header-avatar {
-    background: var(--blue-light);
-    color: var(--blue);
-    border-color: var(--light);
-}
-
-/* Botões */
-body.dark-mode .btn-login {
-    border-color: var(--dark);
-    color: var(--dark);
-}
-
-body.dark-mode .btn-login:hover {
-    background: var(--dark);
-    color: #111111;
-}
-
-body.dark-mode .btn-menu {
-    background: var(--off-white);
-    color: var(--dark);
-    border-color: var(--light);
-}
-
-body.dark-mode .btn-menu:hover {
-    background: var(--light);
-}
-
-/* Menu */
-body.dark-mode .menu-overlay {
-    background: var(--white);
-    border-color: var(--light);
-}
-
-body.dark-mode .menu-link {
-    color: var(--dark);
-    border-color: var(--light);
-}
-
-body.dark-mode .menu-labs {
-    color: var(--dark);
-    border-color: var(--light);
-}
-
-body.dark-mode .menu-labs:hover {
-    background: var(--off-white);
-}
-
-/* Hero */
-body.dark-mode .hero-title {
-    color: var(--dark);
-    mix-blend-mode: normal;
-}
-
-body.dark-mode .hero-scroll-bar {
-    background: rgba(17, 17, 17, 0.6);
-    border-color: var(--light);
-}
-
-/* Seções */
-body.dark-mode .secao {
-    background: var(--white);
-    border-color: var(--light);
-}
-
-/* Painéis */
-body.dark-mode .painel-header {
-    background: var(--white);
-    border-color: var(--light);
-}
-
-body.dark-mode .painel-titulo {
-    color: var(--dark);
-}
-
-/* Filtros */
-body.dark-mode .filtros {
-    background: var(--off-white);
-    border-color: var(--light);
-}
-
-body.dark-mode .select-wrap select,
-body.dark-mode .input-wrap {
-    background: #151515;
-    border-color: var(--light);
-    color: var(--dark);
-}
-
-body.dark-mode .select-wrap select {
-    color-scheme: dark;
-}
-
-body.dark-mode .input-wrap input {
-    color: var(--dark);
-}
-
-body.dark-mode .input-wrap input::placeholder {
-    color: var(--mid);
-}
-
-/* Cards de jogos */
-body.dark-mode .jogo-card {
-    background: var(--white);
-    border-color: var(--light);
-}
-
-body.dark-mode .jogo-card:hover {
-    background: var(--off-white);
-}
-
-body.dark-mode .jogo-info {
-    border-color: var(--light);
-}
-
-body.dark-mode .jogo-capa {
-    background: var(--light);
-}
-
-body.dark-mode .jogo-capa-placeholder {
-    color: var(--dark);
-}
-
-body.dark-mode .jogo-rating-badge {
-    background: rgba(20, 20, 20, 0.92);
-    border-color: rgba(255, 255, 255, 0.08);
-    color: var(--dark);
-}
 
 /* Botão Biblioteca */
 body.dark-mode .btn-bib {
@@ -1642,92 +1205,3 @@ body.dark-mode .toast {
     color: #111111;
 }
 
-/* Botão de tema */
-.btn-tema {
-    display: grid;
-    width: 38px;
-    height: 38px;
-    place-items: center;
-    border: 1px solid var(--light);
-    border-radius: 50%;
-    background: var(--off-white);
-    color: var(--dark);
-    font-size: 16px;
-    transition:
-        background 0.2s,
-        border-color 0.2s,
-        transform 0.2s;
-}
-
-.btn-tema:hover {
-    background: var(--light);
-    transform: rotate(15deg);
-}
-
-body.dark-mode .btn-tema {
-    background: var(--off-white);
-    color: var(--dark);
-}
-
-/* ============================================================
-   ANIMAÇÕES DE SCROLL — YCloud
-   Elementos entram suavemente quando chegam à viewport.
-============================================================ */
-.reveal-scroll,
-.reveal-left,
-.reveal-right {
-    opacity: 0;
-    will-change: opacity, transform;
-}
-
-.reveal-scroll {
-    transform: translate3d(0, 70px, 0);
-    transition: opacity .85s cubic-bezier(.22,1,.36,1),
-                transform .85s cubic-bezier(.22,1,.36,1);
-}
-
-.reveal-left {
-    transform: translate3d(-70px, 0, 0);
-    transition: opacity .85s cubic-bezier(.22,1,.36,1),
-                transform .85s cubic-bezier(.22,1,.36,1);
-}
-
-.reveal-right {
-    transform: translate3d(70px, 0, 0);
-    transition: opacity .85s cubic-bezier(.22,1,.36,1),
-                transform .85s cubic-bezier(.22,1,.36,1);
-}
-
-.reveal-scroll.visivel,
-.reveal-left.visivel,
-.reveal-right.visivel {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-}
-
-/* Cards criados dinamicamente pelo JavaScript */
-.jogo-card.scroll-card {
-    opacity: 0;
-    transform: translate3d(0, 35px, 0);
-    transition: opacity .65s cubic-bezier(.22,1,.36,1),
-                transform .65s cubic-bezier(.22,1,.36,1),
-                background .25s;
-    animation: none;
-}
-
-.jogo-card.scroll-card.visible {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-}
-
-/* Respeita usuários que preferem menos movimento */
-@media (prefers-reduced-motion: reduce) {
-    .reveal-scroll,
-    .reveal-left,
-    .reveal-right,
-    .jogo-card.scroll-card {
-        opacity: 1 !important;
-        transform: none !important;
-        transition: none !important;
-    }
-}
