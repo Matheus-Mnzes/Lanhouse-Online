@@ -1091,6 +1091,7 @@ button { cursor: pointer; }
 }
 
 .login-card h2 {
+    margin-bottom: 20px;
     font-family: var(--font-serif);
     font-size: 38px;
     font-style: italic;
