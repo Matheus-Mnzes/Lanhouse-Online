@@ -7,9 +7,15 @@ let jogosCatalogo = [];
 let temporizadorPesquisa;
 let catalogoCarregado = false;
 
+let heroJogos = [];
+let heroAtual = 0;
+let heroTimer = null;
+const HERO_INTERVAL = 6000;
+
 const GENEROS = { "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro", "Fighting": "Luta", "Indie": "Independente", "Music": "Música", "Platform": "Plataforma", "Puzzle": "Quebra-cabeça", "Racing": "Corrida", "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático", "Visual Novel": "Visual novel" };
 const USUARIOS_DEMO = [
-    { usuario: "joao", senha: "1234" }
+    { usuario: "joao", senha: "1234" },
+    { usuario: "maria", senha: "senha" }
 ];
 let modoCadastro = false;
 let planoPendente = null;
@@ -26,10 +32,6 @@ function obterUsuariosCadastrados() {
     catch { return []; }
 }
 function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
-function obterDadosUsuario(usuario = obterUsuarioLogado()) {
-    if (!usuario) return null;
-    return obterTodosUsuarios().find(item => item.usuario.toLowerCase() === usuario.toLowerCase()) || null;
-}
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
@@ -66,9 +68,7 @@ function atualizarAreaPlano() {
 }
 function atualizarPerfil() {
     const usuario = obterUsuarioLogado();
-    const dadosUsuario = obterDadosUsuario(usuario);
     const nome = document.getElementById("perfilUsuario");
-    const info = document.getElementById("perfilInfo");
     const foto = document.getElementById("perfilFoto");
     const iniciais = document.getElementById("perfilIniciais");
     const fotoCabecalho = document.getElementById("headerAvatarFoto");
@@ -76,24 +76,6 @@ function atualizarPerfil() {
     const imagem = usuario ? localStorage.getItem(chaveFotoDoUsuario(usuario)) : null;
 
     if (nome) nome.textContent = usuario || "Jogador";
-    if (info) {
-        const detalhes = dadosUsuario ? [
-            ["CPF", dadosUsuario.cpf],
-            ["Nascimento", formatarData(dadosUsuario.dataNascimento)],
-            ["Gmail", dadosUsuario.gmail],
-            ["Telefone", dadosUsuario.telefone],
-            ["Cadastro", formatarDataHora(dadosUsuario.dataCadastro)]
-        ].filter(item => item[1]) : [];
-
-        info.replaceChildren(...detalhes.flatMap(function(item) {
-            const termo = document.createElement("dt");
-            const descricao = document.createElement("dd");
-            termo.textContent = item[0];
-            descricao.textContent = item[1];
-            return [termo, descricao];
-        }));
-        info.hidden = detalhes.length === 0;
-    }
     if (iniciais) iniciais.textContent = usuario ? usuario.slice(0, 2).toUpperCase() : "Y";
     if (foto) {
         foto.hidden = !imagem;
@@ -190,23 +172,14 @@ function abrirLogin() {
 }
 function configurarModoLogin(cadastro) {
     modoCadastro = cadastro;
-    document.body.classList.toggle("cadastro-aberto", cadastro);
     const titulo = document.getElementById("loginTitulo");
     const ajuda = document.getElementById("loginAjuda");
     const enviar = document.querySelector(".login-enviar");
     const alternar = document.getElementById("loginAlternar");
-    const camposCadastro = document.querySelector(".campos-cadastro");
-    const camposExtras = camposCadastro?.querySelectorAll("input") || [];
     if (titulo) titulo.textContent = cadastro ? "Crie sua conta" : "Entre na sua conta";
-    if (ajuda) ajuda.innerHTML = cadastro ? "Preencha seus dados para salvar a conta neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
+    if (ajuda) ajuda.innerHTML = cadastro ? "Escolha um usuário e uma senha para salvar neste navegador." : "Para testar: <strong>joao / 1234</strong> ou <strong>maria / senha</strong>.";
     if (enviar) enviar.textContent = cadastro ? "Criar conta" : "Entrar";
     if (alternar) alternar.textContent = cadastro ? "Já tenho uma conta" : "Criar uma conta nova";
-    if (camposCadastro) camposCadastro.hidden = !cadastro;
-    camposExtras.forEach(function(campo) {
-        campo.required = cadastro;
-    });
-    const senha = document.getElementById("loginSenha");
-    if (senha) senha.autocomplete = cadastro ? "new-password" : "current-password";
     document.getElementById("loginErro").textContent = "";
 }
 function alternarModoLogin() { configurarModoLogin(!modoCadastro); }
@@ -215,31 +188,24 @@ function fecharLogin() {
     if (!modal) return;
     modal.classList.remove("aberto");
     modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("cadastro-aberto");
     document.getElementById("loginErro").textContent = "";
 }
 function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
     const senha = document.getElementById("loginSenha").value;
-    const cpf = document.getElementById("cadastroCpf")?.value.trim() || "";
-    const dataNascimento = document.getElementById("cadastroNascimento")?.value || "";
-    const gmail = document.getElementById("cadastroGmail")?.value.trim() || "";
-    const telefone = document.getElementById("cadastroTelefone")?.value.trim() || "";
     const usuarios = obterTodosUsuarios();
     const valido = usuarios.some(item => item.usuario === usuario && item.senha === senha);
     const erro = document.getElementById("loginErro");
     if (modoCadastro) {
         if (usuario.length < 3) { erro.textContent = "O usuário deve ter ao menos 3 caracteres."; return; }
         if (senha.length < 3) { erro.textContent = "A senha deve ter ao menos 3 caracteres."; return; }
-        if (!cpf || !dataNascimento || !gmail || !telefone) { erro.textContent = "Preencha todos os dados do cadastro."; return; }
-        if (!gmail.toLowerCase().endsWith("@gmail.com")) { erro.textContent = "Informe um endereço Gmail válido."; return; }
         if (usuarios.some(item => item.usuario.toLowerCase() === usuario.toLowerCase())) {
             erro.textContent = "Este nome de usuário já existe.";
             return;
         }
         const cadastrados = obterUsuariosCadastrados();
-        cadastrados.push({ usuario, senha, cpf, dataNascimento, gmail, telefone, dataCadastro: new Date().toISOString() });
+        cadastrados.push({ usuario, senha });
         localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
         localStorage.setItem("ycloudUsuarioLogado", usuario);
         migrarBibliotecaLegada();
@@ -247,7 +213,6 @@ function fazerLogin(evento) {
         atualizarBotaoLogin();
         atualizarPerfil();
         aplicarPlanoPendente();
-        mostrarPainel("conta");
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
     }
@@ -272,20 +237,6 @@ function sair() {
     mostrarToast("Você saiu da conta.");
 }
 
-function formatarData(data) {
-    if (!data) return "";
-    const partes = data.split("-");
-    if (partes.length !== 3) return data;
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-}
-
-function formatarDataHora(data) {
-    if (!data) return "";
-    const valor = new Date(data);
-    if (Number.isNaN(valor.getTime())) return data;
-    return valor.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
-}
-
 function mostrarPainel(id) {
     if ((id === "biblioteca" || id === "conta") && !obterUsuarioLogado()) {
         fecharMenu();
@@ -299,6 +250,11 @@ function mostrarPainel(id) {
         painel.classList.toggle("painel-oculto", !ativo);
         painel.classList.toggle("ativo", ativo);
     });
+
+    const header = document.getElementById("header");
+    if (header && alvo !== "inicio") {
+        header.classList.remove("on-hero");
+    }
 
     if (alvo === "jogos" && !catalogoCarregado) {
         carregarCatalogo(1);
@@ -391,12 +347,15 @@ async function carregarCatalogo(pagina) {
         paginaAtual     = pagina;
         catalogoCarregado = true;
         renderizarCatalogo();
+        iniciarAnimacoesScroll();
 
         if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
                 jogos.slice(0, 4)
             );
+            montarHero(jogos);
+            iniciarAnimacoesScroll();
         }
 
         if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
@@ -419,12 +378,12 @@ function preencherCatalogo(container, jogos, mensagem = "", naBiblioteca = false
     jogos.forEach(function(jogo) { container.appendChild(criarCardJogo(jogo, naBiblioteca)); });
 }
 function criarCardJogo(jogo, naBiblioteca) {
-    const card = document.createElement("article"); card.className = "jogo-card";
+    const card = document.createElement("article"); card.className = "jogo-card scroll-card";
     const capa = document.createElement("div"); capa.className = "jogo-capa";
-    if (jogo.cover?.image_id) { const imagem = document.createElement("img"); imagem.src = `https://images.igdb.com/igdb/image/upload/t_cover_big/${jogo.cover.image_id}.jpg`; imagem.alt = `Capa de ${jogo.name}`; imagem.loading = "lazy"; capa.appendChild(imagem); } else capa.textContent = "Y";
+    if (jogo.cover?.image_id) { const imagem = document.createElement("img"); imagem.src = urlCapaJogo(jogo); imagem.alt = `Capa de ${jogo.name}`; imagem.loading = "lazy"; capa.appendChild(imagem); } else capa.textContent = "Y";
     const info = document.createElement("div"); info.className = "jogo-info";
     const titulo = document.createElement("h3"); titulo.className = "jogo-titulo"; titulo.textContent = jogo.name;
-    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = jogo.genres?.length ? jogo.genres.map(function(item) { return GENEROS[item.name] || item.name; }).join(", ") : "Gênero não informado";
+    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogo);
     const acoes = document.createElement("div"); acoes.className = "jogo-acoes";
     if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogo.name}...`); }); acoes.appendChild(jogar); }
     const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogo.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogo.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogo); }); acoes.appendChild(biblioteca);
@@ -474,6 +433,170 @@ async function carregarFiltroGeneros() {
 // ── Jogar ──────────────────────────────────────────────────────────
 function jogar(nomeJogo) {
     mostrarToast(`Abrindo ${nomeJogo}…`);
+}
+
+function urlCapaJogo(jogo, tamanho = "t_cover_big") {
+    if (!jogo.cover?.image_id) return null;
+    return `https://images.igdb.com/igdb/image/upload/${tamanho}/${jogo.cover.image_id}.jpg`;
+}
+
+function textoGeneros(jogo) {
+    if (!jogo.genres?.length) return "Gênero não informado";
+    return jogo.genres
+        .slice(0, 2)
+        .map(function(item) { return GENEROS[item.name] || item.name; })
+        .join(" · ");
+}
+
+function montarHero(jogos) {
+    const slidesWrap = document.getElementById("slides");
+    const progressWrap = document.getElementById("progress");
+    if (!slidesWrap || !progressWrap) return;
+
+    heroJogos = jogos.filter(function(j) { return j.cover?.image_id; }).slice(0, 4);
+    if (!heroJogos.length) {
+        document.getElementById("gameTitle").textContent = "Catálogo indisponível";
+        document.getElementById("gameGenre").textContent = "Verifique a API";
+        return;
+    }
+
+    slidesWrap.replaceChildren();
+    progressWrap.replaceChildren();
+
+    heroJogos.forEach(function(jogo, indice) {
+        const slide = document.createElement("div");
+        slide.className = "slide" + (indice === 0 ? " active" : "");
+        const img = document.createElement("img");
+        img.src = urlCapaJogo(jogo, "t_1080p");
+        img.alt = jogo.name;
+        slide.appendChild(img);
+        slidesWrap.appendChild(slide);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.setAttribute("aria-label", `Slide ${indice + 1}`);
+        if (indice === 0) btn.classList.add("active");
+        btn.addEventListener("click", function() {
+            irParaHero(indice);
+            reiniciarTimerHero();
+        });
+        progressWrap.appendChild(btn);
+    });
+
+    heroAtual = 0;
+    atualizarInfoHero();
+    reiniciarTimerHero();
+}
+
+function atualizarInfoHero() {
+    const jogo = heroJogos[heroAtual];
+    const titleEl = document.getElementById("gameTitle");
+    const genreEl = document.getElementById("gameGenre");
+    const countEl = document.getElementById("slideCount");
+    if (!jogo || !titleEl || !genreEl || !countEl) return;
+
+    titleEl.textContent = jogo.name;
+    genreEl.textContent = textoGeneros(jogo);
+    countEl.textContent =
+        String(heroAtual + 1).padStart(2, "0") + " / " + String(heroJogos.length).padStart(2, "0");
+}
+
+function irParaHero(indice) {
+    const slides = [...document.querySelectorAll("#slides .slide")];
+    const buttons = [...document.querySelectorAll("#progress button")];
+    const gameBox = document.getElementById("heroGame");
+    if (!slides.length || indice === heroAtual) return;
+
+    slides[heroAtual].classList.remove("active");
+    buttons[heroAtual]?.classList.remove("active");
+    heroAtual = (indice + slides.length) % slides.length;
+    slides[heroAtual].classList.add("active");
+
+    if (buttons[heroAtual]) {
+        void buttons[heroAtual].offsetWidth;
+        buttons[heroAtual].classList.add("active");
+    }
+
+    if (gameBox) {
+        gameBox.classList.add("fading");
+        setTimeout(function() {
+            atualizarInfoHero();
+            gameBox.classList.remove("fading");
+        }, 350);
+    }
+}
+
+function proximoHero() {
+    irParaHero(heroAtual + 1);
+}
+
+function reiniciarTimerHero() {
+    clearInterval(heroTimer);
+    if (heroJogos.length > 1) {
+        heroTimer = setInterval(proximoHero, HERO_INTERVAL);
+    }
+}
+
+function iniciarParallaxHero() {
+    const slidesWrap = document.getElementById("slides");
+    const heroContent = document.getElementById("heroContent");
+    const hero = document.getElementById("hero");
+    const header = document.getElementById("header");
+    const painelInicio = document.getElementById("painel-inicio");
+    if (!slidesWrap || !hero || !header) return;
+
+    let mx = 0, my = 0, tx = 0, ty = 0;
+
+    window.addEventListener("mousemove", function(e) {
+        mx = (e.clientX / window.innerWidth - 0.5) * 2;
+        my = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function animate() {
+        tx += (mx - tx) * 0.05;
+        ty += (my - ty) * 0.05;
+        slidesWrap.style.transform = `translate3d(${tx * -22}px, ${ty * -14}px, 0) scale(1.06)`;
+
+        const sc = window.scrollY;
+        const inicioVisivel = painelInicio && !painelInicio.classList.contains("painel-oculto");
+
+        if (inicioVisivel && sc < hero.offsetHeight) {
+            slidesWrap.style.top = sc * 0.35 + "px";
+            if (heroContent) {
+                heroContent.style.transform = `translateY(${sc * 0.18}px)`;
+                heroContent.style.opacity = String(Math.max(0, 1 - sc / (hero.offsetHeight * 0.65)));
+            }
+            header.classList.add("on-hero");
+        } else if (inicioVisivel) {
+            header.classList.remove("on-hero");
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+function iniciarAnimacoesScroll() {
+    const cards = document.querySelectorAll(".featured .jogo-card, .featured .game-card, .jogo-card.scroll-card");
+    if (!cards.length) return;
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry, i) {
+            if (entry.isIntersecting) {
+                setTimeout(function() {
+                    entry.target.classList.add("visible");
+                }, i * 90);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+
+    cards.forEach(function(card) {
+        if (!card.classList.contains("visible")) {
+            observer.observe(card);
+        }
+    });
 }
 
 // ── Modo Escuro ──────────────────────────────────────────────────────────
@@ -549,4 +672,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("keydown", e => {
         if (e.key === "Escape") { fecharMenu(); fecharLogin(); }
     });
+
+    iniciarParallaxHero();
+    iniciarAnimacoesScroll();
 });
