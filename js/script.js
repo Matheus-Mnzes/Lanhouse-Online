@@ -380,10 +380,25 @@ function mostrarErro(container, texto) { if (!container) return; const estado = 
 
 function renderizarBiblioteca() {
     const pesquisa = document.getElementById("pesquisaBiblioteca")?.value.trim().toLowerCase() || "";
-    const todos = obterBiblioteca(); const jogos = todos.filter(function(jogo) { return jogo.name.toLowerCase().includes(pesquisa); });
-    preencherCatalogo(document.getElementById("catalogoBiblioteca"), jogos, "", true);
-    const vazio = document.getElementById("bibVazio"); if (vazio) vazio.hidden = jogos.length > 0;
+    const todos = obterBiblioteca();
+    const jogos = todos.filter(function(jogo) {
+        return jogo.name.toLowerCase().includes(pesquisa);
+    });
+
+    preencherCatalogo(
+        document.getElementById("catalogoBiblioteca"),
+        jogos,
+        "",
+        true
+    );
+
+    const vazio = document.getElementById("bibVazio");
+
+    if (vazio) {
+        vazio.hidden = todos.length > 0;
+    }
 }
+
 // ── Filtro de gêneros ─────────────────────────────────────────────
 async function carregarFiltroGeneros() {
     const filtro = document.getElementById("filtroGenero");
