@@ -79,7 +79,39 @@ function obterUsuariosCadastrados() {
     }
     catch { return []; }
 }
-function obterTodosUsuarios() { return [...USUARIOS_DEMO, ...obterUsuariosCadastrados()]; }
+function obterTodosUsuarios() {
+    const mapa = new Map();
+
+    USUARIOS_DEMO.forEach(function(item) {
+        if (!item || !item.usuario) return;
+        mapa.set(String(item.usuario).trim().toLowerCase(), {
+            usuario: item.usuario,
+            senha: item.senha || "",
+            admin: Boolean(item.admin),
+            cpf: item.cpf || "",
+            dataNascimento: item.dataNascimento || "",
+            gmail: item.gmail || "",
+            telefone: item.telefone || "",
+            dataCadastro: item.dataCadastro || ""
+        });
+    });
+
+    obterUsuariosCadastrados().forEach(function(item) {
+        if (!item || !item.usuario) return;
+        mapa.set(String(item.usuario).trim().toLowerCase(), {
+            usuario: item.usuario,
+            senha: item.senha || "",
+            admin: Boolean(item.admin),
+            cpf: item.cpf || "",
+            dataNascimento: item.dataNascimento || "",
+            gmail: item.gmail || "",
+            telefone: item.telefone || "",
+            dataCadastro: item.dataCadastro || ""
+        });
+    });
+
+    return Array.from(mapa.values());
+}
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
