@@ -381,6 +381,7 @@ function mostrarErro(container, texto) { if (!container) return; const estado = 
 function renderizarBiblioteca() {
     const pesquisa = document.getElementById("pesquisaBiblioteca")?.value.trim().toLowerCase() || "";
     const todos = obterBiblioteca();
+
     const jogos = todos.filter(function(jogo) {
         return jogo.name.toLowerCase().includes(pesquisa);
     });
@@ -396,6 +397,7 @@ function renderizarBiblioteca() {
 
     if (vazio) {
         vazio.hidden = todos.length > 0;
+        vazio.style.display = todos.length > 0 ? "none" : "";
     }
 }
 

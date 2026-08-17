@@ -784,6 +784,10 @@ button { cursor: pointer; }
     margin-top: 28px;
 }
 
+.estado-vazio[hidden] {
+    display: none !important;
+}
+
 .estado-vazio-icone {
     font-size: 40px;
     opacity: 0.2;
