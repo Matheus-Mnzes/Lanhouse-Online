@@ -191,6 +191,7 @@ function abrirLogin() {
 }
 function configurarModoLogin(cadastro) {
     modoCadastro = cadastro;
+    document.body.classList.toggle("cadastro-aberto", cadastro);
     const titulo = document.getElementById("loginTitulo");
     const ajuda = document.getElementById("loginAjuda");
     const enviar = document.querySelector(".login-enviar");
@@ -215,6 +216,7 @@ function fecharLogin() {
     if (!modal) return;
     modal.classList.remove("aberto");
     modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("cadastro-aberto");
     document.getElementById("loginErro").textContent = "";
 }
 function fazerLogin(evento) {
@@ -246,6 +248,7 @@ function fazerLogin(evento) {
         atualizarBotaoLogin();
         atualizarPerfil();
         aplicarPlanoPendente();
+        mostrarPainel("conta");
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
     }

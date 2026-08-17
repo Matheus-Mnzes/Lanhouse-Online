@@ -49,6 +49,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+body.cadastro-aberto { overflow: hidden; }
+
 ::selection { background: var(--dark); color: var(--white); }
 
 a { text-decoration: none; color: inherit; }
@@ -1043,6 +1045,7 @@ button { cursor: pointer; }
     display: grid;
     place-items: center;
     padding: 20px;
+    overflow-y: auto;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s;
