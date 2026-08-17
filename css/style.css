@@ -47,6 +47,11 @@ body {
     min-height: 100vh;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
+    color-scheme: light;
+}
+
+body.dark-mode {
+    color-scheme: dark;
 }
 
 ::selection { background: var(--dark); color: var(--white); }

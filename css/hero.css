@@ -16,6 +16,224 @@ body {
     font-family: var(--hero-sans);
 }
 
+body.dark-mode {
+    --hero-bg: #0b0d10;
+    --hero-ink: #f3f5f7;
+    --hero-ink-soft: #afb7c5;
+    --hero-blue: #6d86ff;
+    --hero-line: rgba(255, 255, 255, 0.12);
+}
+
+body.dark-mode,
+body.dark-mode .hero,
+body.dark-mode .featured,
+body.dark-mode .site-footer,
+body.dark-mode .secao-planos,
+body.dark-mode .menu-overlay,
+body.dark-mode .plano,
+body.dark-mode .jogo-card,
+body.dark-mode .login-card,
+body.dark-mode .conta-perfil,
+body.dark-mode .conta-assinatura {
+    color-scheme: dark;
+}
+
+body.dark-mode .site-header {
+    background: rgba(11, 13, 16, 0.72);
+    border-color: var(--hero-line);
+}
+
+body.dark-mode .site-header.on-hero {
+    background: rgba(11, 13, 16, 0.18);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+body.dark-mode .site-header .logo,
+body.dark-mode .site-header .logo-word,
+body.dark-mode .site-header .header-tag,
+body.dark-mode .site-header .btn,
+body.dark-mode .section-label,
+body.dark-mode .section-link,
+body.dark-mode .hero-sub,
+body.dark-mode .hero-eyebrow,
+body.dark-mode .hero-game,
+body.dark-mode .footer-meta,
+body.dark-mode .menu-link,
+body.dark-mode .menu-labs,
+body.dark-mode .plano-lista,
+body.dark-mode .plano-nome,
+body.dark-mode .jogo-genero,
+body.dark-mode .featured .btn-bib,
+body.dark-mode .featured .jogo-titulo,
+body.dark-mode .featured .game-info h3 {
+    color: var(--hero-ink);
+}
+
+body.dark-mode .site-header.on-hero .logo,
+body.dark-mode .site-header.on-hero .header-tag,
+body.dark-mode .site-header.on-hero .btn-outline,
+body.dark-mode .site-header.on-hero .btn-dark,
+body.dark-mode .hero-eyebrow .count,
+body.dark-mode .hero-game,
+body.dark-mode .hero-title,
+body.dark-mode .hero-sub,
+body.dark-mode .hero-game .g-title,
+body.dark-mode .hero-game .g-genre,
+body.dark-mode .hero-bottombar,
+body.dark-mode .hero-bottombar .cross,
+body.dark-mode .featured .btn-bib:hover,
+body.dark-mode .featured .btn-bib.salvo,
+body.dark-mode .btn-outline,
+body.dark-mode .login-card,
+body.dark-mode .btn {
+    color: var(--hero-ink);
+}
+
+body.dark-mode .site-header.on-hero .btn-outline {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+body.dark-mode .site-header.on-hero .btn-outline:hover {
+    border-color: #fff;
+}
+
+body.dark-mode .painel,
+body.dark-mode .featured,
+body.dark-mode .site-footer,
+body.dark-mode .secao-planos,
+body.dark-mode .featured .jogo-card,
+body.dark-mode .featured .game-card {
+    background: var(--hero-bg);
+}
+
+body.dark-mode .featured .jogo-card,
+body.dark-mode .featured .game-card,
+body.dark-mode .featured .jogo-capa,
+body.dark-mode .featured .game-cover,
+body.dark-mode .featured .btn-bib,
+body.dark-mode .featured .skel,
+body.dark-mode .plano,
+body.dark-mode .plano-destaque,
+body.dark-mode .login-card,
+body.dark-mode .conta-perfil,
+body.dark-mode .conta-assinatura,
+body.dark-mode .section-head {
+    border-color: var(--hero-line);
+}
+
+body.dark-mode .featured .jogo-card,
+body.dark-mode .featured .game-card,
+body.dark-mode .plano,
+body.dark-mode .plano-destaque,
+body.dark-mode .featured .btn-bib,
+body.dark-mode .site-footer {
+    background: #11151a;
+}
+
+body.dark-mode .plano-destaque {
+    background: #0d1014;
+}
+
+body.dark-mode .section-head {
+    border-bottom-color: var(--hero-line);
+}
+
+body.dark-mode .featured .jogo-card:hover,
+body.dark-mode .featured .game-card:hover {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+body.dark-mode .featured .btn-bib {
+    background: transparent;
+    color: var(--hero-ink);
+}
+
+body.dark-mode .featured .btn-bib:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+body.dark-mode .hero {
+    background: #0b0d10;
+}
+
+body.dark-mode .hero-veil {
+    background:
+        linear-gradient(to top, rgba(10, 12, 14, 0.82) 0%, rgba(10, 12, 14, 0.28) 42%, rgba(10, 12, 14, 0.15) 60%, rgba(10, 12, 14, 0.35) 100%),
+        linear-gradient(100deg, rgba(10, 12, 14, 0.55) 0%, transparent 55%);
+}
+
+body.dark-mode .section-link:hover {
+    border-color: var(--hero-ink);
+}
+
+body.dark-mode .btn-outline,
+body.dark-mode .site-header.on-hero .btn-outline,
+body.dark-mode .site-header .btn-outline {
+    border-color: var(--hero-line);
+}
+
+body.dark-mode .btn-outline:hover {
+    border-color: var(--hero-ink);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+body.dark-mode .btn-dark {
+    background: #fff;
+    color: #111;
+}
+
+body.dark-mode .btn-dark:hover {
+    background: var(--hero-blue);
+    color: #fff;
+}
+
+body.dark-mode .btn-light,
+body.dark-mode .btn-ghost,
+body.dark-mode .site-header.on-hero .btn-dark {
+    background: #fff;
+    color: #111;
+}
+
+body.dark-mode .btn-light:hover,
+body.dark-mode .btn-ghost:hover {
+    background: var(--hero-blue);
+    color: #fff;
+}
+
+body.dark-mode .site-header.on-hero .btn-dark {
+    border-color: transparent;
+}
+
+body.dark-mode .menu-overlay {
+    background: #111417;
+}
+
+body.dark-mode .menu-link,
+body.dark-mode .menu-labs,
+body.dark-mode .menu-link-num,
+body.dark-mode .menu-link-arrow {
+    color: var(--hero-ink);
+}
+
+body.dark-mode .menu-labs:hover,
+body.dark-mode .menu-link:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+body.dark-mode .hero-bottombar {
+    border-color: var(--hero-line);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+body.dark-mode .scroll-hint .line-v,
+body.dark-mode .scroll-hint .line-v::after,
+body.dark-mode .hero-progress button::before,
+body.dark-mode .hero-progress button::after {
+    opacity: 1;
+}
+
 ::selection {
     background: var(--hero-blue);
     color: #fff;

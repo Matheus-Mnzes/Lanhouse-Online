@@ -616,6 +616,7 @@ function atualizarBotaoTema() {
 
 function alternarTema() {
     const modoEscuro = document.body.classList.toggle("dark-mode");
+    document.documentElement.style.colorScheme = modoEscuro ? "dark" : "light";
 
     localStorage.setItem(
         "ycloudTema",
@@ -628,11 +629,13 @@ function alternarTema() {
 // ── Init ───────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
     const temaSalvo = localStorage.getItem("ycloudTema");
+    const temaDoSistema = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
-    if (temaSalvo === "escuro") {
+    if (temaSalvo === "escuro" || (!temaSalvo && temaDoSistema)) {
         document.body.classList.add("dark-mode");
     }
 
+    document.documentElement.style.colorScheme = document.body.classList.contains("dark-mode") ? "dark" : "light";
     atualizarBotaoTema();
 
     document.getElementById("btnTema")?.addEventListener("click", alternarTema);
