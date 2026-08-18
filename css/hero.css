@@ -97,6 +97,19 @@ body.dark-mode .site-header.on-hero .btn-outline:hover {
     border-color: #fff;
 }
 
+body.dark-mode .site-header .btn-dark,
+body.dark-mode .site-header.on-hero .btn-dark {
+    background: #f4f3ee;
+    color: #111;
+    border-color: transparent;
+}
+
+body.dark-mode .site-header .btn-dark:hover,
+body.dark-mode .site-header.on-hero .btn-dark:hover {
+    background: var(--hero-blue);
+    color: #fff;
+}
+
 body.dark-mode .painel,
 body.dark-mode .featured,
 body.dark-mode .site-footer,
