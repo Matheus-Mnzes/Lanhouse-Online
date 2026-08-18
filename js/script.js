@@ -674,7 +674,14 @@ function alternarBiblioteca(jogo, botao) {
         mostrarToast(`"${jogoNormalizado.name}" adicionado a biblioteca`);
     }
 
-    localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
+    const chave = chaveBibliotecaDoUsuario();
+    if (!chave) {
+        console.warn('Não há usuário logado — não foi possível salvar biblioteca');
+        return;
+    }
+
+    localStorage.setItem(chave, JSON.stringify(biblioteca));
+    console.debug('Biblioteca salvo em', chave, biblioteca);
 
     // Atualiza todos os botões que representam este jogo na página
     try {
@@ -791,6 +798,7 @@ function mostrarErro(container, texto) { if (!container) return; const estado = 
 function renderizarBiblioteca() {
     const pesquisa = document.getElementById("pesquisaBiblioteca")?.value.trim().toLowerCase() || "";
     const todos = obterBiblioteca();
+    console.debug('renderizarBiblioteca — total encontrado:', (todos || []).length, todos);
 
     const jogos = todos.filter(function(jogo) {
         return normalizarTexto(jogo.name ?? "").toLowerCase().includes(pesquisa);
