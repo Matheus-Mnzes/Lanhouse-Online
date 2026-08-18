@@ -764,7 +764,7 @@ function criarCardJogo(jogo, naBiblioteca) {
         genres: []
     };
 
-    const card = document.createElement("article"); card.className = "jogo-card scroll-card";
+    const card = document.createElement("article"); card.className = "jogo-card" + (naBiblioteca ? "" : " scroll-card");
     const capa = document.createElement("div"); capa.className = "jogo-capa";
     const temCapa = Boolean(jogoNormalizado.cover?.image_id || jogoNormalizado.cover?.url);
     if (temCapa) {
