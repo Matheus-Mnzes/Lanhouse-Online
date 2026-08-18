@@ -676,22 +676,17 @@ function alternarBiblioteca(jogo, botao) {
 
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
 
-    // Atualiza apenas o botão clicado para evitar re-render completo do catálogo
-    if (botao && botao.classList) {
-        botao.classList.toggle('salvo', adicionou);
-        botao.textContent = adicionou ? 'Salvo' : 'Biblioteca';
-    }
+    // Atualiza todos os botões que representam este jogo na página
+    try {
+        const selector = `.btn-bib[data-jogo-id="${String(jogoNormalizado.id)}"]`;
+        document.querySelectorAll(selector).forEach(function(b) {
+            b.classList.toggle('salvo', adicionou);
+            b.textContent = adicionou ? 'Salvo' : 'Biblioteca';
+        });
+    } catch (e) { /* não crítico */ }
 
     // Atualiza a visualização da biblioteca
     renderizarBiblioteca();
-
-    // Atualiza a seção de jogos em destaque somente se existir e houver dados
-    if (paginaAtual === 1 && !generoSelecionado && !pesquisaSelecionada) {
-        const populares = document.getElementById("jogos-populares");
-        if (populares && Array.isArray(jogosCatalogo) && jogosCatalogo.length) {
-            preencherCatalogo(populares, jogosCatalogo.slice(0, 4));
-        }
-    }
 }
 
 
@@ -782,11 +777,14 @@ function criarCardJogo(jogo, naBiblioteca) {
     const biblioteca = document.createElement("button");
     biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogoNormalizado.id) ? " salvo" : "");
     biblioteca.textContent = jogoEstaNaBiblioteca(jogoNormalizado.id) ? "Salvo" : "Biblioteca";
+    biblioteca.dataset.jogoId = String(jogoNormalizado.id);
     biblioteca.addEventListener("click", function(evt) {
         alternarBiblioteca(jogoNormalizado, evt.currentTarget);
     });
     acoes.appendChild(biblioteca);
-    info.append(titulo, genero, acoes); card.append(capa, info); return card;
+    info.append(titulo, genero, acoes);
+    card.dataset.jogoId = String(jogoNormalizado.id);
+    card.append(capa, info); return card;
 }
 function mostrarErro(container, texto) { if (!container) return; const estado = document.createElement("p"); estado.className = "estado-texto"; estado.textContent = texto; container.replaceChildren(estado); }
 
