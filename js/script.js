@@ -418,8 +418,7 @@ function configurarModoLogin(cadastro) {
     });
 
     document.getElementById("loginForm")?.reset();
-    const erroEl = document.getElementById("loginErro");
-    if (erroEl) erroEl.textContent = "";
+    document.getElementById("loginErro").textContent = "";
 }
 function alternarModoLogin() { configurarModoLogin(!modoCadastro); }
 function fecharLogin() {
@@ -427,8 +426,7 @@ function fecharLogin() {
     if (!modal) return;
     modal.classList.remove("aberto");
     modal.setAttribute("aria-hidden", "true");
-    const erroEl = document.getElementById("loginErro");
-    if (erroEl) erroEl.textContent = "";
+    document.getElementById("loginErro").textContent = "";
 }
 function limparMascara(valor, tipo) {
     if (!valor) return "";
@@ -497,17 +495,17 @@ function fazerLogin(evento) {
     const valido = usuarios.some(item => item.usuario === usuario && item.senha === senha);
     const erro = document.getElementById("loginErro");
     if (modoCadastro) {
-        if (usuario.length < 3) { if (erro) erro.textContent = "O usuário deve ter ao menos 3 caracteres."; return; }
-        if (senha.length < 3) { if (erro) erro.textContent = "A senha deve ter ao menos 3 caracteres."; return; }
+        if (usuario.length < 3) { erro.textContent = "O usuário deve ter ao menos 3 caracteres."; return; }
+        if (senha.length < 3) { erro.textContent = "A senha deve ter ao menos 3 caracteres."; return; }
         if (usuarios.some(item => item.usuario.toLowerCase() === usuario.toLowerCase())) {
-            if (erro) erro.textContent = "Este nome de usuário já existe.";
+            erro.textContent = "Este nome de usuário já existe.";
             return;
         }
 
         const dadosCadastro = obterDadosCadastroFormulario();
         const erroCadastro = validarDadosCadastro(dadosCadastro);
         if (erroCadastro) {
-            if (erro) erro.textContent = erroCadastro;
+            erro.textContent = erroCadastro;
             return;
         }
 
@@ -533,12 +531,12 @@ function fazerLogin(evento) {
         return;
     }
     if (!valido) {
-        if (erro) erro.textContent = "Usuário ou senha inválidos.";
+        erro.textContent = "Usuário ou senha inválidos.";
         return;
     }
     const dadosUsuario = obterDadosUsuario(usuario);
     if (!dadosUsuario) {
-        if (erro) erro.textContent = "Usuário não encontrado.";
+        erro.textContent = "Usuário não encontrado.";
         return;
     }
     localStorage.setItem("ycloudUsuarioLogado", usuario);
@@ -606,6 +604,7 @@ function abrirMenu() { document.body.classList.add("menu-aberto"); document.getE
 function fecharMenu() { document.body.classList.remove("menu-aberto"); document.getElementById("menuOverlay")?.setAttribute("aria-hidden", "true"); }
 function fecharMenuE(id) { fecharMenu(); mostrarPainel(id); }
 
+
 function mostrarToast(texto) {
     const toast = document.getElementById("toast");
     if (!toast) return;
@@ -615,79 +614,22 @@ function mostrarToast(texto) {
     toast._timer = setTimeout(function() { toast.classList.remove("visivel"); }, 2800);
 }
 
-function normalizarIdJogo(id) {
-    return String(id ?? "").trim();
-}
-
-function normalizarJogoSalvo(jogo) {
-    if (!jogo || typeof jogo !== "object") return null;
-
-    const nome = normalizarTexto(jogo.name || jogo.title || "Jogo sem nome");
-    const id = normalizarIdJogo(jogo.id ?? jogo.game_id ?? jogo.slug ?? nome);
-
-    if (!id && !nome) return null;
-
-    return {
-        ...jogo,
-        id: id,
-        name: nome,
-        title: nome,
-        genres: Array.isArray(jogo.genres) ? jogo.genres.map(function(item) {
-            if (!item || typeof item !== "object") return { name: "Gênero" };
-            return { ...item, name: normalizarTexto(item.name || item.titulo || "Gênero") };
-        }) : [],
-        cover: jogo.cover || null
-    };
-}
-
 function obterBiblioteca() {
     const chave = chaveBibliotecaDoUsuario();
     if (!chave) return [];
-
-    try {
-        const itens = JSON.parse(localStorage.getItem(chave) || "[]");
-        if (!Array.isArray(itens)) return [];
-
-        return itens
-            .map(normalizarJogoSalvo)
-            .filter(Boolean);
-    } catch {
-        return [];
-    }
+    try { return JSON.parse(localStorage.getItem(chave) || "[]"); } catch { return []; }
 }
-
-function jogoEstaNaBiblioteca(id) {
-    const idNormalizado = normalizarIdJogo(id);
-    return obterBiblioteca().some(function(jogo) { return normalizarIdJogo(jogo.id) === idNormalizado; });
-}
-
+function jogoEstaNaBiblioteca(id) { return obterBiblioteca().some(function(jogo) { return jogo.id === id; }); }
 function alternarBiblioteca(jogo) {
     if (!obterUsuarioLogado()) {
         abrirLogin();
         mostrarToast("Entre para salvar jogos na biblioteca.");
         return;
     }
-    
-    const jogoNormalizado = normalizarJogoSalvo(jogo);
-    if (!jogoNormalizado) {
-        mostrarToast("Não foi possível salvar este jogo.");
-        return;
-    }
-
     const biblioteca = obterBiblioteca();
-    const idNormalizado = normalizarIdJogo(jogoNormalizado.id);
-    const indice = biblioteca.findIndex(function(item) {
-        return normalizarIdJogo(item?.id) === idNormalizado;
-    });
-
-    if (indice >= 0) {
-        biblioteca.splice(indice, 1);
-        mostrarToast(`${jogoNormalizado.name} removido da biblioteca`);
-    } else {
-        biblioteca.push(jogoNormalizado);
-        mostrarToast(`"${jogoNormalizado.name}" adicionado à biblioteca`);
-    }
-
+    const indice = biblioteca.findIndex(function(item) { return item.id === jogo.id; });
+    if (indice >= 0) { biblioteca.splice(indice, 1); mostrarToast(`${jogo.name} removido da biblioteca`); }
+    else { biblioteca.push(jogo); mostrarToast(`"${jogo.name}" adicionado a biblioteca`); }
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
     renderizarCatalogo();
     renderizarBiblioteca();
@@ -700,12 +642,13 @@ function alternarBiblioteca(jogo) {
     }
 }
 
+
 // ── Carregar e renderizar catálogo ──────────────────────────────
 async function carregarCatalogo(pagina) {
     const botaoAnterior = document.getElementById("paginaAnterior");
     const botaoProxima = document.getElementById("paginaProxima");
     const indicador = document.getElementById("paginaIndicador");
-    const catalogo = document.getElementById("catalogo");
+    const catalogo  = document.getElementById("catalogo");
 
     if (botaoAnterior) botaoAnterior.disabled = true;
     if (botaoProxima) botaoProxima.disabled = true;
@@ -725,17 +668,19 @@ async function carregarCatalogo(pagina) {
 
         const jogos = dados.jogos || [];
         const jogosComCustom = obterJogosCatalogoComCustom(jogos);
-        jogosCatalogo = jogosComCustom;
-        paginaAtual = pagina;
+        jogosCatalogo   = jogosComCustom;
+        paginaAtual     = pagina;
         catalogoCarregado = true;
         renderizarCatalogo();
+        iniciarAnimacoesScroll();
 
         if (pagina === 1 && !generoSelecionado && !pesquisaSelecionada) {
             preencherCatalogo(
                 document.getElementById("jogos-populares"),
                 jogosComCustom.slice(0, 4)
             );
-            if (typeof montarHero === "function") montarHero(jogosComCustom);
+            montarHero(jogosComCustom);
+            iniciarAnimacoesScroll();
         }
 
         if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
@@ -763,7 +708,7 @@ function criarCardJogo(jogo, naBiblioteca) {
     const temCapa = Boolean(jogo.cover?.image_id || jogo.cover?.url);
     if (temCapa) {
         const imagem = document.createElement("img");
-        imagem.src = typeof urlCapaJogo === "function" ? urlCapaJogo(jogo) : (jogo.cover?.url || "");
+        imagem.src = urlCapaJogo(jogo);
         imagem.alt = `Capa de ${jogo.name}`;
         imagem.loading = "lazy";
         capa.appendChild(imagem);
@@ -772,7 +717,7 @@ function criarCardJogo(jogo, naBiblioteca) {
     }
     const info = document.createElement("div"); info.className = "jogo-info";
     const titulo = document.createElement("h3"); titulo.className = "jogo-titulo"; titulo.textContent = jogo.name;
-    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = typeof textoGeneros === "function" ? textoGeneros(jogo) : "";
+    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogo);
     const acoes = document.createElement("div"); acoes.className = "jogo-acoes";
     if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogo.name}...`); }); acoes.appendChild(jogar); }
     const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogo.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogo.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogo); }); acoes.appendChild(biblioteca);
@@ -785,8 +730,7 @@ function renderizarBiblioteca() {
     const todos = obterBiblioteca();
 
     const jogos = todos.filter(function(jogo) {
-        const nome = normalizarTexto(jogo?.name || jogo?.title || "");
-        return nome.toLowerCase().includes(pesquisa);
+        return jogo.name.toLowerCase().includes(pesquisa);
     });
 
     preencherCatalogo(
@@ -799,9 +743,8 @@ function renderizarBiblioteca() {
     const vazio = document.getElementById("bibVazio");
 
     if (vazio) {
-        const temItens = todos.length > 0;
-        vazio.hidden = temItens;
-        vazio.style.display = temItens ? "none" : "";
+        vazio.hidden = todos.length > 0;
+        vazio.style.display = todos.length > 0 ? "none" : "";
     }
 }
 
@@ -811,13 +754,269 @@ async function carregarFiltroGeneros() {
     if (!filtro) return;
 
     try {
-        if (typeof buscarGeneros === "function") {
-            const generos = await buscarGeneros();
-            filtro.replaceChildren(new Option("Todos os gêneros", ""));
-            generos.forEach(g => filtro.add(new Option(GENEROS[g.name] || g.name, g.id)));
-            filtro.disabled = false;
-        }
+        const generos = await buscarGeneros();
+        filtro.replaceChildren(new Option("Todos os gêneros", ""));
+        generos.forEach(g => filtro.add(new Option(GENEROS[g.name] || g.name, g.id)));
+        filtro.disabled = false;
     } catch {
         filtro.replaceChildren(new Option("Erro ao carregar gêneros", ""));
     }
 }
+
+
+// ── Jogar ──────────────────────────────────────────────────────────
+function jogar(nomeJogo) {
+    mostrarToast(`Abrindo ${nomeJogo}…`);
+}
+
+function urlCapaJogo(jogo, tamanho = "t_cover_big") {
+    if (jogo.cover?.url) return jogo.cover.url;
+    if (!jogo.cover?.image_id) return null;
+    return `https://images.igdb.com/igdb/image/upload/${tamanho}/${jogo.cover.image_id}.jpg`;
+}
+
+function textoGeneros(jogo) {
+    if (!jogo.genres?.length) return "Gênero não informado";
+    return jogo.genres
+        .slice(0, 2)
+        .map(function(item) { return GENEROS[item.name] || item.name; })
+        .join(" · ");
+}
+
+function montarHero(jogos) {
+    const slidesWrap = document.getElementById("slides");
+    const progressWrap = document.getElementById("progress");
+    if (!slidesWrap || !progressWrap) return;
+
+    heroJogos = jogos.filter(function(j) { return j.cover?.image_id; }).slice(0, 4);
+    if (!heroJogos.length) {
+        document.getElementById("gameTitle").textContent = "Catálogo indisponível";
+        document.getElementById("gameGenre").textContent = "Verifique a API";
+        return;
+    }
+
+    slidesWrap.replaceChildren();
+    progressWrap.replaceChildren();
+
+    heroJogos.forEach(function(jogo, indice) {
+        const slide = document.createElement("div");
+        slide.className = "slide" + (indice === 0 ? " active" : "");
+        const img = document.createElement("img");
+        img.src = urlCapaJogo(jogo, "t_1080p");
+        img.alt = jogo.name;
+        slide.appendChild(img);
+        slidesWrap.appendChild(slide);
+
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.setAttribute("aria-label", `Slide ${indice + 1}`);
+        if (indice === 0) btn.classList.add("active");
+        btn.addEventListener("click", function() {
+            irParaHero(indice);
+            reiniciarTimerHero();
+        });
+        progressWrap.appendChild(btn);
+    });
+
+    heroAtual = 0;
+    atualizarInfoHero();
+    reiniciarTimerHero();
+}
+
+function atualizarInfoHero() {
+    const jogo = heroJogos[heroAtual];
+    const titleEl = document.getElementById("gameTitle");
+    const genreEl = document.getElementById("gameGenre");
+    const countEl = document.getElementById("slideCount");
+    if (!jogo || !titleEl || !genreEl || !countEl) return;
+
+    titleEl.textContent = jogo.name;
+    genreEl.textContent = textoGeneros(jogo);
+    countEl.textContent =
+        String(heroAtual + 1).padStart(2, "0") + " / " + String(heroJogos.length).padStart(2, "0");
+}
+
+function irParaHero(indice) {
+    const slides = [...document.querySelectorAll("#slides .slide")];
+    const buttons = [...document.querySelectorAll("#progress button")];
+    const gameBox = document.getElementById("heroGame");
+    if (!slides.length || indice === heroAtual) return;
+
+    slides[heroAtual].classList.remove("active");
+    buttons[heroAtual]?.classList.remove("active");
+    heroAtual = (indice + slides.length) % slides.length;
+    slides[heroAtual].classList.add("active");
+
+    if (buttons[heroAtual]) {
+        void buttons[heroAtual].offsetWidth;
+        buttons[heroAtual].classList.add("active");
+    }
+
+    if (gameBox) {
+        gameBox.classList.add("fading");
+        setTimeout(function() {
+            atualizarInfoHero();
+            gameBox.classList.remove("fading");
+        }, 350);
+    }
+}
+
+function proximoHero() {
+    irParaHero(heroAtual + 1);
+}
+
+function reiniciarTimerHero() {
+    clearInterval(heroTimer);
+    if (heroJogos.length > 1) {
+        heroTimer = setInterval(proximoHero, HERO_INTERVAL);
+    }
+}
+
+function iniciarParallaxHero() {
+    const slidesWrap = document.getElementById("slides");
+    const heroContent = document.getElementById("heroContent");
+    const hero = document.getElementById("hero");
+    const header = document.getElementById("header");
+    const painelInicio = document.getElementById("painel-inicio");
+    if (!slidesWrap || !hero || !header) return;
+
+    let mx = 0, my = 0, tx = 0, ty = 0;
+
+    window.addEventListener("mousemove", function(e) {
+        mx = (e.clientX / window.innerWidth - 0.5) * 2;
+        my = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    function animate() {
+        tx += (mx - tx) * 0.05;
+        ty += (my - ty) * 0.05;
+        slidesWrap.style.transform = `translate3d(${tx * -22}px, ${ty * -14}px, 0) scale(1.06)`;
+
+        const sc = window.scrollY;
+        const inicioVisivel = painelInicio && !painelInicio.classList.contains("painel-oculto");
+
+        if (inicioVisivel && sc < hero.offsetHeight) {
+            slidesWrap.style.top = sc * 0.35 + "px";
+            if (heroContent) {
+                heroContent.style.transform = `translateY(${sc * 0.18}px)`;
+                heroContent.style.opacity = String(Math.max(0, 1 - sc / (hero.offsetHeight * 0.65)));
+            }
+            header.classList.add("on-hero");
+        } else if (inicioVisivel) {
+            header.classList.remove("on-hero");
+        }
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+}
+
+function iniciarAnimacoesScroll() {
+    const cards = document.querySelectorAll(".featured .jogo-card, .featured .game-card, .jogo-card.scroll-card");
+    if (!cards.length) return;
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry, i) {
+            if (entry.isIntersecting) {
+                setTimeout(function() {
+                    entry.target.classList.add("visible");
+                }, i * 90);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15 });
+
+    cards.forEach(function(card) {
+        if (!card.classList.contains("visible")) {
+            observer.observe(card);
+        }
+    });
+}
+
+// ── Modo Escuro ──────────────────────────────────────────────────────────
+
+function atualizarBotaoTema() {
+    const botao = document.getElementById("btnTema");
+    if (!botao) return;
+
+    const modoEscuro = document.body.classList.contains("dark-mode");
+
+    botao.textContent = modoEscuro ? "☀" : "☾";
+    botao.setAttribute(
+        "aria-label",
+        modoEscuro ? "Ativar modo claro" : "Ativar modo escuro"
+    );
+}
+
+function alternarTema() {
+    const modoEscuro = document.body.classList.toggle("dark-mode");
+    document.documentElement.style.colorScheme = modoEscuro ? "dark" : "light";
+
+    localStorage.setItem(
+        "ycloudTema",
+        modoEscuro ? "escuro" : "claro"
+    );
+
+    atualizarBotaoTema();
+}
+
+// ── Init ───────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+    const temaSalvo = localStorage.getItem("ycloudTema");
+    const temaDoSistema = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    if (temaSalvo === "escuro" || (!temaSalvo && temaDoSistema)) {
+        document.body.classList.add("dark-mode");
+    }
+
+    document.documentElement.style.colorScheme = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    atualizarBotaoTema();
+
+    document.getElementById("btnTema")?.addEventListener("click", alternarTema);
+
+    atualizarBotaoLogin();
+    atualizarAreaPlano();
+    renderizarPlanos();
+    atualizarPerfil();
+
+    carregarCatalogo(1);
+    carregarFiltroGeneros();
+    renderizarBiblioteca();
+
+    document.getElementById("paginaAnterior")?.addEventListener("click", () => carregarCatalogo(paginaAtual - 1));
+    document.getElementById("paginaProxima")?.addEventListener("click", () => carregarCatalogo(paginaAtual + 1));
+
+    document.getElementById("filtroGenero")?.addEventListener("change", e => {
+        generoSelecionado = e.target.value;
+        carregarCatalogo(1);
+    });
+
+    document.getElementById("pesquisaJogos")?.addEventListener("input", e => {
+        clearTimeout(temporizadorPesquisa);
+        temporizadorPesquisa = setTimeout(() => {
+            pesquisaSelecionada = e.target.value.trim();
+            carregarCatalogo(1);
+        }, 350);
+    });
+
+    document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
+    aplicarMascaraCampo("cadastroCpf", "cpf");
+    aplicarMascaraCampo("cadastroTelefone", "telefone");
+
+    document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
+    document.getElementById("inputFotoPerfil")?.addEventListener("change", salvarFotoPerfil);
+    document.getElementById("formNovoJogo")?.addEventListener("submit", adicionarJogoCustom);
+    document.getElementById("formNovoPlano")?.addEventListener("submit", adicionarPlanoCustom);
+    document.querySelectorAll(".plano-btn").forEach(function(botao) {
+        botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
+    });
+
+    // Fecha o menu com a tecla Esc
+    document.addEventListener("keydown", e => {
+        if (e.key === "Escape") { fecharMenu(); fecharLogin(); }
+    });
+
+    iniciarParallaxHero();
+    iniciarAnimacoesScroll();
+});
