@@ -804,12 +804,14 @@ function renderizarBiblioteca() {
         return normalizarTexto(jogo.name ?? "").toLowerCase().includes(pesquisa);
     });
 
-    preencherCatalogo(
-        document.getElementById("catalogoBiblioteca"),
-        jogos,
-        "",
-        true
-    );
+    const container = document.getElementById("catalogoBiblioteca");
+    try {
+        preencherCatalogo(container, jogos, "", true);
+        console.debug('catalogoBiblioteca children:', container?.children?.length);
+    } catch (err) {
+        console.error('Erro ao preencher catalogoBiblioteca:', err);
+        mostrarErro(container, 'Erro ao renderizar biblioteca.');
+    }
 
     const vazio = document.getElementById("bibVazio");
 
