@@ -51,6 +51,25 @@ function usuarioEhAdmin(usuario = obterUsuarioLogado()) {
 function normalizarTexto(valor) {
     return String(valor ?? "").trim();
 }
+function normalizarJogo(jogo) {
+    if (!jogo || typeof jogo !== "object") return null;
+
+    const nome = normalizarTexto(jogo.name ?? jogo.title ?? "");
+    if (!nome) return null;
+
+    return {
+        ...jogo,
+        id: jogo.id ?? jogo.slug ?? `${nome}-${Date.now()}`,
+        name: nome,
+        cover: jogo.cover && typeof jogo.cover === "object" ? jogo.cover : null,
+        genres: Array.isArray(jogo.genres) ? jogo.genres.filter(Boolean) : []
+    };
+}
+function normalizarListaJogos(valor) {
+    if (Array.isArray(valor)) return valor.map(normalizarJogo).filter(Boolean);
+    if (valor && typeof valor === "object") return [normalizarJogo(valor)].filter(Boolean);
+    return [];
+}
 function formatarDataBrasileira(dataValor) {
     const valor = normalizarTexto(dataValor);
     if (!valor) return "Não informado";
@@ -91,7 +110,7 @@ function chaveFotoDoUsuario(usuario = obterUsuarioLogado()) {
 }
 function obterJogosCustom() {
     try {
-        return JSON.parse(localStorage.getItem("ycloudJogosCustom") || "[]");
+        return normalizarListaJogos(JSON.parse(localStorage.getItem("ycloudJogosCustom") || "[]"));
     } catch {
         return [];
     }
@@ -99,7 +118,7 @@ function obterJogosCustom() {
 
 function obterJogosCatalogoComCustom(jogos = []) {
     const custom = obterJogosCustom();
-    return [...custom, ...jogos];
+    return [...custom, ...normalizarListaJogos(jogos)];
 }
 
 function obterPlanoDoUsuario(usuario = obterUsuarioLogado()) {
@@ -324,7 +343,15 @@ function migrarBibliotecaLegada() {
     const chave = chaveBibliotecaDoUsuario();
     const bibliotecaAntiga = localStorage.getItem("biblioteca") || localStorage.getItem("favoritos");
     if (!chave || !bibliotecaAntiga || localStorage.getItem(chave)) return;
-    localStorage.setItem(chave, bibliotecaAntiga);
+
+    try {
+        const biblioteca = normalizarListaJogos(JSON.parse(bibliotecaAntiga));
+        if (!biblioteca.length) return;
+        localStorage.setItem(chave, JSON.stringify(biblioteca));
+    } catch {
+        return;
+    }
+
     localStorage.removeItem("biblioteca");
     localStorage.removeItem("favoritos");
 }
@@ -585,19 +612,33 @@ function mostrarToast(texto) {
 function obterBiblioteca() {
     const chave = chaveBibliotecaDoUsuario();
     if (!chave) return [];
-    try { return JSON.parse(localStorage.getItem(chave) || "[]"); } catch { return []; }
+    try {
+        const dados = JSON.parse(localStorage.getItem(chave) || "[]");
+        return normalizarListaJogos(dados);
+    } catch {
+        return [];
+    }
 }
-function jogoEstaNaBiblioteca(id) { return obterBiblioteca().some(function(jogo) { return jogo.id === id; }); }
+function jogoEstaNaBiblioteca(id) {
+    return obterBiblioteca().some(function(jogo) { return String(jogo.id) === String(id); });
+}
 function alternarBiblioteca(jogo) {
     if (!obterUsuarioLogado()) {
         abrirLogin();
         mostrarToast("Entre para salvar jogos na biblioteca.");
         return;
     }
+
+    const jogoNormalizado = normalizarJogo(jogo) || { id: `jogo-${Date.now()}`, name: "Jogo", genres: [], cover: null };
     const biblioteca = obterBiblioteca();
-    const indice = biblioteca.findIndex(function(item) { return item.id === jogo.id; });
-    if (indice >= 0) { biblioteca.splice(indice, 1); mostrarToast(`${jogo.name} removido da biblioteca`); }
-    else { biblioteca.push(jogo); mostrarToast(`"${jogo.name}" adicionado a biblioteca`); }
+    const indice = biblioteca.findIndex(function(item) { return String(item.id) === String(jogoNormalizado.id); });
+    if (indice >= 0) {
+        biblioteca.splice(indice, 1);
+        mostrarToast(`${jogoNormalizado.name} removido da biblioteca`);
+    } else {
+        biblioteca.push(jogoNormalizado);
+        mostrarToast(`"${jogoNormalizado.name}" adicionado a biblioteca`);
+    }
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
     renderizarCatalogo();
     renderizarBiblioteca();
@@ -671,24 +712,31 @@ function preencherCatalogo(container, jogos, mensagem = "", naBiblioteca = false
     jogos.forEach(function(jogo) { container.appendChild(criarCardJogo(jogo, naBiblioteca)); });
 }
 function criarCardJogo(jogo, naBiblioteca) {
+    const jogoNormalizado = normalizarJogo(jogo) || {
+        id: `fallback-${Date.now()}`,
+        name: "Jogo indisponível",
+        cover: null,
+        genres: []
+    };
+
     const card = document.createElement("article"); card.className = "jogo-card scroll-card";
     const capa = document.createElement("div"); capa.className = "jogo-capa";
-    const temCapa = Boolean(jogo.cover?.image_id || jogo.cover?.url);
+    const temCapa = Boolean(jogoNormalizado.cover?.image_id || jogoNormalizado.cover?.url);
     if (temCapa) {
         const imagem = document.createElement("img");
-        imagem.src = urlCapaJogo(jogo);
-        imagem.alt = `Capa de ${jogo.name}`;
+        imagem.src = urlCapaJogo(jogoNormalizado);
+        imagem.alt = `Capa de ${jogoNormalizado.name}`;
         imagem.loading = "lazy";
         capa.appendChild(imagem);
     } else {
         capa.textContent = "Y";
     }
     const info = document.createElement("div"); info.className = "jogo-info";
-    const titulo = document.createElement("h3"); titulo.className = "jogo-titulo"; titulo.textContent = jogo.name;
-    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogo);
+    const titulo = document.createElement("h3"); titulo.className = "jogo-titulo"; titulo.textContent = jogoNormalizado.name;
+    const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogoNormalizado);
     const acoes = document.createElement("div"); acoes.className = "jogo-acoes";
-    if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogo.name}...`); }); acoes.appendChild(jogar); }
-    const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogo.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogo.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogo); }); acoes.appendChild(biblioteca);
+    if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogoNormalizado.name}...`); }); acoes.appendChild(jogar); }
+    const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogoNormalizado.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogoNormalizado.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogoNormalizado); }); acoes.appendChild(biblioteca);
     info.append(titulo, genero, acoes); card.append(capa, info); return card;
 }
 function mostrarErro(container, texto) { if (!container) return; const estado = document.createElement("p"); estado.className = "estado-texto"; estado.textContent = texto; container.replaceChildren(estado); }
@@ -698,7 +746,7 @@ function renderizarBiblioteca() {
     const todos = obterBiblioteca();
 
     const jogos = todos.filter(function(jogo) {
-        return jogo.name.toLowerCase().includes(pesquisa);
+        return normalizarTexto(jogo.name ?? "").toLowerCase().includes(pesquisa);
     });
 
     preencherCatalogo(
