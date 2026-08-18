@@ -654,7 +654,7 @@ function obterBiblioteca() {
 function jogoEstaNaBiblioteca(id) {
     return obterBiblioteca().some(function(jogo) { return String(jogo.id) === String(id); });
 }
-function alternarBiblioteca(jogo) {
+function alternarBiblioteca(jogo, botao) {
     if (!obterUsuarioLogado()) {
         abrirLogin();
         mostrarToast("Entre para salvar jogos na biblioteca.");
@@ -664,6 +664,8 @@ function alternarBiblioteca(jogo) {
     const jogoNormalizado = normalizarJogo(jogo) || { id: `jogo-${Date.now()}`, name: "Jogo", genres: [], cover: null };
     const biblioteca = obterBiblioteca();
     const indice = biblioteca.findIndex(function(item) { return String(item.id) === String(jogoNormalizado.id); });
+    const adicionou = indice < 0;
+
     if (indice >= 0) {
         biblioteca.splice(indice, 1);
         mostrarToast(`${jogoNormalizado.name} removido da biblioteca`);
@@ -671,15 +673,24 @@ function alternarBiblioteca(jogo) {
         biblioteca.push(jogoNormalizado);
         mostrarToast(`"${jogoNormalizado.name}" adicionado a biblioteca`);
     }
+
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
-    renderizarCatalogo();
+
+    // Atualiza apenas o botão clicado para evitar re-render completo do catálogo
+    if (botao && botao.classList) {
+        botao.classList.toggle('salvo', adicionou);
+        botao.textContent = adicionou ? 'Salvo' : 'Biblioteca';
+    }
+
+    // Atualiza a visualização da biblioteca
     renderizarBiblioteca();
 
+    // Atualiza a seção de jogos em destaque somente se existir e houver dados
     if (paginaAtual === 1 && !generoSelecionado && !pesquisaSelecionada) {
-        preencherCatalogo(
-            document.getElementById("jogos-populares"),
-            jogosCatalogo.slice(0, 4)
-        );
+        const populares = document.getElementById("jogos-populares");
+        if (populares && Array.isArray(jogosCatalogo) && jogosCatalogo.length) {
+            preencherCatalogo(populares, jogosCatalogo.slice(0, 4));
+        }
     }
 }
 
@@ -768,7 +779,13 @@ function criarCardJogo(jogo, naBiblioteca) {
     const genero = document.createElement("p"); genero.className = "jogo-genero"; genero.textContent = textoGeneros(jogoNormalizado);
     const acoes = document.createElement("div"); acoes.className = "jogo-acoes";
     if (naBiblioteca) { const jogar = document.createElement("button"); jogar.className = "btn-jogar"; jogar.textContent = "Jogar"; jogar.addEventListener("click", function() { mostrarToast(`Abrindo ${jogoNormalizado.name}...`); }); acoes.appendChild(jogar); }
-    const biblioteca = document.createElement("button"); biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogoNormalizado.id) ? " salvo" : ""); biblioteca.textContent = jogoEstaNaBiblioteca(jogoNormalizado.id) ? "Salvo" : "Biblioteca"; biblioteca.addEventListener("click", function() { alternarBiblioteca(jogoNormalizado); }); acoes.appendChild(biblioteca);
+    const biblioteca = document.createElement("button");
+    biblioteca.className = "btn-bib" + (jogoEstaNaBiblioteca(jogoNormalizado.id) ? " salvo" : "");
+    biblioteca.textContent = jogoEstaNaBiblioteca(jogoNormalizado.id) ? "Salvo" : "Biblioteca";
+    biblioteca.addEventListener("click", function(evt) {
+        alternarBiblioteca(jogoNormalizado, evt.currentTarget);
+    });
+    acoes.appendChild(biblioteca);
     info.append(titulo, genero, acoes); card.append(capa, info); return card;
 }
 function mostrarErro(container, texto) { if (!container) return; const estado = document.createElement("p"); estado.className = "estado-texto"; estado.textContent = texto; container.replaceChildren(estado); }
