@@ -304,7 +304,22 @@
                         <input id="novoJogoGenero" name="genero" type="text" placeholder="Ex.: RPG" required>
 
                         <label for="novoJogoImagem">URL da capa</label>
-                        <input id="novoJogoImagem" name="imagem" type="url" placeholder="https://...">
+                        <input id="novoJogoImagem" name="imagem" type="url" placeholder="https://..." required>
+
+                        <label>Preço (R$)</label>
+                        <input name="Identificador" type="number" required>
+
+                        <label>Classificação indicativa</label>
+                        <input name="classificação" type="text" required>
+
+                        <label>Desenvolvedora</label>
+                        <input name="Desenvolvedora" type="text" required>
+
+                        <label>Ano de lançamento</label>
+                        <input name="Lançamento" type="text" required>
+
+                        <label>Código do jogo</label>
+                        <input name="Identificador" type="text" required>
 
                         <button type="submit" class="btn btn-dark">Salvar jogo</button>
                     </form>
@@ -318,6 +333,12 @@
 
                         <label for="novoPlanoPreco">Preço (R$)</label>
                         <input id="novoPlanoPreco" name="preco" type="number" min="0" step="0.01" required>
+
+                        <label>Periodicidade</label>
+                        <input name="Periodo" type="text" required>
+
+                        <label>Código do plano</label>
+                        <input name="código" type="text" required>
 
                         <label for="novoPlanoDescricao">Descrição</label>
                         <textarea id="novoPlanoDescricao" name="descricao" rows="3" placeholder="Ex.: 4 dispositivos · 4K · suporte 24/7" required></textarea>
