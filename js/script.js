@@ -710,10 +710,41 @@ function normalizarIdJogo(id) {
     return String(id ?? "").trim();
 }
 
+function normalizarJogoSalvo(jogo) {
+    if (!jogo || typeof jogo !== "object") return null;
+
+    const nome = normalizarTexto(jogo.name || jogo.title || "Jogo sem nome");
+    const id = normalizarIdJogo(jogo.id ?? jogo.game_id ?? jogo.slug ?? nome);
+
+    if (!id && !nome) return null;
+
+    return {
+        ...jogo,
+        id: id,
+        name: nome,
+        title: nome,
+        genres: Array.isArray(jogo.genres) ? jogo.genres.map(function(item) {
+            if (!item || typeof item !== "object") return { name: "Gênero" };
+            return { ...item, name: normalizarTexto(item.name || item.titulo || "Gênero") };
+        }) : [],
+        cover: jogo.cover || null
+    };
+}
+
 function obterBiblioteca() {
     const chave = chaveBibliotecaDoUsuario();
     if (!chave) return [];
-    try { return JSON.parse(localStorage.getItem(chave) || "[]"); } catch { return []; }
+
+    try {
+        const itens = JSON.parse(localStorage.getItem(chave) || "[]");
+        if (!Array.isArray(itens)) return [];
+
+        return itens
+            .map(normalizarJogoSalvo)
+            .filter(Boolean);
+    } catch {
+        return [];
+    }
 }
 
 function jogoEstaNaBiblioteca(id) {
@@ -746,18 +777,24 @@ function alternarBiblioteca(jogo) {
         return;
     }
 
+    const jogoNormalizado = normalizarJogoSalvo(jogo);
+    if (!jogoNormalizado) {
+        mostrarToast("Não foi possível salvar este jogo.");
+        return;
+    }
+
     const biblioteca = obterBiblioteca();
-    const idNormalizado = normalizarIdJogo(jogo?.id);
+    const idNormalizado = normalizarIdJogo(jogoNormalizado.id);
     const indice = biblioteca.findIndex(function(item) {
         return normalizarIdJogo(item?.id) === idNormalizado;
     });
 
     if (indice >= 0) {
         biblioteca.splice(indice, 1);
-        mostrarToast(`${jogo.name} removido da biblioteca`);
+        mostrarToast(`${jogoNormalizado.name} removido da biblioteca`);
     } else {
-        biblioteca.push(jogo);
-        mostrarToast(`"${jogo.name}" adicionado a biblioteca`);
+        biblioteca.push(jogoNormalizado);
+        mostrarToast(`"${jogoNormalizado.name}" adicionado a biblioteca`);
     }
 
     localStorage.setItem(chaveBibliotecaDoUsuario(), JSON.stringify(biblioteca));
@@ -870,7 +907,8 @@ function renderizarBiblioteca() {
     const todos = obterBiblioteca();
 
     const jogos = todos.filter(function(jogo) {
-        return jogo.name.toLowerCase().includes(pesquisa);
+        const nome = normalizarTexto(jogo?.name || jogo?.title || "");
+        return nome.toLowerCase().includes(pesquisa);
     });
 
     preencherCatalogo(
@@ -883,8 +921,9 @@ function renderizarBiblioteca() {
     const vazio = document.getElementById("bibVazio");
 
     if (vazio) {
-        vazio.hidden = todos.length > 0;
-        vazio.style.display = todos.length > 0 ? "none" : "";
+        const temItens = todos.length > 0;
+        vazio.hidden = temItens;
+        vazio.style.display = temItens ? "none" : "";
     }
 }
 
