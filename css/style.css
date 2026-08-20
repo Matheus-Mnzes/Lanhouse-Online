@@ -1731,3 +1731,9 @@ body.dark-mode .btn-tema {
         transition: none !important;
     }
 }
+.grid-jogos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+    padding: 32px;
+}
