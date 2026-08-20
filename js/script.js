@@ -399,7 +399,9 @@ function atualizarBotaoLogin() {
 function atualizarMenuAdmin() {
     const link = document.getElementById("menuAdmin");
     if (!link) return;
-    link.hidden = !usuarioEhAdmin();
+    const ehAdmin = usuarioEhAdmin();
+    link.hidden = !ehAdmin;
+    link.classList.toggle("oculto", !ehAdmin);
 }
 function abrirLogin() {
     const modal = document.getElementById("loginModal");

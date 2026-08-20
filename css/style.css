@@ -256,6 +256,10 @@ button { cursor: pointer; }
     overflow: hidden;
 }
 
+.menu-link.oculto{
+    display: none;
+}
+
 .menu-link:hover {
     color: var(--blue);
     padding-left: 8px;
