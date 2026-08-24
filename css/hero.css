@@ -916,7 +916,10 @@ body.dark-mode .hero-progress button::after {
     }
 
     .site-header {
-        padding: 14px 18px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px 14px 14px;
     }
 
     .hero-content,
@@ -933,5 +936,72 @@ body.dark-mode .hero-progress button::after {
     .site-footer {
         padding-left: 18px;
         padding-right: 18px;
+    }
+
+    .logo {
+        gap: 7px;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .logo-word {
+        font-size: 18px;
+    }
+
+    .site-header .header-avatar {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+    }
+
+    .header-actions {
+        width: 100%;
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        gap: 6px;
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        padding-bottom: 2px;
+    }
+
+    .header-actions::-webkit-scrollbar {
+        display: none;
+    }
+
+    .header-actions .btn {
+        flex: 0 0 auto;
+        justify-content: center;
+        min-width: auto;
+        min-height: 32px;
+        padding: 8px 12px;
+        font-size: 9px;
+        letter-spacing: 0.09em;
+        white-space: nowrap;
+    }
+
+    .header-actions .btn-dark {
+        min-width: 88px;
+    }
+
+    .header-actions .btn-outline {
+        min-width: 72px;
+    }
+
+    .header-actions .btn-icon {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        flex-shrink: 0;
+        min-width: 34px;
+    }
+
+    #menuBtn {
+        min-width: 74px;
+    }
+
+    #menuBtn::after {
+        font-size: 14px;
     }
 }

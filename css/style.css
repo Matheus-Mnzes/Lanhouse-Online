@@ -1326,6 +1326,18 @@ button { cursor: pointer; }
     .conta-plano { align-items: flex-start; flex-direction: column; padding: 24px 20px; }
     .conta-area { padding: 20px; }
     .conta-perfil, .conta-assinatura-topo { align-items: flex-start; flex-direction: column; }
+    .conta-dados-head {
+        align-items: center;
+        text-align: center;
+        padding: 24px 18px 10px;
+    }
+    .btn-editar-conta {
+        align-self: center;
+        width: auto;
+        max-width: 100%;
+        padding: 10px 14px;
+        font-size: 10px;
+    }
     .conta-planos { grid-template-columns: 1fr; }
 }
 
