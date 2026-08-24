@@ -267,6 +267,63 @@ function abrirContaPeloAvatar() {
     if (obterUsuarioLogado()) mostrarPainel("conta");
     else abrirLogin();
 }
+function abrirEdicaoConta() {
+    const dados = obterDadosUsuario();
+    if (!dados) return;
+
+    document.getElementById("contaEditCpf").value = formatarMascara(dados.cpf, "cpf");
+    document.getElementById("contaEditNascimento").value = dados.dataNascimento || "";
+    document.getElementById("contaEditGmail").value = dados.gmail || "";
+    document.getElementById("contaEditTelefone").value = formatarMascara(dados.telefone, "telefone");
+
+    document.getElementById("contaDadosGrid").hidden = true;
+    document.getElementById("contaEdicaoWrap").hidden = false;
+}
+function fecharEdicaoConta() {
+    document.getElementById("contaEdicaoWrap").hidden = true;
+    document.getElementById("contaDadosGrid").hidden = false;
+}
+function salvarEdicaoConta(evento) {
+    evento.preventDefault();
+
+    const usuarioAtual = obterUsuarioLogado();
+    if (!usuarioAtual) return;
+
+    const dados = {
+        cpf: limparMascara(document.getElementById("contaEditCpf")?.value, "cpf"),
+        dataNascimento: normalizarTexto(document.getElementById("contaEditNascimento")?.value),
+        gmail: normalizarTexto(document.getElementById("contaEditGmail")?.value),
+        telefone: limparMascara(document.getElementById("contaEditTelefone")?.value, "telefone")
+    };
+
+    const erroValidacao = validarDadosCadastro(dados);
+    if (erroValidacao) {
+        mostrarToast(erroValidacao);
+        return;
+    }
+
+    const cadastrados = obterUsuariosCadastrados();
+    const indice = cadastrados.findIndex(item => String(item.usuario).toLowerCase() === String(usuarioAtual).trim().toLowerCase());
+
+    if (indice === -1) {
+        // Usuário de demonstração (ainda não está em "ycloudUsuarios"): cria o registro agora.
+        const dadosBase = obterDadosUsuario(usuarioAtual) || {};
+        cadastrados.push({
+            usuario: usuarioAtual,
+            senha: dadosBase.senha || "",
+            admin: Boolean(dadosBase.admin),
+            dataCadastro: dadosBase.dataCadastro || new Date().toISOString(),
+            ...dados
+        });
+    } else {
+        cadastrados[indice] = { ...cadastrados[indice], ...dados };
+    }
+
+    localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
+    atualizarDadosConta();
+    fecharEdicaoConta();
+    mostrarToast("Informações atualizadas com sucesso.");
+}
 function selecionarPlano(plano) {
     const planosDisponiveis = obterPlanosDisponiveis();
     if (!planosDisponiveis[plano]) return;
@@ -1078,11 +1135,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("pesquisaBiblioteca")?.addEventListener("input", renderizarBiblioteca);
     aplicarMascaraCampo("cadastroCpf", "cpf");
     aplicarMascaraCampo("cadastroTelefone", "telefone");
+    aplicarMascaraCampo("contaEditCpf", "cpf");
+    aplicarMascaraCampo("contaEditTelefone", "telefone");
 
     document.getElementById("loginForm")?.addEventListener("submit", fazerLogin);
     document.getElementById("inputFotoPerfil")?.addEventListener("change", salvarFotoPerfil);
     document.getElementById("formNovoJogo")?.addEventListener("submit", adicionarJogoCustom);
     document.getElementById("formNovoPlano")?.addEventListener("submit", adicionarPlanoCustom);
+    document.getElementById("formEditarConta")?.addEventListener("submit", salvarEdicaoConta);
     document.querySelectorAll(".plano-btn").forEach(function(botao) {
         botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
     });
