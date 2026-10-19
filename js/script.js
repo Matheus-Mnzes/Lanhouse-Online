@@ -13,11 +13,7 @@ let heroTimer = null;
 const HERO_INTERVAL = 6000;
 
 const GENEROS = { "Adventure": "Aventura", "Arcade": "Arcade", "Card & Board Game": "Cartas e tabuleiro", "Fighting": "Luta", "Indie": "Independente", "Music": "Música", "Platform": "Plataforma", "Puzzle": "Quebra-cabeça", "Racing": "Corrida", "Role-playing (RPG)": "RPG", "Shooter": "Tiro", "Simulator": "Simulação", "Sport": "Esporte", "Strategy": "Estratégia", "Tactical": "Tático", "Visual Novel": "Visual novel" };
-const USUARIOS_DEMO = [
-    { usuario: "joao", senha: "1234", admin: false },
-    { usuario: "maria", senha: "senha", admin: false },
-    { usuario: "admin", senha: "admin", admin: true }
-];
+const USUARIOS_DEMO = [];
 let modoCadastro = false;
 let planoPendente = null;
 
