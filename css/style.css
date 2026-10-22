@@ -1055,6 +1055,15 @@ button { cursor: pointer; }
     gap: 16px;
     padding: 24px 28px 28px;
 }
+.conta-download {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 28px 28px;
+}
+.conta-download p { margin-top: 6px; color: var(--mid); font-size: 13px; }
+.conta-download-acoes { display: flex; flex-wrap: wrap; gap: 10px; }
 .conta-edicao-wrap {
     padding: 0 28px 28px;
 }
@@ -1367,6 +1376,7 @@ button { cursor: pointer; }
         font-size: 10px;
     }
     .conta-planos { grid-template-columns: 1fr; }
+    .conta-download { align-items: flex-start; flex-direction: column; padding: 0 20px 20px; }
     .admin-area { padding: 20px; }
     .admin-card { padding: 20px; }
     .importar-usuarios { align-items: flex-start; flex-direction: column; }
