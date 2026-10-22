@@ -568,6 +568,68 @@ function validarDadosCadastro(dados) {
     return "";
 }
 
+// Gera um nome de arquivo seguro a partir do nome de usuário.
+function normalizarNomeArquivo(texto) {
+    return String(texto)
+        .trim()
+        .replace(/[\\\\/:*?"<>|]/g, "_")
+        .replace(/\s+/g, "_") || "cliente";
+}
+
+// Faz o download de um arquivo que foi criado apenas na memória do navegador.
+function baixarArquivoCadastro(conteudo, nomeArquivo, tipo) {
+    const arquivo = new Blob([conteudo], { type: tipo });
+    const url = URL.createObjectURL(arquivo);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = nomeArquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Libera o endereço temporário depois que o navegador iniciou o download.
+    setTimeout(function() {
+        URL.revokeObjectURL(url);
+    }, 100);
+}
+
+function escaparCsv(valor) {
+    const texto = String(valor ?? "");
+    return /[;"\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
+}
+
+// Salva o cadastro recém-criado nos dois formatos solicitados.
+// A senha não é exportada para não expor uma informação sensível do cliente.
+function salvarCadastroEmArquivos(cliente) {
+    const dataCadastro = new Date(cliente.dataCadastro).toLocaleString("pt-BR");
+    const campos = [
+        ["Usuário", cliente.usuario],
+        ["Tipo de conta", cliente.admin ? "Administrador" : "Usuário comum"],
+        ["CPF", cliente.cpf],
+        ["Data de nascimento", cliente.dataNascimento],
+        ["Gmail", cliente.gmail],
+        ["Telefone", cliente.telefone],
+        ["Data de cadastro", dataCadastro]
+    ];
+
+    let txt = "CADASTRO DE CLIENTE - YCLOUD\n";
+    txt += "================================\n\n";
+    campos.forEach(function([rotulo, valor]) {
+        txt += `${rotulo}: ${valor}\n`;
+    });
+
+    const csv = [
+        campos.map(function([rotulo]) { return rotulo; }).join(";"),
+        campos.map(function([, valor]) { return escaparCsv(valor); }).join(";")
+    ].join("\n");
+
+    const nomeBase = `cadastro_${normalizarNomeArquivo(cliente.usuario)}`;
+    baixarArquivoCadastro(txt, `${nomeBase}.txt`, "text/plain;charset=utf-8");
+    // O BOM ajuda o Excel a abrir o CSV com acentos corretamente.
+    baixarArquivoCadastro(`\uFEFF${csv}`, `${nomeBase}.csv`, "text/csv;charset=utf-8");
+}
+
 function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
@@ -592,7 +654,7 @@ function fazerLogin(evento) {
         }
 
         const cadastrados = obterUsuariosCadastrados();
-        cadastrados.push({
+        const novoCliente = {
             usuario,
             senha,
             admin: tipoConta === "admin",
@@ -601,7 +663,8 @@ function fazerLogin(evento) {
             gmail: dadosCadastro.gmail,
             telefone: dadosCadastro.telefone,
             dataCadastro: new Date().toISOString()
-        });
+        };
+        cadastrados.push(novoCliente);
         localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
         localStorage.setItem("ycloudUsuarioLogado", usuario);
         migrarBibliotecaLegada();
@@ -609,6 +672,7 @@ function fazerLogin(evento) {
         atualizarBotaoLogin();
         atualizarPerfil();
         aplicarPlanoPendente();
+        salvarCadastroEmArquivos(novoCliente);
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
     }
