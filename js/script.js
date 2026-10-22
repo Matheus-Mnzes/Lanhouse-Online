@@ -69,6 +69,12 @@ function normalizarListaJogos(valor) {
 function formatarDataBrasileira(dataValor) {
     const valor = normalizarTexto(dataValor);
     if (!valor) return "Não informado";
+    // Campos de data do formulário não incluem horário; formatá-los diretamente
+    // evita que o fuso horário apresente o dia anterior.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+        const [ano, mes, dia] = valor.split("-");
+        return `${dia}/${mes}/${ano}`;
+    }
     const data = new Date(valor);
     if (Number.isNaN(data.getTime())) return valor;
     return new Intl.DateTimeFormat("pt-BR").format(data);
@@ -126,6 +132,47 @@ function obterTodosUsuarios() {
     });
 
     return Array.from(mapa.values());
+}
+function criarCelulaTabela(linha, valor, classe) {
+    const celula = document.createElement("td");
+    if (classe) celula.className = classe;
+    celula.textContent = valor || "Não informado";
+    linha.appendChild(celula);
+}
+function renderizarUsuariosCadastrados() {
+    const lista = document.getElementById("usuariosCadastradosLista");
+    const resumo = document.getElementById("usuariosCadastradosResumo");
+    if (!lista || !resumo) return;
+
+    const usuarios = obterTodosUsuarios().sort(function(a, b) {
+        return String(a.usuario).localeCompare(String(b.usuario), "pt-BR", { sensitivity: "base" });
+    });
+
+    lista.replaceChildren();
+    resumo.textContent = usuarios.length === 1 ? "1 usuário cadastrado" : `${usuarios.length} usuários cadastrados`;
+
+    if (!usuarios.length) {
+        const linha = document.createElement("tr");
+        const celula = document.createElement("td");
+        celula.colSpan = 7;
+        celula.className = "tabela-usuarios-vazia";
+        celula.textContent = "Nenhum usuário cadastrado até o momento.";
+        linha.appendChild(celula);
+        lista.appendChild(linha);
+        return;
+    }
+
+    usuarios.forEach(function(usuario) {
+        const linha = document.createElement("tr");
+        criarCelulaTabela(linha, usuario.usuario, "tabela-usuario-nome");
+        criarCelulaTabela(linha, usuario.admin ? "Administrador" : "Usuário");
+        criarCelulaTabela(linha, usuario.cpf);
+        criarCelulaTabela(linha, formatarDataBrasileira(usuario.dataNascimento));
+        criarCelulaTabela(linha, usuario.gmail);
+        criarCelulaTabela(linha, usuario.telefone);
+        criarCelulaTabela(linha, formatarDataBrasileira(usuario.dataCadastro));
+        lista.appendChild(linha);
+    });
 }
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
@@ -737,6 +784,9 @@ function mostrarPainel(id) {
         atualizarAreaPlano();
         atualizarPerfil();
     }
+    if (alvo === "admin") {
+        renderizarUsuariosCadastrados();
+    }
 
     if (id === "planos") {
         document.getElementById("painel-planos")?.scrollIntoView({ behavior: "smooth" });
@@ -1171,6 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atualizarAreaPlano();
     renderizarPlanos();
     atualizarPerfil();
+    renderizarUsuariosCadastrados();
 
     carregarCatalogo(1);
     carregarFiltroGeneros();

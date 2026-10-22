@@ -344,6 +344,32 @@
                         <button type="submit" class="btn btn-dark">Salvar plano</button>
                     </form>
                 </section>
+
+                <section class="admin-card admin-card-usuarios">
+                    <div class="admin-card-cabecalho">
+                        <div>
+                            <h3>Usuários cadastrados</h3>
+                            <p id="usuariosCadastradosResumo" class="admin-card-descricao">Carregando usuários...</p>
+                        </div>
+                    </div>
+                    <div class="tabela-usuarios-wrap" tabindex="0">
+                        <table class="tabela-usuarios">
+                            <caption class="sr-only">Lista de usuários cadastrados na plataforma</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Usuário</th>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col">CPF</th>
+                                    <th scope="col">Nascimento</th>
+                                    <th scope="col">E-mail</th>
+                                    <th scope="col">Telefone</th>
+                                    <th scope="col">Cadastro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usuariosCadastradosLista"></tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
         </section>
     </main>

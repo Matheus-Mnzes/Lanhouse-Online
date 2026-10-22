@@ -64,6 +64,18 @@ button { cursor: pointer; }
     outline-offset: 3px;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--off-white); }
@@ -1111,6 +1123,19 @@ button { cursor: pointer; }
     margin-bottom: 18px;
 }
 
+.admin-card-usuarios { grid-column: 1 / -1; }
+.admin-card-cabecalho { display: flex; justify-content: space-between; gap: 20px; }
+.admin-card-cabecalho h3 { margin-bottom: 6px; }
+.admin-card-descricao { color: var(--mid); font-size: 13px; }
+.tabela-usuarios-wrap { overflow-x: auto; border: 1px solid var(--light); }
+.tabela-usuarios { width: 100%; min-width: 860px; border-collapse: collapse; font-size: 13px; text-align: left; }
+.tabela-usuarios th { padding: 13px 16px; background: var(--off-white); color: var(--mid); font-size: 10px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.tabela-usuarios td { padding: 15px 16px; border-top: 1px solid var(--light); color: var(--dark); vertical-align: middle; }
+.tabela-usuarios tbody tr { transition: background .2s; }
+.tabela-usuarios tbody tr:hover { background: var(--off-white); }
+.tabela-usuario-nome { font-weight: 600; }
+.tabela-usuarios-vazia { padding: 32px !important; color: var(--mid) !important; font-family: var(--font-serif); font-size: 16px; font-style: italic; text-align: center; }
+
 .admin-form {
     display: flex;
     flex-direction: column;
@@ -1306,6 +1331,7 @@ button { cursor: pointer; }
 /* ── RESPONSIVO ──────────────────────────────────────── */
 @media (max-width: 960px) {
     .planos-grid { grid-template-columns: 1fr; }
+    .admin-area { grid-template-columns: 1fr; }
     .menu-overlay { width: 100%; }
     .header-tagline { display: none; }
 }
@@ -1339,6 +1365,8 @@ button { cursor: pointer; }
         font-size: 10px;
     }
     .conta-planos { grid-template-columns: 1fr; }
+    .admin-area { padding: 20px; }
+    .admin-card { padding: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
