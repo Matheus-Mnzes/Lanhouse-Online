@@ -677,6 +677,124 @@ function salvarCadastroEmArquivos(cliente) {
     baixarArquivoCadastro(`\uFEFF${csv}`, `${nomeBase}.csv`, "text/csv;charset=utf-8");
 }
 
+function lerCsv(conteudo) {
+    const primeiraLinha = conteudo.split(/\r?\n/, 1)[0] || "";
+    const separador = primeiraLinha.split(";").length >= primeiraLinha.split(",").length ? ";" : ",";
+    const linhas = [];
+    let linha = [];
+    let campo = "";
+    let entreAspas = false;
+
+    for (let indice = 0; indice < conteudo.length; indice += 1) {
+        const caractere = conteudo[indice];
+        if (caractere === '"') {
+            if (entreAspas && conteudo[indice + 1] === '"') {
+                campo += '"';
+                indice += 1;
+            } else {
+                entreAspas = !entreAspas;
+            }
+        } else if (caractere === separador && !entreAspas) {
+            linha.push(campo.trim());
+            campo = "";
+        } else if ((caractere === "\n" || caractere === "\r") && !entreAspas) {
+            if (caractere === "\r" && conteudo[indice + 1] === "\n") indice += 1;
+            linha.push(campo.trim());
+            if (linha.some(Boolean)) linhas.push(linha);
+            linha = [];
+            campo = "";
+        } else {
+            campo += caractere;
+        }
+    }
+    linha.push(campo.trim());
+    if (linha.some(Boolean)) linhas.push(linha);
+    return linhas;
+}
+
+function normalizarCabecalhoCsv(valor) {
+    return normalizarTexto(valor).replace(/^\uFEFF/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function importarUsuariosCsv(evento) {
+    const arquivo = evento.target.files?.[0];
+    if (!arquivo) return;
+    if (arquivo.size > 2 * 1024 * 1024) {
+        mostrarToast("O arquivo CSV deve ter no máximo 2 MB.");
+        evento.target.value = "";
+        return;
+    }
+
+    const leitor = new FileReader();
+    leitor.onload = function() {
+        const linhas = lerCsv(String(leitor.result || ""));
+        if (linhas.length < 2) {
+            mostrarToast("O CSV precisa ter um cabeçalho e ao menos um usuário.");
+            return;
+        }
+
+        const cabecalhos = linhas[0].map(normalizarCabecalhoCsv);
+        const indiceCampo = function(...nomes) { return cabecalhos.findIndex(cabecalho => nomes.includes(cabecalho)); };
+        const indiceUsuario = indiceCampo("usuario", "nome de usuario");
+        if (indiceUsuario === -1) {
+            mostrarToast("Não foi encontrada a coluna Usuário no arquivo CSV.");
+            return;
+        }
+
+        const indiceTipo = indiceCampo("tipo de conta", "tipo");
+        const indiceCpf = indiceCampo("cpf");
+        const indiceNascimento = indiceCampo("data de nascimento", "nascimento");
+        const indiceEmail = indiceCampo("gmail", "email", "e-mail");
+        const indiceTelefone = indiceCampo("telefone", "celular");
+        const indiceCadastro = indiceCampo("data de cadastro", "cadastro");
+        const indiceSenha = indiceCampo("senha", "password");
+        const valorDaLinha = function(linha, indice) { return indice >= 0 ? normalizarTexto(linha[indice]) : ""; };
+        const cadastrados = obterUsuariosCadastrados();
+        const usuariosExistentes = new Set(obterTodosUsuarios().map(item => String(item.usuario).toLowerCase()));
+        let importados = 0;
+        let ignorados = 0;
+        let semSenha = 0;
+
+        linhas.slice(1).forEach(function(linha) {
+            const usuario = valorDaLinha(linha, indiceUsuario);
+            const chaveUsuario = usuario.toLowerCase();
+            if (usuario.length < 3 || usuariosExistentes.has(chaveUsuario)) {
+                ignorados += 1;
+                return;
+            }
+
+            const tipoConta = valorDaLinha(linha, indiceTipo).toLowerCase();
+            const senha = valorDaLinha(linha, indiceSenha);
+            cadastrados.push({
+                usuario,
+                senha,
+                admin: tipoConta === "administrador" || tipoConta === "admin" || tipoConta === "true",
+                cpf: limparMascara(valorDaLinha(linha, indiceCpf), "cpf"),
+                dataNascimento: valorDaLinha(linha, indiceNascimento),
+                gmail: valorDaLinha(linha, indiceEmail),
+                telefone: limparMascara(valorDaLinha(linha, indiceTelefone), "telefone"),
+                dataCadastro: valorDaLinha(linha, indiceCadastro) || new Date().toISOString()
+            });
+            usuariosExistentes.add(chaveUsuario);
+            importados += 1;
+            if (!senha) semSenha += 1;
+        });
+
+        if (importados) localStorage.setItem("ycloudUsuarios", JSON.stringify(cadastrados));
+        renderizarUsuariosCadastrados();
+        if (!importados) {
+            mostrarToast("Nenhum usuário foi importado. Verifique nomes duplicados ou inválidos.");
+        } else if (semSenha) {
+            mostrarToast(`${importados} usuário(s) importado(s). ${semSenha} sem senha para login.`);
+        } else {
+            mostrarToast(`${importados} usuário(s) importado(s)${ignorados ? `; ${ignorados} ignorado(s)` : ""}.`);
+        }
+    };
+    leitor.onerror = function() { mostrarToast("Não foi possível ler o arquivo CSV."); };
+    leitor.readAsText(arquivo, "UTF-8");
+    evento.target.value = "";
+}
+
 function fazerLogin(evento) {
     evento.preventDefault();
     const usuario = document.getElementById("loginUsuario").value.trim();
@@ -1254,6 +1372,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("formNovoJogo")?.addEventListener("submit", adicionarJogoCustom);
     document.getElementById("formNovoPlano")?.addEventListener("submit", adicionarPlanoCustom);
     document.getElementById("formEditarConta")?.addEventListener("submit", salvarEdicaoConta);
+    document.getElementById("btnImportarUsuarios")?.addEventListener("click", function() {
+        document.getElementById("arquivoUsuariosCsv")?.click();
+    });
+    document.getElementById("arquivoUsuariosCsv")?.addEventListener("change", importarUsuariosCsv);
     document.querySelectorAll(".plano-btn").forEach(function(botao) {
         botao.addEventListener("click", function() { selecionarPlano(botao.dataset.plano); });
     });

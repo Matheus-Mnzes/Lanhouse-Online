@@ -1135,6 +1135,8 @@ button { cursor: pointer; }
 .tabela-usuarios tbody tr:hover { background: var(--off-white); }
 .tabela-usuario-nome { font-weight: 600; }
 .tabela-usuarios-vazia { padding: 32px !important; color: var(--mid) !important; font-family: var(--font-serif); font-size: 16px; font-style: italic; text-align: center; }
+.importar-usuarios { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+.importar-usuarios p { color: var(--mid); font-size: 12px; line-height: 1.5; }
 
 .admin-form {
     display: flex;
@@ -1367,6 +1369,7 @@ button { cursor: pointer; }
     .conta-planos { grid-template-columns: 1fr; }
     .admin-area { padding: 20px; }
     .admin-card { padding: 20px; }
+    .importar-usuarios { align-items: flex-start; flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {
