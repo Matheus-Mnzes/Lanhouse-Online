@@ -3,6 +3,7 @@
 let paginaAtual = 1;
 let generoSelecionado = "";
 let pesquisaSelecionada = "";
+let ordenacaoSelecionada = "padrao";
 let jogosCatalogo = [];
 let temporizadorPesquisa;
 let catalogoCarregado = false;
@@ -1013,11 +1014,16 @@ async function carregarCatalogo(pagina) {
     }
 
     try {
-        const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada);
+        const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada, ordenacaoSelecionada);
         if (!dados) return;
 
         const jogos = dados.jogos || [];
         const jogosComCustom = obterJogosCatalogoComCustom(jogos);
+        if (ordenacaoSelecionada === "alfabetica") {
+            jogosComCustom.sort(function(a, b) {
+                return a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
+            });
+        }
         jogosCatalogo   = jogosComCustom;
         paginaAtual     = pagina;
         catalogoCarregado = true;
@@ -1359,6 +1365,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("filtroGenero")?.addEventListener("change", e => {
         generoSelecionado = e.target.value;
+        carregarCatalogo(1);
+    });
+
+    document.getElementById("ordenacaoJogos")?.addEventListener("change", e => {
+        ordenacaoSelecionada = e.target.value;
         carregarCatalogo(1);
     });
 
