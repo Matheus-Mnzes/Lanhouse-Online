@@ -337,10 +337,17 @@ body.dark-mode .hero-progress button::after {
     color: #fff;
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.header-actions .btn {
+    margin: 0;          /* anula o margin-top: 8px do .btn-outline */
+    height: 40px;       /* mesma altura para todos */
+    padding-top: 0;
+    padding-bottom: 0;
+    justify-content: center;
+}
+
+.header-actions .btn-icon {
+    width: 40px;
+    padding: 0;
 }
 
 .btn {
@@ -1004,4 +1011,39 @@ body.dark-mode .hero-progress button::after {
     #menuBtn::after {
         font-size: 14px;
     }
+}
+.select-wrap select,
+.select-wrap select:hover,
+.select-wrap select:focus,
+.select-wrap select option {
+    cursor: pointer !important;
+}
+
+.select-wrap select:disabled {
+    cursor: not-allowed !important;
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-actions .btn {
+    box-sizing: border-box;
+    height: 40px !important;
+    min-height: 40px !important;
+    margin: 0 !important;
+    padding: 0 22px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    align-self: center !important;
+    vertical-align: middle;
+}
+
+.header-actions .btn-icon {
+    width: 40px !important;
+    padding: 0 !important;
+    border-radius: 50%;
 }
