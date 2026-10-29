@@ -533,6 +533,15 @@ button { cursor: pointer; }
 
 .input-wrap input::placeholder { color: var(--mid); }
 
+.resultado-pesquisa {
+    padding: 14px 32px;
+    margin: 0;
+    border-bottom: 1px solid var(--light);
+    background: var(--off-white);
+    color: var(--mid);
+    font-size: 13px;
+}
+
 
 /* ── GRID DE JOGOS ───────────────────────────────────── */
 .grid-jogos {
@@ -1413,6 +1422,7 @@ button { cursor: pointer; }
     .secao { padding: 60px 20px; }
     .painel-header { padding: 36px 20px 28px; }
     .filtros { padding: 20px; }
+    .resultado-pesquisa { padding: 14px 20px; }
     .grid-jogos { padding: 0; }
     .carregar-wrap { padding: 32px 20px; }
     .filtro-busca { margin-left: 0; }

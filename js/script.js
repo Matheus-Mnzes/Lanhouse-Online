@@ -999,10 +999,12 @@ async function carregarCatalogo(pagina) {
     const botaoProxima = document.getElementById("paginaProxima");
     const indicador = document.getElementById("paginaIndicador");
     const catalogo  = document.getElementById("catalogo");
+    const resultadoPesquisa = document.getElementById("resultadoPesquisa");
 
     if (botaoAnterior) botaoAnterior.disabled = true;
     if (botaoProxima) botaoProxima.disabled = true;
     if (indicador) indicador.textContent = "Carregando...";
+    if (resultadoPesquisa) resultadoPesquisa.hidden = true;
 
     if (catalogo) {
         catalogo.replaceChildren(...Array.from({ length: 6 }, () => {
@@ -1036,6 +1038,12 @@ async function carregarCatalogo(pagina) {
         if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
         if (botaoProxima) botaoProxima.disabled = jogos.length < (dados.limite ?? 15);
         if (indicador) indicador.textContent = `Página ${pagina}`;
+        if (resultadoPesquisa && pesquisaSelecionada) {
+            const total = Number(dados.total) || 0;
+            const textoResultado = total === 1 ? "resultado encontrado" : "resultados encontrados";
+            resultadoPesquisa.textContent = `${total} ${textoResultado} para “${pesquisaSelecionada}”.`;
+            resultadoPesquisa.hidden = false;
+        }
 
     } catch (erro) {
         mostrarErro(catalogo, erro.message || "Não foi possível carregar os jogos.");

@@ -81,16 +81,22 @@ export default async function handler(request, response) {
             return response.status(200).json(generos);
         }
 
-        // 3. Consultar a API
-        const igdbResponse = await fetch(
+        // 3. Consultar a API. Em pesquisas, também contamos todos os resultados.
+        const consultaFiltros = `
+            ${pesquisa ? `search "${pesquisa}";` : ""}
+            where cover != null & rating != null ${pesquisa ? "" : " & rating_count >= 500"}${genero ? ` & genres = (${genero})` : ""};
+        `;
+        const cabecalhosIgdb = {
+            "Client-ID": clientId,
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "text/plain"
+        };
+        const [igdbResponse, contagemResponse] = await Promise.all([
+            fetch(
             "https://api.igdb.com/v4/games",
             {
                 method: "POST",
-                headers: {
-                    "Client-ID": clientId,
-                    "Authorization": `Bearer ${accessToken}`,
-                    "Content-Type": "text/plain"
-                },
+                headers: cabecalhosIgdb,
                 body: `
                     fields
                         id,
@@ -101,8 +107,7 @@ export default async function handler(request, response) {
                         first_release_date,
                         platforms.name;
 
-                    ${pesquisa ? `search "${pesquisa}";` : ""}
-                    where cover != null & rating != null ${pesquisa ? "" : " & rating_count >= 500"}${genero ? ` & genres = (${genero})` : ""};
+                    ${consultaFiltros}
 
                     ${pesquisa ? "" : "sort rating desc;"}
 
@@ -110,9 +115,21 @@ export default async function handler(request, response) {
                     offset ${offset};
                 `
             }
-        );
+            ),
+            pesquisa ? fetch(
+                "https://api.igdb.com/v4/games/count",
+                {
+                    method: "POST",
+                    headers: cabecalhosIgdb,
+                    body: consultaFiltros
+                }
+            ) : Promise.resolve(null)
+        ]);
 
-        const jogos = await igdbResponse.json();
+        const [jogos, dadosContagem] = await Promise.all([
+            igdbResponse.json(),
+            contagemResponse ? contagemResponse.json() : Promise.resolve(null)
+        ]);
 
         if (!igdbResponse.ok) {
             return response.status(igdbResponse.status).json({
@@ -120,6 +137,17 @@ export default async function handler(request, response) {
                 detalhes: jogos
             });
         }
+
+        if (contagemResponse && !contagemResponse.ok) {
+            return response.status(contagemResponse.status).json({
+                erro: dadosContagem.message || "Erro ao contar os jogos encontrados.",
+                detalhes: dadosContagem
+            });
+        }
+
+        const totalEncontrado = Array.isArray(dadosContagem)
+            ? dadosContagem[0]?.count
+            : dadosContagem?.count;
 
         const traducoesGeneros = {
             "Pinball": "Pinball",
@@ -159,6 +187,7 @@ export default async function handler(request, response) {
         return response.status(200).json({
             pagina: pagina,
             limite: limite,
+            total: pesquisa ? (Number(totalEncontrado) || 0) : null,
             jogos: jogos
         });
 
