@@ -229,6 +229,16 @@
                         <div class="conta-dado-item"><span>Telefone</span><strong>Carregando...</strong></div>
                         <div class="conta-dado-item"><span>Data de cadastro</span><strong>Carregando...</strong></div>
                     </div>
+                    <div class="conta-download">
+                        <div>
+                            <span class="conta-plano-label">SEUS ARQUIVOS</span>
+                            <p>Baixe uma cópia dos dados da sua conta quando precisar.</p>
+                        </div>
+                        <div class="conta-download-acoes">
+                            <button class="btn btn-dark" type="button" onclick="baixarDadosDaConta('csv')">Baixar CSV</button>
+                            <button class="btn btn-outline" type="button" onclick="baixarDadosDaConta('txt')">Baixar TXT</button>
+                        </div>
+                    </div>
 
                     <div id="contaEdicaoWrap" class="conta-edicao-wrap" hidden>
                         <form id="formEditarConta" class="admin-form conta-form">

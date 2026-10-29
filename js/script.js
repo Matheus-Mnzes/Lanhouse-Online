@@ -646,10 +646,15 @@ function escaparCsv(valor) {
     return /[;"\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
 }
 
-// Salva o cadastro recém-criado nos dois formatos solicitados.
 // A senha não é exportada para não expor uma informação sensível do cliente.
-function salvarCadastroEmArquivos(cliente) {
-    const dataCadastro = new Date(cliente.dataCadastro).toLocaleString("pt-BR");
+function baixarDadosDaConta(formato) {
+    const cliente = obterDadosUsuario();
+    if (!cliente) {
+        mostrarToast("Entre na sua conta para baixar seus dados.");
+        return;
+    }
+    const data = new Date(cliente.dataCadastro);
+    const dataCadastro = Number.isNaN(data.getTime()) ? (cliente.dataCadastro || "Não informado") : data.toLocaleString("pt-BR");
     const campos = [
         ["Usuário", cliente.usuario],
         ["Tipo de conta", cliente.admin ? "Administrador" : "Usuário comum"],
@@ -672,9 +677,14 @@ function salvarCadastroEmArquivos(cliente) {
     ].join("\n");
 
     const nomeBase = `cadastro_${normalizarNomeArquivo(cliente.usuario)}`;
+    if (formato === "csv") {
+        // O BOM ajuda o Excel a abrir o CSV com acentos corretamente.
+        baixarArquivoCadastro(`\uFEFF${csv}`, `${nomeBase}.csv`, "text/csv;charset=utf-8");
+        mostrarToast("Arquivo CSV baixado.");
+        return;
+    }
     baixarArquivoCadastro(txt, `${nomeBase}.txt`, "text/plain;charset=utf-8");
-    // O BOM ajuda o Excel a abrir o CSV com acentos corretamente.
-    baixarArquivoCadastro(`\uFEFF${csv}`, `${nomeBase}.csv`, "text/csv;charset=utf-8");
+    mostrarToast("Arquivo TXT baixado.");
 }
 
 function lerCsv(conteudo) {
@@ -837,7 +847,6 @@ function fazerLogin(evento) {
         atualizarBotaoLogin();
         atualizarPerfil();
         aplicarPlanoPendente();
-        salvarCadastroEmArquivos(novoCliente);
         mostrarToast(`Conta criada. Bem-vindo, ${usuario}!`);
         return;
     }
