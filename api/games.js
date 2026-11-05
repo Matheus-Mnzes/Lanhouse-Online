@@ -24,6 +24,9 @@ export default async function handler(request, response) {
             .trim()
             .slice(0, 100)
             .replace(/[\\"]/g, "\\$&");
+        const ordenacao = url.searchParams.get("ordenacao") === "alfabetica"
+            ? "alfabetica"
+            : "padrao";
         const recurso = url.searchParams.get("recurso");
         const limite = 15;
         const offset = (pagina - 1) * limite;
@@ -109,7 +112,7 @@ export default async function handler(request, response) {
 
                     ${consultaFiltros}
 
-                    ${pesquisa ? "" : "sort rating desc;"}
+                    ${ordenacao === "alfabetica" ? "sort name asc;" : (pesquisa ? "" : "sort rating desc;")}
 
                     limit ${limite};
                     offset ${offset};

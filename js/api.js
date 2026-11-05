@@ -2,7 +2,7 @@
    BUSCAR JOGOS NA API
 ========================= */
 
-async function buscarJogos(pagina = 1, genero = "", pesquisa = "") {
+async function buscarJogos(pagina = 1, genero = "", pesquisa = "", ordenacao = "padrao") {
     try {
         // Envia a página que queremos buscar
         const parametros = new URLSearchParams({ pagina: String(pagina) });
@@ -12,6 +12,9 @@ async function buscarJogos(pagina = 1, genero = "", pesquisa = "") {
 
         if (pesquisa) {
             parametros.set("pesquisa", pesquisa);
+        }
+        if (ordenacao === "alfabetica") {
+            parametros.set("ordenacao", ordenacao);
         }
 
         const resposta = await fetch(`/api/games?${parametros}`);
