@@ -155,6 +155,15 @@
                         </select>
                     </div>
                 </div>
+                <div class="filtro-item">
+                    <label class="filtro-label" for="ordenacaoJogos">Ordenar por</label>
+                    <div class="select-wrap">
+                        <select id="ordenacaoJogos">
+                            <option value="padrao">Padrão do catálogo</option>
+                            <option value="alfabetica">Ordem alfabética (A–Z)</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="filtro-item filtro-busca">
                     <label class="filtro-label" for="pesquisaJogos">Buscar</label>
                     <div class="input-wrap">
@@ -162,6 +171,8 @@
                     </div>
                 </div>
             </div>
+
+            <p id="resultadoPesquisa" class="resultado-pesquisa" role="status" hidden></p>
 
             <div id="catalogo" class="grid-jogos" aria-live="polite">
                 <div class="skel"></div><div class="skel"></div>
@@ -301,6 +312,25 @@
                 <h2 class="painel-titulo">Administração</h2>
                 <p class="painel-sub">Gerencie jogos e planos da plataforma</p>
             </div>
+            <section class="relatorio-admin" aria-labelledby="relatorioTitulo">
+                <div class="relatorio-cabecalho">
+                    <div>
+                        <p class="relatorio-eyebrow">VISÃO GERAL</p>
+                        <h3 id="relatorioTitulo">Relatório de indicadores</h3>
+                        <p class="relatorio-descricao">Acompanhe os principais números da plataforma.</p>
+                    </div>
+                    <button class="btn btn-dark" id="atualizarIndicadores" type="button">Atualizar indicadores</button>
+                </div>
+                <div class="indicadores-grid">
+                    <article class="indicador-card"><span>Usuários cadastrados</span><strong id="indicadorUsuarios">—</strong></article>
+                    <article class="indicador-card"><span>Jogos disponíveis</span><strong id="indicadorJogos">—</strong></article>
+                    <article class="indicador-card"><span>Planos cadastrados</span><strong id="indicadorPlanos">—</strong></article>
+                    <article class="indicador-card"><span>Assinaturas ativas</span><strong id="indicadorAssinaturas">—</strong></article>
+                    <article class="indicador-card"><span>Receita mensal estimada</span><strong id="indicadorReceita">—</strong></article>
+                    <article class="indicador-card"><span>Plano mais popular</span><strong id="indicadorPlanoPopular">—</strong></article>
+                </div>
+                <p class="indicador-nota">A receita é uma estimativa baseada nos planos selecionados nas contas, não representa pagamentos confirmados.</p>
+            </section>
             <div class="admin-area">
                 <section class="admin-card">
                     <h3>Cadastrar novo jogo</h3>

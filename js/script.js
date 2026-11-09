@@ -3,7 +3,9 @@
 let paginaAtual = 1;
 let generoSelecionado = "";
 let pesquisaSelecionada = "";
+let ordenacaoSelecionada = "padrao";
 let jogosCatalogo = [];
+let totalJogosCatalogo = 0;
 let temporizadorPesquisa;
 let catalogoCarregado = false;
 
@@ -174,6 +176,46 @@ function renderizarUsuariosCadastrados() {
         lista.appendChild(linha);
     });
 }
+function formatarMoedaIndicador(valor) {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor);
+}
+
+function obterPrecoPlanoIndicador(info) {
+    if (Number.isFinite(Number(info?.preco))) return Number(info.preco);
+    const texto = String(info?.descricao || "");
+    const match = texto.match(/R\$\s*([\d.]+,\d{2}|\d+)/i);
+    if (!match) return 0;
+    return Number(match[1].replace(/\./g, "").replace(",", ".")) || 0;
+}
+
+function atualizarIndicadores() {
+    const elemento = id => document.getElementById(id);
+    if (!elemento("indicadorUsuarios")) return;
+
+    const usuarios = obterTodosUsuarios();
+    const planos = obterPlanosDisponiveis();
+    const planosSelecionados = usuarios
+        .map(usuario => ({ usuario, plano: obterPlanoDoUsuario(usuario.usuario) }))
+        .filter(item => item.plano && planos[item.plano]);
+    const contagemPlanos = {};
+    let receita = 0;
+
+    planosSelecionados.forEach(({ plano }) => {
+        contagemPlanos[plano] = (contagemPlanos[plano] || 0) + 1;
+        receita += obterPrecoPlanoIndicador(planos[plano]);
+    });
+
+    const planoPopular = Object.entries(contagemPlanos)
+        .sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+
+    elemento("indicadorUsuarios").textContent = usuarios.length;
+    elemento("indicadorJogos").textContent = totalJogosCatalogo || jogosCatalogo.length;
+    elemento("indicadorPlanos").textContent = Object.keys(planos).length;
+    elemento("indicadorAssinaturas").textContent = planosSelecionados.length;
+    elemento("indicadorReceita").textContent = formatarMoedaIndicador(receita);
+    elemento("indicadorPlanoPopular").textContent = planoPopular;
+}
+
 function chaveBibliotecaDoUsuario(usuario = obterUsuarioLogado()) {
     return usuario ? `ycloudBiblioteca_${encodeURIComponent(usuario.toLowerCase())}` : null;
 }
@@ -377,6 +419,7 @@ function selecionarPlano(plano) {
         return;
     }
     localStorage.setItem(chavePlanoDoUsuario(), plano);
+    atualizarIndicadores();
     planoPendente = null;
     atualizarAreaPlano();
     renderizarPlanos();
@@ -403,6 +446,7 @@ function adicionarPlanoCustom(evento) {
     document.getElementById("formNovoPlano")?.reset();
     renderizarPlanos();
     atualizarAreaPlano();
+    atualizarIndicadores();
     mostrarToast(`Plano "${chave}" cadastrado.`);
 }
 
@@ -428,6 +472,7 @@ function adicionarJogoCustom(evento) {
     document.getElementById("formNovoJogo")?.reset();
     carregarCatalogo(1);
     renderizarBiblioteca();
+    atualizarIndicadores();
     mostrarToast(`Jogo "${nome}" adicionado ao catálogo.`);
 }
 
@@ -436,6 +481,7 @@ function cancelarPlano() {
     if (!plano) return;
     if (!window.confirm(`Cancelar o plano ${plano}? Você perderá os benefícios ao fim do período atual.`)) return;
     localStorage.removeItem(chavePlanoDoUsuario());
+    atualizarIndicadores();
     atualizarAreaPlano();
     renderizarPlanos();
     mostrarToast("Seu plano foi cancelado.");
@@ -999,10 +1045,12 @@ async function carregarCatalogo(pagina) {
     const botaoProxima = document.getElementById("paginaProxima");
     const indicador = document.getElementById("paginaIndicador");
     const catalogo  = document.getElementById("catalogo");
+    const resultadoPesquisa = document.getElementById("resultadoPesquisa");
 
     if (botaoAnterior) botaoAnterior.disabled = true;
     if (botaoProxima) botaoProxima.disabled = true;
     if (indicador) indicador.textContent = "Carregando...";
+    if (resultadoPesquisa) resultadoPesquisa.hidden = true;
 
     if (catalogo) {
         catalogo.replaceChildren(...Array.from({ length: 6 }, () => {
@@ -1013,12 +1061,19 @@ async function carregarCatalogo(pagina) {
     }
 
     try {
-        const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada);
+        const dados = await buscarJogos(pagina, generoSelecionado, pesquisaSelecionada, ordenacaoSelecionada);
         if (!dados) return;
 
         const jogos = dados.jogos || [];
         const jogosComCustom = obterJogosCatalogoComCustom(jogos);
+        if (ordenacaoSelecionada === "alfabetica") {
+            jogosComCustom.sort(function(a, b) {
+                return a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
+            });
+        }
         jogosCatalogo   = jogosComCustom;
+        totalJogosCatalogo = (Number(dados.total) || jogos.length) + obterJogosCustom().length;
+        atualizarIndicadores();
         paginaAtual     = pagina;
         catalogoCarregado = true;
         renderizarCatalogo();
@@ -1036,6 +1091,12 @@ async function carregarCatalogo(pagina) {
         if (botaoAnterior) botaoAnterior.disabled = pagina === 1;
         if (botaoProxima) botaoProxima.disabled = jogos.length < (dados.limite ?? 15);
         if (indicador) indicador.textContent = `Página ${pagina}`;
+        if (resultadoPesquisa && pesquisaSelecionada) {
+            const total = Number(dados.total) || 0;
+            const textoResultado = total === 1 ? "resultado encontrado" : "resultados encontrados";
+            resultadoPesquisa.textContent = `${total} ${textoResultado} para “${pesquisaSelecionada}”.`;
+            resultadoPesquisa.hidden = false;
+        }
 
     } catch (erro) {
         mostrarErro(catalogo, erro.message || "Não foi possível carregar os jogos.");
@@ -1349,6 +1410,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarPlanos();
     atualizarPerfil();
     renderizarUsuariosCadastrados();
+    atualizarIndicadores();
+    document.getElementById("atualizarIndicadores")?.addEventListener("click", atualizarIndicadores);
 
     carregarCatalogo(1);
     carregarFiltroGeneros();
@@ -1359,6 +1422,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.getElementById("filtroGenero")?.addEventListener("change", e => {
         generoSelecionado = e.target.value;
+        carregarCatalogo(1);
+    });
+
+    document.getElementById("ordenacaoJogos")?.addEventListener("change", e => {
+        ordenacaoSelecionada = e.target.value;
         carregarCatalogo(1);
     });
 
