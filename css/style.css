@@ -1158,6 +1158,11 @@ button { cursor: pointer; }
     text-align: left;
 }
 
+.tabela-usuarios caption {
+    padding: 14px 16px;
+    text-align: center;
+}
+
 .tabela-usuarios th,
 .tabela-usuarios td {
     padding: 14px 16px;
@@ -1955,7 +1960,7 @@ body.dark-mode .btn-tema {
 }
 .relatorio-cabecalho h3 {
     margin: 0;
-    color: var(--dark);
+    color: var(--blue);
     font-size: clamp(1.25rem, 2.5vw, 1.7rem);
 }
 .relatorio-descricao {
@@ -1999,7 +2004,7 @@ body.dark-mode .relatorio-admin {
     background: #151515;
     border-color: #383838;
 }
-body.dark-mode .relatorio-cabecalho h3 { color: var(--white); }
+body.dark-mode .relatorio-cabecalho h3 { color: var(--blue); }
 body.dark-mode .relatorio-descricao,
 body.dark-mode .indicador-card span,
 body.dark-mode .indicador-nota { color: #aaa; }

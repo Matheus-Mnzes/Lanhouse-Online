@@ -84,7 +84,7 @@ export default async function handler(request, response) {
             return response.status(200).json(generos);
         }
 
-        // 3. Consultar a API. Em pesquisas, também contamos todos os resultados.
+        // 3. Consultar a API e contar todos os resultados com os filtros aplicados.
         const consultaFiltros = `
             ${pesquisa ? `search "${pesquisa}";` : ""}
             where cover != null & rating != null ${pesquisa ? "" : " & rating_count >= 500"}${genero ? ` & genres = (${genero})` : ""};
@@ -119,14 +119,14 @@ export default async function handler(request, response) {
                 `
             }
             ),
-            pesquisa ? fetch(
+            fetch(
                 "https://api.igdb.com/v4/games/count",
                 {
                     method: "POST",
                     headers: cabecalhosIgdb,
                     body: consultaFiltros
                 }
-            ) : Promise.resolve(null)
+            )
         ]);
 
         const [jogos, dadosContagem] = await Promise.all([
@@ -190,7 +190,7 @@ export default async function handler(request, response) {
         return response.status(200).json({
             pagina: pagina,
             limite: limite,
-            total: pesquisa ? (Number(totalEncontrado) || 0) : null,
+            total: Number(totalEncontrado) || 0,
             jogos: jogos
         });
 

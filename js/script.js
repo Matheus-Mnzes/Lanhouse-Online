@@ -209,7 +209,7 @@ function atualizarIndicadores() {
         .sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
 
     elemento("indicadorUsuarios").textContent = usuarios.length;
-    elemento("indicadorJogos").textContent = totalJogosCatalogo || jogosCatalogo.length;
+    elemento("indicadorJogos").textContent = totalJogosCatalogo;
     elemento("indicadorPlanos").textContent = Object.keys(planos).length;
     elemento("indicadorAssinaturas").textContent = planosSelecionados.length;
     elemento("indicadorReceita").textContent = formatarMoedaIndicador(receita);
@@ -1072,7 +1072,8 @@ async function carregarCatalogo(pagina) {
             });
         }
         jogosCatalogo   = jogosComCustom;
-        totalJogosCatalogo = (Number(dados.total) || jogos.length) + obterJogosCustom().length;
+        const totalJogosApi = Number(dados.total);
+        totalJogosCatalogo = (Number.isFinite(totalJogosApi) ? totalJogosApi : jogos.length) + obterJogosCustom().length;
         atualizarIndicadores();
         paginaAtual     = pagina;
         catalogoCarregado = true;
